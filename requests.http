@@ -1,0 +1,76 @@
+@baseUrl = http://localhost:8080
+@productoId = 10
+
+# IMPORTANTE:
+# 1. Ejecutamos el servidor Spring Boot con: .\mvnw.cmd spring-boot:run
+# 2. Abrimos la colección de pruebas en Postman y reemplazamos {{baseUrl}} por http://localhost:8080 y {{productoId}} por 1.
+# 3. Ejecuta estas solicitudes en el orden indicado.
+# Al reiniciarse H2, el primer producto tendrá el ID 1.
+
+
+
+### 1. POST correcto - debe responder 201 Created
+POST {{baseUrl}}/api/productos
+Content-Type: application/json
+
+{
+  "nombre": "Hamburguesa clásica",
+  "precio": 12.50,
+  "stock": 20
+}
+
+### 2. POST incorrecto - debe responder 400 Bad Request
+# El precio contiene texto y no puede convertirse a BigDecimal.
+POST {{baseUrl}}/api/productos
+Content-Type: application/json
+
+{
+  "nombre": "Producto inválido",
+  "precio": "doce con cincuenta",
+  "stock": 10
+}
+
+
+
+### 3. GET correcto - debe responder 200 OK
+GET {{baseUrl}}/api/productos/{{productoId}}
+
+### 4. GET incorrecto - debe responder 404 Not Found
+# La ruta solicitada no existe en ningún Controller.
+GET {{baseUrl}}/api/ruta-inexistente
+
+
+
+### 5. PUT correcto - debe responder 200 OK
+PUT {{baseUrl}}/api/productos/{{productoId}}
+Content-Type: application/json
+
+{
+  "nombre": "Hamburguesa clásica grande",
+  "precio": 15.00,
+  "stock": 15
+}
+
+### 6. PUT incorrecto - debe responder 400 Bad Request
+# El stock contiene texto y no puede convertirse a un número entero.
+PUT {{baseUrl}}/api/productos/{{productoId}}
+Content-Type: application/json
+
+{
+  "nombre": "Hamburguesa inválida",
+  "precio": 15.00,
+  "stock": "stock-invalido"
+}
+
+
+
+### 7. DELETE correcto - debe responder 204 No Content
+DELETE {{baseUrl}}/api/productos/{{productoId}}
+
+### 8. DELETE incorrecto - debe responder 404 Not Found
+# La ruta solicitada no existe en ningún Controller.
+DELETE {{baseUrl}}/api/ruta-inexistente/{{productoId}}
+
+
+### 9. Listar productos después de eliminar - debe responder 200 con una lista vacía
+GET {{baseUrl}}/api/productos
