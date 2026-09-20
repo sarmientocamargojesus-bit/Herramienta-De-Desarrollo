@@ -1,6 +1,6 @@
 # Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
-Proyecto académico grupal. El avance actual contiene el CRUD de productos y los
+Proyecto académico grupal. El avance actual contiene el CRUD de productos, clientes y pedidos, y los
 conceptos estudiados durante las semanas 2, 3 y 6.
 
 ## Semana 2
@@ -23,8 +23,9 @@ conceptos estudiados durante las semanas 2, 3 y 6.
 ## Semana 6
 
 - Persistencia mediante Spring Data JPA e Hibernate.
-- Entidad `Producto` asociada con la tabla `productos`.
+- Entidades `Producto`, `Cliente` y `Pedido` asociadas con sus tablas.
 - Operaciones CRUD mediante `JpaRepository`.
+- Consultas derivadas para clientes y pedidos.
 - PostgreSQL alojado en Supabase.
 - H2 utilizado únicamente en las pruebas automáticas.
 
@@ -32,9 +33,9 @@ conceptos estudiados durante las semanas 2, 3 y 6.
 
 ```text
 Cliente HTTP
-    -> ProductoController
-    -> ProductoService
-    -> ProductoRepository
+    -> Controller
+    -> Service
+    -> Repository
     -> Hibernate
     -> Session Pooler de Supabase (puerto 5432)
     -> PostgreSQL
@@ -65,7 +66,7 @@ Después se inicia el backend:
 .\mvnw.cmd spring-boot:run
 ```
 
-La API se ejecuta en `http://localhost:8080/api/productos`.
+La API se ejecuta en `http://localhost:8080`.
 
 ## Endpoints
 
@@ -76,6 +77,20 @@ La API se ejecuta en `http://localhost:8080/api/productos`.
 | POST | `/api/productos` | Registrar un producto |
 | PUT | `/api/productos/{id}` | Actualizar un producto |
 | DELETE | `/api/productos/{id}` | Eliminar un producto |
+| GET | `/api/clientes` | Listar clientes |
+| GET | `/api/clientes/{id}` | Buscar cliente por identificador |
+| POST | `/api/clientes` | Registrar un cliente |
+| PUT | `/api/clientes/{id}` | Actualizar un cliente |
+| DELETE | `/api/clientes/{id}` | Eliminar un cliente |
+| GET | `/api/clientes/buscar?apellidos=...` | Buscar por apellidos |
+| GET | `/api/clientes/correo?correo=...` | Buscar por correo |
+| GET | `/api/pedidos` | Listar pedidos |
+| GET | `/api/pedidos/{id}` | Buscar pedido por identificador |
+| POST | `/api/pedidos` | Registrar un pedido |
+| PUT | `/api/pedidos/{id}` | Actualizar un pedido |
+| DELETE | `/api/pedidos/{id}` | Eliminar un pedido |
+| GET | `/api/pedidos/cliente/{clienteId}` | Buscar pedidos por cliente |
+| GET | `/api/pedidos/estado/{estado}` | Buscar pedidos por estado |
 
 Ejemplo de producto:
 

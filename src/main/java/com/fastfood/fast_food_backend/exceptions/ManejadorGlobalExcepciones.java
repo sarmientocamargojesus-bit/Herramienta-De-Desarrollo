@@ -132,6 +132,14 @@ public class ManejadorGlobalExcepciones {
         return construirRespuesta(HttpStatus.BAD_REQUEST, PARAMETRO_INVALIDO, request, Map.of());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> manejarArgumentoInvalido(
+            IllegalArgumentException exception,
+            HttpServletRequest request) {
+        logger.warn("Datos inválidos: {}", exception.getMessage());
+        return construirRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
     /**
      * Maneja excepciones cuando no se encuentra el endpoint solicitado.
      *

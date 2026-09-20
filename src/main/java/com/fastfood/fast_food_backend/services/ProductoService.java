@@ -2,11 +2,11 @@ package com.fastfood.fast_food_backend.services;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
 import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 
 @Service
@@ -24,7 +24,7 @@ public class ProductoService {
 
     public Producto buscarPorId(Long id) {
         return productoRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Producto no encontrado: " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + id));
     }
 
     public Producto registrar(Producto producto) {

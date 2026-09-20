@@ -1,11 +1,13 @@
 @baseUrl = http://localhost:8080
 @productoId = 10
+@clienteId = 1
+@pedidoId = 1
 
 # IMPORTANTE:
 # 1. Ejecutamos el servidor Spring Boot con: .\mvnw.cmd spring-boot:run
 # 2. Abrimos la colección de pruebas en Postman y reemplazamos {{baseUrl}} por http://localhost:8080 y {{productoId}} por 1.
 # 3. Ejecuta estas solicitudes en el orden indicado.
-# Al reiniciarse H2, el primer producto tendrá el ID 1.
+# Los datos de ejecución se guardan permanentemente en Supabase.
 
 
 
@@ -74,3 +76,79 @@ DELETE {{baseUrl}}/api/ruta-inexistente/{{productoId}}
 
 ### 9. Listar productos después de eliminar - debe responder 200 con una lista vacía
 GET {{baseUrl}}/api/productos
+
+
+### 10. Registrar cliente - debe responder 201 Created
+POST {{baseUrl}}/api/clientes
+Content-Type: application/json
+
+{
+  "nombres": "Ana",
+  "apellidos": "Pérez García",
+  "telefono": "999111222",
+  "correo": "ana.perez@correo.com",
+  "direccion": "Av. Principal 123"
+}
+
+### 11. Listar clientes - debe responder 200 OK
+GET {{baseUrl}}/api/clientes
+
+### 12. Buscar clientes por apellido - consulta derivada
+GET {{baseUrl}}/api/clientes/buscar?apellidos=Pérez
+
+### 13. Buscar cliente por correo - consulta derivada
+GET {{baseUrl}}/api/clientes/correo?correo=ana.perez@correo.com
+
+### 14. Actualizar cliente - debe responder 200 OK
+PUT {{baseUrl}}/api/clientes/{{clienteId}}
+Content-Type: application/json
+
+{
+  "nombres": "Ana María",
+  "apellidos": "Pérez García",
+  "telefono": "999111222",
+  "correo": "ana.perez@correo.com",
+  "direccion": "Av. Nueva 456",
+  "activo": true
+}
+
+### 15. Registrar pedido - primero debe existir el cliente indicado
+POST {{baseUrl}}/api/pedidos
+Content-Type: application/json
+
+{
+  "clienteId": {{clienteId}},
+  "estado": "PENDIENTE",
+  "total": 25.00,
+  "tipoEntrega": "DOMICILIO",
+  "direccionEntrega": "Av. Nueva 456",
+  "observaciones": "Sin mayonesa"
+}
+
+### 16. Listar pedidos - debe responder 200 OK
+GET {{baseUrl}}/api/pedidos
+
+### 17. Buscar pedidos por cliente - consulta derivada
+GET {{baseUrl}}/api/pedidos/cliente/{{clienteId}}
+
+### 18. Buscar pedidos por estado - consulta derivada
+GET {{baseUrl}}/api/pedidos/estado/PENDIENTE
+
+### 19. Actualizar pedido - debe responder 200 OK
+PUT {{baseUrl}}/api/pedidos/{{pedidoId}}
+Content-Type: application/json
+
+{
+  "clienteId": {{clienteId}},
+  "estado": "EN_PREPARACION",
+  "total": 25.00,
+  "tipoEntrega": "DOMICILIO",
+  "direccionEntrega": "Av. Nueva 456",
+  "observaciones": "Sin mayonesa"
+}
+
+### 20. Eliminar pedido - debe responder 204 No Content
+DELETE {{baseUrl}}/api/pedidos/{{pedidoId}}
+
+### 21. Eliminar cliente - primero elimina sus pedidos
+DELETE {{baseUrl}}/api/clientes/{{clienteId}}

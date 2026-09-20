@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +77,7 @@ class ProductoServiceTest {
     void debeInformarCuandoElProductoNoExiste() {
         when(productoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> productoService.buscarPorId(99L));
+        assertThrows(RecursoNoEncontradoException.class, () -> productoService.buscarPorId(99L));
     }
 
     private Producto producto(String nombre, String precio, int stock) {
