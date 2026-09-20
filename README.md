@@ -1,6 +1,7 @@
-# Fast Food - Avance de las semanas 2 y 3
+# Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
-Proyecto académico limitado al módulo de productos y a los conceptos estudiados en clase.
+Proyecto académico grupal. El avance actual contiene el CRUD de productos y los
+conceptos estudiados durante las semanas 2, 3 y 6.
 
 ## Semana 2
 
@@ -19,6 +20,14 @@ Proyecto académico limitado al módulo de productos y a los conceptos estudiado
 - Pruebas de la capa Service.
 - Pruebas de endpoints con MockMvc.
 
+## Semana 6
+
+- Persistencia mediante Spring Data JPA e Hibernate.
+- Entidad `Producto` asociada con la tabla `productos`.
+- Operaciones CRUD mediante `JpaRepository`.
+- PostgreSQL alojado en Supabase.
+- H2 utilizado únicamente en las pruebas automáticas.
+
 ## Estructura
 
 ```text
@@ -26,10 +35,31 @@ Cliente HTTP
     -> ProductoController
     -> ProductoService
     -> ProductoRepository
-    -> H2
+    -> Hibernate
+    -> Session Pooler de Supabase (puerto 5432)
+    -> PostgreSQL
 ```
 
 ## Ejecutar la aplicación
+
+Cada integrante debe obtener en Supabase la conexión `Session pooler` del
+puerto `5432`. Después debe copiar la plantilla `.env.example` con el nombre
+`.env`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+En `.env` se reemplazan los tres valores de ejemplo con el host, usuario y
+contraseña reales. Los datos exactos deben copiarse desde la opción `Connect`
+del proyecto de Supabase. Spring Boot importa automáticamente este archivo al
+iniciar la aplicación.
+
+El archivo `.env` está excluido de Git y nunca debe compartirse ni subirse al
+repositorio. Solamente `.env.example`, que no contiene secretos, se mantiene en
+GitHub.
+
+Después se inicia el backend:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -66,6 +96,6 @@ Las solicitudes manuales se encuentran en `requests.http`.
 ```
 
 Las pruebas de `ProductoService` utilizan JUnit y Mockito. Las pruebas de
-`ProductoController` utilizan MockMvc para simular solicitudes HTTP.
-
-El ciclo completo y sus resultados están documentados en `EVIDENCIA-TDD.md`.
+`ProductoController` utilizan MockMvc para simular solicitudes HTTP. Durante
+las pruebas se utiliza una base H2 en memoria, por lo que no requieren las
+credenciales de Supabase.
