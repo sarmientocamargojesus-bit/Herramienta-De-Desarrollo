@@ -65,7 +65,8 @@ class ProductoControllerTest {
                                 {
                                   "nombre": "Hamburguesa",
                                   "precio": 12.50,
-                                  "stock": 10
+                                  "stock": 10,
+                                  "categoria": "HAMBURGUESAS"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -78,6 +79,7 @@ class ProductoControllerTest {
         producto.setNombre("Hamburguesa");
         producto.setPrecio(new BigDecimal("12.50"));
         producto.setStock(10);
+        producto.setCategoria("HAMBURGUESAS");
         return producto;
     }
 }

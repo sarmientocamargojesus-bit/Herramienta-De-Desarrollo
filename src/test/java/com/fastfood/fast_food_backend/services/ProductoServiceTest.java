@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fastfood.fast_food_backend.entities.Producto;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
+import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,11 +82,47 @@ class ProductoServiceTest {
         assertThrows(RecursoNoEncontradoException.class, () -> productoService.buscarPorId(99L));
     }
 
+    @Test
+    void debeBuscarProductosPorRangoDePrecios() {
+        Producto producto = producto("Hamburguesa", "12.50", 10);
+        BigDecimal minimo = new BigDecimal("10.00");
+        BigDecimal maximo = new BigDecimal("20.00");
+        when(productoRepository.buscarPorRangoDePrecios(minimo, maximo)).thenReturn(List.of(producto));
+
+        List<Producto> resultado = productoService.buscarPorRangoDePrecios(minimo, maximo);
+
+        assertEquals(1, resultado.size());
+        assertSame(producto, resultado.get(0));
+    }
+
+    @Test
+    void debeDescontarStockDisponible() {
+        Producto producto = producto("Hamburguesa", "12.50", 10);
+        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+        when(productoRepository.save(producto)).thenReturn(producto);
+
+        Producto resultado = productoService.descontarStock(1L, 3);
+
+        assertEquals(7, resultado.getStock());
+        verify(productoRepository).save(producto);
+    }
+
+    @Test
+    void debeRechazarDescuentoConStockInsuficiente() {
+        Producto producto = producto("Hamburguesa", "12.50", 2);
+        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+
+        assertThrows(ReglaNegocioException.class, () -> productoService.descontarStock(1L, 3));
+
+        verify(productoRepository, never()).save(any());
+    }
+
     private Producto producto(String nombre, String precio, int stock) {
         Producto producto = new Producto();
         producto.setNombre(nombre);
         producto.setPrecio(new BigDecimal(precio));
         producto.setStock(stock);
+        producto.setCategoria("HAMBURGUESAS");
         return producto;
     }
 }

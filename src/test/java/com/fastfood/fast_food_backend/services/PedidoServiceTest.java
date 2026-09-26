@@ -21,7 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.repositories.ClienteRepository;
+import com.fastfood.fast_food_backend.repositories.DetallePedidoRepository;
 import com.fastfood.fast_food_backend.repositories.PedidoRepository;
+import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PedidoServiceTest {
@@ -31,6 +33,12 @@ class PedidoServiceTest {
 
     @Mock
     private ClienteRepository clienteRepository;
+
+    @Mock
+    private ProductoRepository productoRepository;
+
+    @Mock
+    private DetallePedidoRepository detallePedidoRepository;
 
     @InjectMocks
     private PedidoService pedidoService;

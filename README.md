@@ -1,7 +1,7 @@
 # Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
 Proyecto académico grupal. El avance actual contiene el CRUD de productos, clientes y pedidos, y los
-conceptos estudiados durante las semanas 2, 3 y 6.
+conceptos estudiados durante las semanas 2, 3, 6 y 7.
 
 ## Semana 2
 
@@ -29,6 +29,18 @@ conceptos estudiados durante las semanas 2, 3 y 6.
 - PostgreSQL alojado en Supabase.
 - H2 utilizado únicamente en las pruebas automáticas.
 
+## Semana 7
+
+- Consultas personalizadas JPQL mediante `@Query` y `@Param`.
+- Búsqueda de productos por nombre y por stock disponible.
+- Filtro por rango de precios con múltiples condiciones.
+- Ordenamiento descendente por precio.
+- Consulta sobre la relación `Pedido - DetallePedido - Producto`.
+- Función de agregación `SUM` para obtener totales por estado.
+- Actualización de stock mediante `@Transactional`.
+- Procesamiento transaccional de pedidos utilizando varios repositorios.
+- Rollback automático cuando un producto no tiene stock suficiente.
+
 ## Estructura
 
 ```text
@@ -36,6 +48,7 @@ Cliente HTTP
     -> Controller
     -> Service
     -> Repository
+    -> JPQL / Spring Data JPA
     -> Hibernate
     -> Session Pooler de Supabase (puerto 5432)
     -> PostgreSQL
@@ -77,6 +90,11 @@ La API se ejecuta en `http://localhost:8080`.
 | POST | `/api/productos` | Registrar un producto |
 | PUT | `/api/productos/{id}` | Actualizar un producto |
 | DELETE | `/api/productos/{id}` | Eliminar un producto |
+| GET | `/api/productos/buscar?nombre=...` | JPQL: buscar por nombre |
+| GET | `/api/productos/disponibles` | JPQL: buscar con stock |
+| GET | `/api/productos/rango-precios?minimo=...&maximo=...` | JPQL: filtrar por rango y stock |
+| GET | `/api/productos/ordenados-precio` | JPQL: ordenar por precio |
+| PUT | `/api/productos/{id}/descontar-stock?cantidad=...` | Actualización transaccional de stock |
 | GET | `/api/clientes` | Listar clientes |
 | GET | `/api/clientes/{id}` | Buscar cliente por identificador |
 | POST | `/api/clientes` | Registrar un cliente |
@@ -91,6 +109,9 @@ La API se ejecuta en `http://localhost:8080`.
 | DELETE | `/api/pedidos/{id}` | Eliminar un pedido |
 | GET | `/api/pedidos/cliente/{clienteId}` | Buscar pedidos por cliente |
 | GET | `/api/pedidos/estado/{estado}` | Buscar pedidos por estado |
+| POST | `/api/pedidos/procesar` | Procesar pedido y descontar stock en una transacción |
+| GET | `/api/pedidos/{id}/detalles` | JPQL: consultar relación con detalles |
+| GET | `/api/pedidos/total-por-estado/{estado}` | JPQL: sumar total por estado |
 
 Ejemplo de producto:
 
@@ -98,7 +119,8 @@ Ejemplo de producto:
 {
   "nombre": "Hamburguesa clásica",
   "precio": 12.50,
-  "stock": 20
+  "stock": 20,
+  "categoria": "HAMBURGUESAS"
 }
 ```
 
@@ -110,7 +132,8 @@ Las solicitudes manuales se encuentran en `requests.http`.
 .\mvnw.cmd test
 ```
 
-Las pruebas de `ProductoService` utilizan JUnit y Mockito. Las pruebas de
-`ProductoController` utilizan MockMvc para simular solicitudes HTTP. Durante
-las pruebas se utiliza una base H2 en memoria, por lo que no requieren las
-credenciales de Supabase.
+Las pruebas de Service utilizan JUnit y Mockito, y las pruebas de Controller
+utilizan MockMvc. Las pruebas de integración ejecutan las consultas JPQL y
+comprueban tanto el commit como el rollback de los pedidos. Durante las pruebas
+se utiliza una base H2 en memoria, por lo que no requieren las credenciales de
+Supabase.

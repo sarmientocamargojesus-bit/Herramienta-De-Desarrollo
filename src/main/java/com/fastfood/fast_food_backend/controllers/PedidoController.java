@@ -1,6 +1,7 @@
 package com.fastfood.fast_food_backend.controllers;
 
 import java.net.URI;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fastfood.fast_food_backend.entities.Pedido;
+import com.fastfood.fast_food_backend.entities.DetallePedido;
+import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
 import com.fastfood.fast_food_backend.services.PedidoService;
 
 @RestController
@@ -62,5 +65,22 @@ public class PedidoController {
     @GetMapping("/estado/{estado}")
     public List<Pedido> buscarPorEstado(@PathVariable String estado) {
         return pedidoService.buscarPorEstado(estado);
+    }
+
+    @PostMapping("/procesar")
+    public ResponseEntity<Pedido> procesarPedido(@RequestBody ProcesarPedidoRequest solicitud) {
+        Pedido pedido = pedidoService.procesarPedido(solicitud);
+        URI ubicacion = URI.create("/api/pedidos/" + pedido.getId());
+        return ResponseEntity.created(ubicacion).body(pedido);
+    }
+
+    @GetMapping("/{id}/detalles")
+    public List<DetallePedido> buscarDetalles(@PathVariable Long id) {
+        return pedidoService.buscarDetalles(id);
+    }
+
+    @GetMapping("/total-por-estado/{estado}")
+    public BigDecimal calcularTotalPorEstado(@PathVariable String estado) {
+        return pedidoService.calcularTotalPorEstado(estado);
     }
 }

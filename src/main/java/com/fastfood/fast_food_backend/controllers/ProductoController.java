@@ -1,6 +1,7 @@
 package com.fastfood.fast_food_backend.controllers;
 
 import java.net.URI;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fastfood.fast_food_backend.entities.Producto;
 import com.fastfood.fast_food_backend.services.ProductoService;
@@ -52,5 +54,32 @@ public class ProductoController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar")
+    public List<Producto> buscarPorNombre(@RequestParam String nombre) {
+        return productoService.buscarPorNombre(nombre);
+    }
+
+    @GetMapping("/disponibles")
+    public List<Producto> buscarConStockDisponible() {
+        return productoService.buscarConStockDisponible();
+    }
+
+    @GetMapping("/rango-precios")
+    public List<Producto> buscarPorRangoDePrecios(
+            @RequestParam BigDecimal minimo,
+            @RequestParam BigDecimal maximo) {
+        return productoService.buscarPorRangoDePrecios(minimo, maximo);
+    }
+
+    @GetMapping("/ordenados-precio")
+    public List<Producto> ordenarPorPrecioDescendente() {
+        return productoService.ordenarPorPrecioDescendente();
+    }
+
+    @PutMapping("/{id}/descontar-stock")
+    public Producto descontarStock(@PathVariable Long id, @RequestParam int cantidad) {
+        return productoService.descontarStock(id, cantidad);
     }
 }

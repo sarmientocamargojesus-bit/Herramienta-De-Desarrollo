@@ -2,6 +2,7 @@
 @productoId = 10
 @clienteId = 1
 @pedidoId = 1
+@productoPedidoId = 1
 
 # IMPORTANTE:
 # 1. Ejecutamos el servidor Spring Boot con: .\mvnw.cmd spring-boot:run
@@ -18,7 +19,8 @@ Content-Type: application/json
 {
   "nombre": "Hamburguesa clásica",
   "precio": 12.50,
-  "stock": 20
+  "stock": 20,
+  "categoria": "HAMBURGUESAS"
 }
 
 ### 2. POST incorrecto - debe responder 400 Bad Request
@@ -29,7 +31,8 @@ Content-Type: application/json
 {
   "nombre": "Producto inválido",
   "precio": "doce con cincuenta",
-  "stock": 10
+  "stock": 10,
+  "categoria": "HAMBURGUESAS"
 }
 
 
@@ -50,7 +53,8 @@ Content-Type: application/json
 {
   "nombre": "Hamburguesa clásica grande",
   "precio": 15.00,
-  "stock": 15
+  "stock": 15,
+  "categoria": "HAMBURGUESAS"
 }
 
 ### 6. PUT incorrecto - debe responder 400 Bad Request
@@ -61,7 +65,8 @@ Content-Type: application/json
 {
   "nombre": "Hamburguesa inválida",
   "precio": 15.00,
-  "stock": "stock-invalido"
+  "stock": "stock-invalido",
+  "categoria": "HAMBURGUESAS"
 }
 
 
@@ -147,8 +152,77 @@ Content-Type: application/json
   "observaciones": "Sin mayonesa"
 }
 
-### 20. Eliminar pedido - debe responder 204 No Content
+# SEMANA 7 - JPQL Y TRANSACCIONES
+
+### 22. Registrar producto para las consultas JPQL
+POST {{baseUrl}}/api/productos
+Content-Type: application/json
+
+{
+  "nombre": "Hamburguesa BBQ",
+  "precio": 18.50,
+  "stock": 10,
+  "categoria": "HAMBURGUESAS"
+}
+
+### 23. JPQL con parámetro: buscar por nombre
+GET {{baseUrl}}/api/productos/buscar?nombre=hamburguesa
+
+### 24. JPQL: productos con stock disponible
+GET {{baseUrl}}/api/productos/disponibles
+
+### 25. JPQL con múltiples condiciones: rango de precios y stock
+GET {{baseUrl}}/api/productos/rango-precios?minimo=10&maximo=25
+
+### 26. JPQL con ORDER BY: precio descendente
+GET {{baseUrl}}/api/productos/ordenados-precio
+
+### 27. Transacción individual exitosa: descontar stock
+PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=2
+
+### 28. Transacción individual rechazada: debe responder 409 si no alcanza el stock
+PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=9999
+
+### 29. Transacción grupal exitosa: registra pedido, detalle y descuenta stock
+POST {{baseUrl}}/api/pedidos/procesar
+Content-Type: application/json
+
+{
+  "clienteId": {{clienteId}},
+  "tipoEntrega": "RECOJO",
+  "observaciones": "Pedido de prueba semana 7",
+  "detalles": [
+    {
+      "productoId": {{productoPedidoId}},
+      "cantidad": 2
+    }
+  ]
+}
+
+### 30. JPQL sobre relación: detalles del pedido
+GET {{baseUrl}}/api/pedidos/{{pedidoId}}/detalles
+
+### 31. JPQL con SUM: total de pedidos pendientes
+GET {{baseUrl}}/api/pedidos/total-por-estado/PENDIENTE
+
+### 32. Rollback: debe responder 409 y no guardar pedido, detalle ni descuento
+POST {{baseUrl}}/api/pedidos/procesar
+Content-Type: application/json
+
+{
+  "clienteId": {{clienteId}},
+  "tipoEntrega": "RECOJO",
+  "observaciones": "Prueba de rollback",
+  "detalles": [
+    {
+      "productoId": {{productoPedidoId}},
+      "cantidad": 9999
+    }
+  ]
+}
+
+### 33. Eliminar pedido al finalizar todas las pruebas - debe responder 204
 DELETE {{baseUrl}}/api/pedidos/{{pedidoId}}
 
-### 21. Eliminar cliente - primero elimina sus pedidos
+### 34. Eliminar cliente después de eliminar sus pedidos - debe responder 204
 DELETE {{baseUrl}}/api/clientes/{{clienteId}}

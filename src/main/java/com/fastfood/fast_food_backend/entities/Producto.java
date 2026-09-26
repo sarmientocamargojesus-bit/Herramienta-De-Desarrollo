@@ -26,6 +26,8 @@ public class Producto {
     @Column(nullable = false)
     private int stock;
 
+    private String categoria;
+
     public Long getId() {
         return id;
     }
@@ -56,5 +58,13 @@ public class Producto {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }
