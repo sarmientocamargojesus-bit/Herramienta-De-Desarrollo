@@ -19,9 +19,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
+import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceTest {
@@ -29,12 +31,17 @@ class ProductoServiceTest {
     @Mock
     private ProductoRepository productoRepository;
 
+    @Mock
+    private CategoriaRepository categoriaRepository;
+
     @InjectMocks
     private ProductoService productoService;
 
     @Test
     void debeRegistrarUnProductoValido() {
         Producto producto = producto("Hamburguesa", "12.50", 10);
+        when(categoriaRepository.findByNombreIgnoreCase("HAMBURGUESAS"))
+                .thenReturn(Optional.of(categoria()));
         when(productoRepository.save(any(Producto.class))).thenReturn(producto);
 
         Producto resultado = productoService.registrar(producto);
@@ -124,5 +131,13 @@ class ProductoServiceTest {
         producto.setStock(stock);
         producto.setCategoria("HAMBURGUESAS");
         return producto;
+    }
+
+    private Categoria categoria() {
+        Categoria categoria = new Categoria();
+        categoria.setId(1L);
+        categoria.setNombre("HAMBURGUESAS");
+        categoria.setActivo(true);
+        return categoria;
     }
 }

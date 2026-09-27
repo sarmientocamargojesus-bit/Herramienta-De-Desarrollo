@@ -7,17 +7,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
+import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
 
 @Service
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    public ProductoService(ProductoRepository productoRepository) {
+    public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
         this.productoRepository = productoRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
     public List<Producto> listar() {
@@ -31,16 +35,19 @@ public class ProductoService {
 
     public Producto registrar(Producto producto) {
         validar(producto);
+        asignarCategoria(producto);
         return productoRepository.save(producto);
     }
 
     public Producto actualizar(Long id, Producto datosProducto) {
         Producto producto = buscarPorId(id);
         producto.setNombre(datosProducto.getNombre());
+        producto.setDescripcion(datosProducto.getDescripcion());
         producto.setPrecio(datosProducto.getPrecio());
         producto.setStock(datosProducto.getStock());
         producto.setCategoria(datosProducto.getCategoria());
         validar(producto);
+        asignarCategoria(producto);
         return productoRepository.save(producto);
     }
 
@@ -102,5 +109,16 @@ public class ProductoService {
         if (producto.getCategoria() == null || producto.getCategoria().isBlank()) {
             throw new IllegalArgumentException("La categoría del producto es obligatoria");
         }
+    }
+
+    private void asignarCategoria(Producto producto) {
+        Categoria categoria = categoriaRepository.findByNombreIgnoreCase(producto.getCategoria().trim())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Categoría no encontrada: " + producto.getCategoria()));
+        if (!Boolean.TRUE.equals(categoria.getActivo())) {
+            throw new ReglaNegocioException("La categoría seleccionada está inactiva");
+        }
+        producto.setCategoria(categoria.getNombre());
+        producto.setCategoriaReferencia(categoria);
     }
 }

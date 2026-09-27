@@ -57,9 +57,9 @@ public class PedidoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/cliente/{clienteId}")
-    public List<Pedido> buscarPorCliente(@PathVariable Long clienteId) {
-        return pedidoService.buscarPorCliente(clienteId);
+    @GetMapping("/usuario/{usuarioId}")
+    public List<Pedido> buscarPorUsuario(@PathVariable Long usuarioId) {
+        return pedidoService.buscarPorUsuario(usuarioId);
     }
 
     @GetMapping("/estado/{estado}")

@@ -11,6 +11,8 @@ import com.fastfood.fast_food_backend.entities.Producto;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
+    boolean existsByCategoriaReferenciaId(Long categoriaId);
+
     @Query("SELECT p FROM Producto p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
     List<Producto> buscarPorNombre(@Param("nombre") String nombre);
 

@@ -1,21 +1,23 @@
 package com.fastfood.fast_food_backend.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ProcesarPedidoRequest {
 
-    private Long clienteId;
+    private Long usuarioId;
     private String tipoEntrega;
     private String direccionEntrega;
     private String observaciones;
+    private BigDecimal costoEntrega;
     private List<DetallePedidoRequest> detalles;
 
-    public Long getClienteId() {
-        return clienteId;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setClienteId(Long clienteId) {
-        this.clienteId = clienteId;
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public String getTipoEntrega() {
@@ -40,6 +42,14 @@ public class ProcesarPedidoRequest {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    public BigDecimal getCostoEntrega() {
+        return costoEntrega;
+    }
+
+    public void setCostoEntrega(BigDecimal costoEntrega) {
+        this.costoEntrega = costoEntrega;
     }
 
     public List<DetallePedidoRequest> getDetalles() {

@@ -11,7 +11,7 @@ import com.fastfood.fast_food_backend.entities.Pedido;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    List<Pedido> findByClienteId(Long clienteId);
+    List<Pedido> findByUsuarioId(Long usuarioId);
 
     List<Pedido> findByEstadoIgnoreCase(String estado);
 

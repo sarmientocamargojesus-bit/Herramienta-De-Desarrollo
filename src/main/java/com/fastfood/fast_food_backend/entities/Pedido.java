@@ -12,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.CascadeType;
@@ -24,8 +26,11 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cliente_id", nullable = false)
-    private Long clienteId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    private String telefono;
 
     @Column(nullable = false)
     private LocalDateTime fecha;
@@ -36,6 +41,11 @@ public class Pedido {
     @Column(nullable = false)
     private BigDecimal total;
 
+    private BigDecimal subtotal;
+
+    @Column(name = "costo_entrega")
+    private BigDecimal costoEntrega;
+
     @Column(name = "tipo_entrega", nullable = false)
     private String tipoEntrega;
 
@@ -43,6 +53,9 @@ public class Pedido {
     private String direccionEntrega;
 
     private String observaciones;
+
+    @Column(name = "fecha_actualizacion")
+    private LocalDateTime fechaActualizacion;
 
     @JsonIgnore
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,12 +69,20 @@ public class Pedido {
         this.id = id;
     }
 
-    public Long getClienteId() {
-        return clienteId;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setClienteId(Long clienteId) {
-        this.clienteId = clienteId;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public LocalDateTime getFecha() {
@@ -88,6 +109,22 @@ public class Pedido {
         this.total = total;
     }
 
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public BigDecimal getCostoEntrega() {
+        return costoEntrega;
+    }
+
+    public void setCostoEntrega(BigDecimal costoEntrega) {
+        this.costoEntrega = costoEntrega;
+    }
+
     public String getTipoEntrega() {
         return tipoEntrega;
     }
@@ -110,6 +147,14 @@ public class Pedido {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    public LocalDateTime getFechaActualizacion() {
+        return fechaActualizacion;
+    }
+
+    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+        this.fechaActualizacion = fechaActualizacion;
     }
 
     public List<DetallePedido> getDetalles() {

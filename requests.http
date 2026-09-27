@@ -1,8 +1,13 @@
 @baseUrl = http://localhost:8080
 @productoId = 10
-@clienteId = 1
 @pedidoId = 1
 @productoPedidoId = 1
+@usuarioId = 1
+@usuarioAdministrativoId = 2
+@inventarioId = 1
+@pagoId = 1
+@pedidoProcesadoId = 2
+@pedidoSinStockId = 3
 
 # IMPORTANTE:
 # 1. Ejecutamos el servidor Spring Boot con: .\mvnw.cmd spring-boot:run
@@ -18,6 +23,7 @@ Content-Type: application/json
 
 {
   "nombre": "Hamburguesa clásica",
+  "descripcion": "Carne, queso y verduras",
   "precio": 12.50,
   "stock": 20,
   "categoria": "HAMBURGUESAS"
@@ -52,6 +58,7 @@ Content-Type: application/json
 
 {
   "nombre": "Hamburguesa clásica grande",
+  "descripcion": "Carne grande, queso y verduras",
   "precio": 15.00,
   "stock": 15,
   "categoria": "HAMBURGUESAS"
@@ -83,69 +90,74 @@ DELETE {{baseUrl}}/api/ruta-inexistente/{{productoId}}
 GET {{baseUrl}}/api/productos
 
 
-### 10. Registrar cliente - debe responder 201 Created
-POST {{baseUrl}}/api/clientes
+### 10. Registrar usuario cliente - el rol CLIENTE se asigna automáticamente
+POST {{baseUrl}}/api/usuarios
 Content-Type: application/json
 
 {
-  "nombres": "Ana",
-  "apellidos": "Pérez García",
-  "telefono": "999111222",
+  "nombre": "Ana Pérez García",
   "correo": "ana.perez@correo.com",
-  "direccion": "Av. Principal 123"
+  "contrasena": "claveSegura123",
+  "telefono": "999111222",
+  "direccion": "Av. Principal 123",
+  "rol": "ADMINISTRADOR"
 }
 
-### 11. Listar clientes - debe responder 200 OK
-GET {{baseUrl}}/api/clientes
+### 11. Listar usuarios - debe responder 200 OK y Ana seguirá teniendo rol CLIENTE
+GET {{baseUrl}}/api/usuarios
 
-### 12. Buscar clientes por apellido - consulta derivada
-GET {{baseUrl}}/api/clientes/buscar?apellidos=Pérez
+### 12. Buscar usuario por correo - consulta derivada
+GET {{baseUrl}}/api/usuarios/correo?correo=ana.perez@correo.com
 
-### 13. Buscar cliente por correo - consulta derivada
-GET {{baseUrl}}/api/clientes/correo?correo=ana.perez@correo.com
-
-### 14. Actualizar cliente - debe responder 200 OK
-PUT {{baseUrl}}/api/clientes/{{clienteId}}
+### 13. Actualizar usuario; este endpoint no permite cambiar su rol
+PUT {{baseUrl}}/api/usuarios/{{usuarioId}}
 Content-Type: application/json
 
 {
-  "nombres": "Ana María",
-  "apellidos": "Pérez García",
-  "telefono": "999111222",
+  "nombre": "Ana María Pérez García",
   "correo": "ana.perez@correo.com",
+  "telefono": "999111222",
   "direccion": "Av. Nueva 456",
   "activo": true
 }
 
-### 15. Registrar pedido - primero debe existir el cliente indicado
+### 14. Registrar pedido - primero debe existir el usuario CLIENTE indicado
 POST {{baseUrl}}/api/pedidos
 Content-Type: application/json
 
 {
-  "clienteId": {{clienteId}},
+  "usuario": {
+    "id": {{usuarioId}}
+  },
   "estado": "PENDIENTE",
+  "subtotal": 20.00,
+  "costoEntrega": 5.00,
   "total": 25.00,
   "tipoEntrega": "DOMICILIO",
   "direccionEntrega": "Av. Nueva 456",
   "observaciones": "Sin mayonesa"
 }
 
-### 16. Listar pedidos - debe responder 200 OK
+### 15. Listar pedidos - debe responder 200 OK
 GET {{baseUrl}}/api/pedidos
 
-### 17. Buscar pedidos por cliente - consulta derivada
-GET {{baseUrl}}/api/pedidos/cliente/{{clienteId}}
+### 16. Buscar pedidos por usuario - consulta derivada
+GET {{baseUrl}}/api/pedidos/usuario/{{usuarioId}}
 
-### 18. Buscar pedidos por estado - consulta derivada
+### 17. Buscar pedidos por estado - consulta derivada
 GET {{baseUrl}}/api/pedidos/estado/PENDIENTE
 
-### 19. Actualizar pedido - debe responder 200 OK
+### 18. Actualizar pedido - debe responder 200 OK
 PUT {{baseUrl}}/api/pedidos/{{pedidoId}}
 Content-Type: application/json
 
 {
-  "clienteId": {{clienteId}},
+  "usuario": {
+    "id": {{usuarioId}}
+  },
   "estado": "EN_PREPARACION",
+  "subtotal": 20.00,
+  "costoEntrega": 5.00,
   "total": 25.00,
   "tipoEntrega": "DOMICILIO",
   "direccionEntrega": "Av. Nueva 456",
@@ -160,6 +172,7 @@ Content-Type: application/json
 
 {
   "nombre": "Hamburguesa BBQ",
+  "descripcion": "Hamburguesa con salsa BBQ",
   "precio": 18.50,
   "stock": 10,
   "categoria": "HAMBURGUESAS"
@@ -183,12 +196,12 @@ PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=2
 ### 28. Transacción individual rechazada: debe responder 409 si no alcanza el stock
 PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=9999
 
-### 29. Transacción grupal exitosa: registra pedido, detalle y descuenta stock
+### 29. Crear pedido: registra pedido y detalle, pero todavía NO descuenta stock
 POST {{baseUrl}}/api/pedidos/procesar
 Content-Type: application/json
 
 {
-  "clienteId": {{clienteId}},
+  "usuarioId": {{usuarioId}},
   "tipoEntrega": "RECOJO",
   "observaciones": "Pedido de prueba semana 7",
   "detalles": [
@@ -199,18 +212,19 @@ Content-Type: application/json
   ]
 }
 
-### 30. JPQL sobre relación: detalles del pedido
-GET {{baseUrl}}/api/pedidos/{{pedidoId}}/detalles
+### 30. JPQL sobre relación: detalles del pedido pendiente
+# Copia en pedidoProcesadoId el id devuelto por la solicitud 29.
+GET {{baseUrl}}/api/pedidos/{{pedidoProcesadoId}}/detalles
 
 ### 31. JPQL con SUM: total de pedidos pendientes
 GET {{baseUrl}}/api/pedidos/total-por-estado/PENDIENTE
 
-### 32. Rollback: debe responder 409 y no guardar pedido, detalle ni descuento
+### 32. Crear otro pedido con cantidad superior al stock: debe quedar PENDIENTE
 POST {{baseUrl}}/api/pedidos/procesar
 Content-Type: application/json
 
 {
-  "clienteId": {{clienteId}},
+  "usuarioId": {{usuarioId}},
   "tipoEntrega": "RECOJO",
   "observaciones": "Prueba de rollback",
   "detalles": [
@@ -221,8 +235,100 @@ Content-Type: application/json
   ]
 }
 
-### 33. Eliminar pedido al finalizar todas las pruebas - debe responder 204
+### 33. Intentar pagar el pedido sin stock: debe responder 409 Conflict
+# Copia en pedidoSinStockId el id devuelto por la solicitud 32.
+# No se guarda el pago, el pedido continúa PENDIENTE y el stock no cambia.
+POST {{baseUrl}}/api/pagos
+Content-Type: application/json
+
+{
+  "pedido": {
+    "id": {{pedidoSinStockId}}
+  },
+  "metodo": "YAPE",
+  "monto": 184981.50
+}
+
+# TABLAS NUEVAS DEL SISTEMA
+
+### 35. Listar categorías predeterminadas: hamburguesas, combos, piqueos y bebidas
+GET {{baseUrl}}/api/categorias/activas
+
+### 36. Registrar segundo usuario; aunque envíe un rol, se guardará como CLIENTE
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Carlos Administrador",
+  "correo": "admin@fastfood.com",
+  "contrasena": "claveSegura123",
+  "telefono": "999888777",
+  "direccion": "Av. Administración 100",
+  "rol": "ADMINISTRADOR"
+}
+
+### 37. Cambiar rol mediante el endpoint administrativo
+PUT {{baseUrl}}/api/usuarios/{{usuarioAdministrativoId}}/rol
+Content-Type: application/json
+
+{
+  "rol": "ADMINISTRADOR"
+}
+
+### 38. Consultar usuario por correo
+GET {{baseUrl}}/api/usuarios/correo?correo=admin@fastfood.com
+
+### 39. Configurar stock mínimo para un producto
+POST {{baseUrl}}/api/inventarios
+Content-Type: application/json
+
+{
+  "producto": {
+    "id": {{productoPedidoId}}
+  },
+  "stockMinimo": 5
+}
+
+### 40. Consultar productos que llegaron al stock mínimo
+GET {{baseUrl}}/api/inventarios/bajo-minimo
+
+### 41. Confirmar el pedido con un pago simulado
+# El monto debe coincidir con el total del pedido creado en la solicitud 29.
+# Debe guardar APROBADO, cambiar el pedido a CONFIRMADO y descontar el stock.
+POST {{baseUrl}}/api/pagos
+Content-Type: application/json
+
+{
+  "pedido": {
+    "id": {{pedidoProcesadoId}}
+  },
+  "metodo": "YAPE",
+  "monto": 37.00
+}
+
+### 42. Consultar el pago asociado al pedido
+GET {{baseUrl}}/api/pagos/pedido/{{pedidoProcesadoId}}
+
+### 43. Pago duplicado: debe responder 409 Conflict
+POST {{baseUrl}}/api/pagos
+Content-Type: application/json
+
+{
+  "pedido": {
+    "id": {{pedidoProcesadoId}}
+  },
+  "metodo": "EFECTIVO",
+  "monto": 37.00
+}
+
+### 44. Eliminar pago al finalizar las pruebas - debe responder 204
+DELETE {{baseUrl}}/api/pagos/{{pagoId}}
+
+### 45. Eliminar configuración de inventario - debe responder 204
+DELETE {{baseUrl}}/api/inventarios/{{inventarioId}}
+
+### 46. Eliminar pedido después de eliminar su pago - debe responder 204
 DELETE {{baseUrl}}/api/pedidos/{{pedidoId}}
 
-### 34. Eliminar cliente después de eliminar sus pedidos - debe responder 204
-DELETE {{baseUrl}}/api/clientes/{{clienteId}}
+### 47. Eliminar usuario después de eliminar sus pedidos - debe responder 204
+DELETE {{baseUrl}}/api/usuarios/{{usuarioId}}
