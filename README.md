@@ -144,6 +144,67 @@ Permisos principales:
 | `EMPLEADO` | Consultar y gestionar pedidos e inventario |
 | `ADMINISTRADOR` | Gestionar usuarios, roles, catálogo, pedidos, pagos e inventario |
 
+## Seguridad de las tablas en Supabase (RLS)
+
+El Security Advisor de Supabase detectó inicialmente siete tablas del esquema
+`public` sin Row Level Security (RLS): `categorias`, `usuarios`,
+`detalles_pedido`, `productos`, `inventarios`, `pagos` y `pedidos`.
+
+RLS protege el acceso realizado mediante la API REST o GraphQL automática de
+Supabase. Esta protección es distinta de Spring Security: Spring Security
+controla quién puede utilizar los endpoints del backend, mientras que RLS
+controla qué filas pueden consultarse directamente mediante la API de
+Supabase.
+
+El frontend de este proyecto no debe conectarse directamente a las tablas. El
+flujo permitido es:
+
+```text
+Frontend -> API Spring Boot -> Spring Security -> JPA/Hibernate -> Supabase PostgreSQL
+```
+
+Para activar RLS y evitar el acceso directo con los roles públicos de Supabase,
+se ejecuta una sola vez el siguiente código desde el SQL Editor del proyecto:
+
+```sql
+ALTER TABLE public.categorias ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.usuarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.detalles_pedido ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.productos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pagos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pedidos ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL PRIVILEGES
+ON ALL TABLES IN SCHEMA public
+FROM anon, authenticated;
+
+REVOKE ALL PRIVILEGES
+ON ALL SEQUENCES IN SCHEMA public
+FROM anon, authenticated;
+```
+
+Cada instrucción cumple la siguiente función:
+
+- `ENABLE ROW LEVEL SECURITY` activa la protección por filas en cada tabla.
+- El primer `REVOKE` retira a los roles `anon` y `authenticated` el acceso
+  directo a las tablas mediante la API de Supabase.
+- El segundo `REVOKE` impide que esos roles utilicen directamente las
+  secuencias que generan los identificadores de las tablas.
+
+Con esta configuración:
+
+- Nadie puede consultar o modificar las tablas utilizando solamente la clave
+  pública de Supabase.
+- Los usuarios deben pasar por la API de Spring Boot.
+- Spring Security continúa aplicando los roles y permisos del sistema.
+- La conexión JDBC del backend continúa funcionando porque utiliza el usuario
+  propietario de PostgreSQL configurado mediante variables de entorno, que
+  normalmente no queda restringido por RLS.
+
+Las credenciales de PostgreSQL nunca deben colocarse en este archivo ni
+publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquitectura.
+
 ## Endpoints
 
 | Método | Ruta | Operación |
