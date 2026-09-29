@@ -3,18 +3,35 @@ package com.fastfood.fast_food_backend.config;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.fastfood.fast_food_backend.entities.Categoria;
+import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
+import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
 
 @Component
 public class InicializadorDatos implements CommandLineRunner {
 
     private final CategoriaRepository categoriaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public InicializadorDatos(CategoriaRepository categoriaRepository) {
+    @Value("${APP_ADMIN_EMAIL:}")
+    private String correoAdministrador;
+
+    @Value("${APP_ADMIN_PASSWORD:}")
+    private String contrasenaAdministrador;
+
+    public InicializadorDatos(
+            CategoriaRepository categoriaRepository,
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder) {
         this.categoriaRepository = categoriaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -23,6 +40,7 @@ public class InicializadorDatos implements CommandLineRunner {
         crearSiNoExiste("COMBOS", "Combos de productos");
         crearSiNoExiste("PIQUEOS", "Piqueos y acompañamientos");
         crearSiNoExiste("BEBIDAS", "Bebidas del menú");
+        crearAdministradorInicial();
     }
 
     private void crearSiNoExiste(String nombre, String descripcion) {
@@ -33,5 +51,22 @@ public class InicializadorDatos implements CommandLineRunner {
             categoria.setActivo(true);
             categoriaRepository.save(categoria);
         }
+    }
+
+    private void crearAdministradorInicial() {
+        if (correoAdministrador == null || correoAdministrador.isBlank()
+                || contrasenaAdministrador == null || contrasenaAdministrador.length() < 6) {
+            return;
+        }
+
+        String correo = correoAdministrador.trim().toLowerCase();
+        Usuario administrador = usuarioRepository.findByCorreoIgnoreCase(correo).orElseGet(Usuario::new);
+        administrador.setNombre("Administrador");
+        administrador.setCorreo(correo);
+        administrador.setContrasena(passwordEncoder.encode(contrasenaAdministrador));
+        administrador.setTelefono("000000000");
+        administrador.setRol("ADMINISTRADOR");
+        administrador.setActivo(true);
+        usuarioRepository.save(administrador);
     }
 }

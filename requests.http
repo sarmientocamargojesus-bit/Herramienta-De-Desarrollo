@@ -1,4 +1,10 @@
 @baseUrl = http://localhost:8080
+@adminEmail = admin@fastfood.com
+@adminPassword = REEMPLAZAR_CON_LA_CLAVE_DEL_ENV
+@clienteEmail = ana.perez@correo.com
+@clientePassword = claveSegura123
+@clienteSeguridadEmail = seguridad.cliente@correo.com
+@clienteSeguridadPassword = claveSegura123
 @productoId = 10
 @pedidoId = 1
 @productoPedidoId = 1
@@ -19,6 +25,7 @@
 
 ### 1. POST correcto - debe responder 201 Created
 POST {{baseUrl}}/api/productos
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -32,6 +39,7 @@ Content-Type: application/json
 ### 2. POST incorrecto - debe responder 400 Bad Request
 # El precio contiene texto y no puede convertirse a BigDecimal.
 POST {{baseUrl}}/api/productos
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -54,6 +62,7 @@ GET {{baseUrl}}/api/ruta-inexistente
 
 ### 5. PUT correcto - debe responder 200 OK
 PUT {{baseUrl}}/api/productos/{{productoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -67,6 +76,7 @@ Content-Type: application/json
 ### 6. PUT incorrecto - debe responder 400 Bad Request
 # El stock contiene texto y no puede convertirse a un número entero.
 PUT {{baseUrl}}/api/productos/{{productoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -80,6 +90,7 @@ Content-Type: application/json
 
 ### 7. DELETE correcto - debe responder 204 No Content
 DELETE {{baseUrl}}/api/productos/{{productoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 8. DELETE incorrecto - debe responder 404 Not Found
 # La ruta solicitada no existe en ningún Controller.
@@ -105,12 +116,15 @@ Content-Type: application/json
 
 ### 11. Listar usuarios - debe responder 200 OK y Ana seguirá teniendo rol CLIENTE
 GET {{baseUrl}}/api/usuarios
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 12. Buscar usuario por correo - consulta derivada
 GET {{baseUrl}}/api/usuarios/correo?correo=ana.perez@correo.com
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 13. Actualizar usuario; este endpoint no permite cambiar su rol
 PUT {{baseUrl}}/api/usuarios/{{usuarioId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -123,6 +137,7 @@ Content-Type: application/json
 
 ### 14. Registrar pedido - primero debe existir el usuario CLIENTE indicado
 POST {{baseUrl}}/api/pedidos
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -140,15 +155,19 @@ Content-Type: application/json
 
 ### 15. Listar pedidos - debe responder 200 OK
 GET {{baseUrl}}/api/pedidos
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 16. Buscar pedidos por usuario - consulta derivada
 GET {{baseUrl}}/api/pedidos/usuario/{{usuarioId}}
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 
 ### 17. Buscar pedidos por estado - consulta derivada
 GET {{baseUrl}}/api/pedidos/estado/PENDIENTE
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 18. Actualizar pedido - debe responder 200 OK
 PUT {{baseUrl}}/api/pedidos/{{pedidoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -168,6 +187,7 @@ Content-Type: application/json
 
 ### 22. Registrar producto para las consultas JPQL
 POST {{baseUrl}}/api/productos
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -192,12 +212,15 @@ GET {{baseUrl}}/api/productos/ordenados-precio
 
 ### 27. Transacción individual exitosa: descontar stock
 PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=2
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 28. Transacción individual rechazada: debe responder 409 si no alcanza el stock
 PUT {{baseUrl}}/api/productos/{{productoPedidoId}}/descontar-stock?cantidad=9999
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 29. Crear pedido: registra pedido y detalle, pero todavía NO descuenta stock
 POST {{baseUrl}}/api/pedidos/procesar
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -215,12 +238,15 @@ Content-Type: application/json
 ### 30. JPQL sobre relación: detalles del pedido pendiente
 # Copia en pedidoProcesadoId el id devuelto por la solicitud 29.
 GET {{baseUrl}}/api/pedidos/{{pedidoProcesadoId}}/detalles
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 
 ### 31. JPQL con SUM: total de pedidos pendientes
 GET {{baseUrl}}/api/pedidos/total-por-estado/PENDIENTE
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 32. Crear otro pedido con cantidad superior al stock: debe quedar PENDIENTE
 POST {{baseUrl}}/api/pedidos/procesar
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -239,6 +265,7 @@ Content-Type: application/json
 # Copia en pedidoSinStockId el id devuelto por la solicitud 32.
 # No se guarda el pago, el pedido continúa PENDIENTE y el stock no cambia.
 POST {{baseUrl}}/api/pagos
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -260,7 +287,7 @@ Content-Type: application/json
 
 {
   "nombre": "Carlos Administrador",
-  "correo": "admin@fastfood.com",
+  "correo": "carlos.admin@correo.com",
   "contrasena": "claveSegura123",
   "telefono": "999888777",
   "direccion": "Av. Administración 100",
@@ -269,6 +296,7 @@ Content-Type: application/json
 
 ### 37. Cambiar rol mediante el endpoint administrativo
 PUT {{baseUrl}}/api/usuarios/{{usuarioAdministrativoId}}/rol
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -276,10 +304,12 @@ Content-Type: application/json
 }
 
 ### 38. Consultar usuario por correo
-GET {{baseUrl}}/api/usuarios/correo?correo=admin@fastfood.com
+GET {{baseUrl}}/api/usuarios/correo?correo=carlos.admin@correo.com
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 39. Configurar stock mínimo para un producto
 POST {{baseUrl}}/api/inventarios
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 Content-Type: application/json
 
 {
@@ -291,11 +321,13 @@ Content-Type: application/json
 
 ### 40. Consultar productos que llegaron al stock mínimo
 GET {{baseUrl}}/api/inventarios/bajo-minimo
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 41. Confirmar el pedido con un pago simulado
 # El monto debe coincidir con el total del pedido creado en la solicitud 29.
 # Debe guardar APROBADO, cambiar el pedido a CONFIRMADO y descontar el stock.
 POST {{baseUrl}}/api/pagos
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -308,9 +340,11 @@ Content-Type: application/json
 
 ### 42. Consultar el pago asociado al pedido
 GET {{baseUrl}}/api/pagos/pedido/{{pedidoProcesadoId}}
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 
 ### 43. Pago duplicado: debe responder 409 Conflict
 POST {{baseUrl}}/api/pagos
+Authorization: Basic {{clienteEmail}} {{clientePassword}}
 Content-Type: application/json
 
 {
@@ -323,12 +357,51 @@ Content-Type: application/json
 
 ### 44. Eliminar pago al finalizar las pruebas - debe responder 204
 DELETE {{baseUrl}}/api/pagos/{{pagoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 45. Eliminar configuración de inventario - debe responder 204
 DELETE {{baseUrl}}/api/inventarios/{{inventarioId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 46. Eliminar pedido después de eliminar su pago - debe responder 204
 DELETE {{baseUrl}}/api/pedidos/{{pedidoId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
 
 ### 47. Eliminar usuario después de eliminar sus pedidos - debe responder 204
 DELETE {{baseUrl}}/api/usuarios/{{usuarioId}}
+Authorization: Basic {{adminEmail}} {{adminPassword}}
+
+
+# SEMANA 8 - SPRING SECURITY, ROLES Y PERMISOS
+# Antes de ejecutar, reemplaza adminPassword con el mismo valor de
+# APP_ADMIN_PASSWORD configurado en tu archivo .env.
+
+### 48. Volver a registrar el cliente usado en las pruebas de seguridad
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Ana Pérez García",
+  "correo": "{{clienteSeguridadEmail}}",
+  "contrasena": "{{clienteSeguridadPassword}}",
+  "telefono": "999111222",
+  "direccion": "Av. Principal 123"
+}
+
+### 49. Recurso público sin credenciales - debe responder 200 OK
+GET {{baseUrl}}/api/productos
+
+### 50. Recurso protegido sin credenciales - debe responder 401 Unauthorized
+GET {{baseUrl}}/api/usuarios
+
+### 51. Cliente autenticado sin permiso administrativo - debe responder 403 Forbidden
+GET {{baseUrl}}/api/usuarios
+Authorization: Basic {{clienteSeguridadEmail}} {{clienteSeguridadPassword}}
+
+### 52. Administrador autenticado - debe responder 200 OK
+GET {{baseUrl}}/api/usuarios
+Authorization: Basic {{adminEmail}} {{adminPassword}}
+
+### 53. Cliente autenticado consulta únicamente sus pedidos - debe responder 200 OK
+GET {{baseUrl}}/api/pedidos/mios
+Authorization: Basic {{clienteSeguridadEmail}} {{clienteSeguridadPassword}}

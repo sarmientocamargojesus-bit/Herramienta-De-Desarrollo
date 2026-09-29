@@ -1,7 +1,7 @@
 # Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
 Proyecto académico grupal. El avance actual contiene el CRUD de productos, usuarios y pedidos, y los
-conceptos estudiados durante las semanas 2, 3, 6 y 7.
+conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 
 ## Semana 2
 
@@ -40,6 +40,16 @@ conceptos estudiados durante las semanas 2, 3, 6 y 7.
 - Creación de pedidos pendientes sin modificar el inventario.
 - Confirmación mediante un pago simulado con `@Transactional`.
 - Descuento de stock al aprobar el pago y rollback automático si no alcanza.
+
+## Semana 8
+
+- Seguridad mediante Spring Security.
+- Inicio de sesión HTTP Basic usando el correo y la contraseña guardados en `usuarios`.
+- Contraseñas protegidas con BCrypt.
+- Autorización por roles `CLIENTE`, `EMPLEADO` y `ADMINISTRADOR`.
+- Respuestas estandarizadas `401 Unauthorized` y `403 Forbidden`.
+- Un cliente solo puede consultar sus propios pedidos y pagos.
+- Pruebas automáticas de autenticación, roles y propiedad de pedidos.
 
 ## Modelo de datos del sistema
 
@@ -100,6 +110,14 @@ contraseña reales. Los datos exactos deben copiarse desde la opción `Connect`
 del proyecto de Supabase. Spring Boot importa automáticamente este archivo al
 iniciar la aplicación.
 
+Para crear o actualizar automáticamente el administrador inicial, también se
+configuran estas dos variables en `.env`:
+
+```properties
+APP_ADMIN_EMAIL=admin@fastfood.com
+APP_ADMIN_PASSWORD=una-clave-segura
+```
+
 El archivo `.env` está excluido de Git y nunca debe compartirse ni subirse al
 repositorio. Solamente `.env.example`, que no contiene secretos, se mantiene en
 GitHub.
@@ -111,6 +129,20 @@ Después se inicia el backend:
 ```
 
 La API se ejecuta en `http://localhost:8080`.
+
+En Postman, los endpoints protegidos usan `Authorization > Basic Auth`. El
+usuario es el correo registrado y la contraseña es la original, no el hash.
+Las consultas `GET` de productos y categorías y el registro público
+`POST /api/usuarios` no requieren autenticación.
+
+Permisos principales:
+
+| Rol | Acceso |
+|---|---|
+| Público | Consultar productos y categorías; registrar un usuario cliente |
+| `CLIENTE` | Crear y consultar sus propios pedidos; registrar y consultar sus pagos |
+| `EMPLEADO` | Consultar y gestionar pedidos e inventario |
+| `ADMINISTRADOR` | Gestionar usuarios, roles, catálogo, pedidos, pagos e inventario |
 
 ## Endpoints
 
@@ -132,6 +164,7 @@ La API se ejecuta en `http://localhost:8080`.
 | PUT | `/api/pedidos/{id}` | Actualizar un pedido |
 | DELETE | `/api/pedidos/{id}` | Eliminar un pedido |
 | GET | `/api/pedidos/usuario/{usuarioId}` | Buscar pedidos por usuario |
+| GET | `/api/pedidos/mios` | Consultar los pedidos del usuario autenticado |
 | GET | `/api/pedidos/estado/{estado}` | Buscar pedidos por estado |
 | POST | `/api/pedidos/procesar` | Crear un pedido pendiente con sus productos, sin descontar stock |
 | GET | `/api/pedidos/{id}/detalles` | JPQL: consultar relación con detalles |
@@ -173,7 +206,7 @@ Las solicitudes manuales se encuentran en `requests.http`.
 ```
 
 Las pruebas de Service utilizan JUnit y Mockito, y las pruebas de Controller
-utilizan MockMvc. Las pruebas de integración ejecutan las consultas JPQL y
+utilizan MockMvc. Las pruebas de integración verifican Spring Security, ejecutan las consultas JPQL y
 comprueban tanto el commit como el rollback de la confirmación y el descuento
 de stock. Durante las pruebas
 se utiliza una base H2 en memoria, por lo que no requieren las credenciales de

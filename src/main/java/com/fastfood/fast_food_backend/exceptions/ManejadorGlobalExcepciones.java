@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -138,6 +139,18 @@ public class ManejadorGlobalExcepciones {
             HttpServletRequest request) {
         logger.warn("Datos inválidos: {}", exception.getMessage());
         return construirRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> manejarAccesoDenegado(
+            AccessDeniedException exception,
+            HttpServletRequest request) {
+        logger.warn("Acceso denegado a la ruta: {}", request.getRequestURI());
+        return construirRespuesta(
+                HttpStatus.FORBIDDEN,
+                "No tiene permisos para realizar esta operación",
+                request,
+                Map.of());
     }
 
     /**

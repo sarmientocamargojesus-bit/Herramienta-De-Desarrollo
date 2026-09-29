@@ -102,6 +102,12 @@ public class PedidoService {
         return pedidoRepository.findByUsuarioId(usuarioId);
     }
 
+    public List<Pedido> buscarPorCorreoUsuario(String correo) {
+        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(correo)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con correo: " + correo));
+        return pedidoRepository.findByUsuarioId(usuario.getId());
+    }
+
     public List<Pedido> buscarPorEstado(String estado) {
         if (estado == null || estado.isBlank()) {
             throw new IllegalArgumentException("El estado de búsqueda es obligatorio");

@@ -3,7 +3,6 @@ package com.fastfood.fast_food_backend.services;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +18,11 @@ public class UsuarioService {
     private static final Set<String> ROLES_PERMITIDOS = Set.of("CLIENTE", "EMPLEADO", "ADMINISTRADOR");
 
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Usuario> listar() {
