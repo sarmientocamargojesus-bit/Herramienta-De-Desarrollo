@@ -18,10 +18,13 @@ public class ProductoService {
 
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final InventarioService inventarioService;
 
-    public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
+    public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
+            InventarioService inventarioService) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.inventarioService = inventarioService;
     }
 
     public List<Producto> listar() {
@@ -33,14 +36,19 @@ public class ProductoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + id));
     }
 
+    @Transactional
     public Producto registrar(Producto producto) {
         validar(producto);
         asignarCategoria(producto);
-        return productoRepository.save(producto);
+        Producto guardado = productoRepository.save(producto);
+        inventarioService.crearParaProductoNuevo(guardado);
+        return guardado;
     }
 
+    @Transactional
     public Producto actualizar(Long id, Producto datosProducto) {
         Producto producto = buscarPorId(id);
+        int stockAnterior = producto.getStock();
         producto.setNombre(datosProducto.getNombre());
         producto.setDescripcion(datosProducto.getDescripcion());
         producto.setPrecio(datosProducto.getPrecio());
@@ -48,11 +56,15 @@ public class ProductoService {
         producto.setCategoria(datosProducto.getCategoria());
         validar(producto);
         asignarCategoria(producto);
-        return productoRepository.save(producto);
+        Producto guardado = productoRepository.save(producto);
+        inventarioService.registrarCambioDeStock(guardado, stockAnterior);
+        return guardado;
     }
 
+    @Transactional
     public void eliminar(Long id) {
         Producto producto = buscarPorId(id);
+        inventarioService.eliminarPorProducto(id);
         productoRepository.delete(producto);
     }
 
@@ -92,8 +104,11 @@ public class ProductoService {
                     "Stock insuficiente para el producto " + producto.getNombre());
         }
 
-        producto.setStock(producto.getStock() - cantidad);
-        return productoRepository.save(producto);
+        int stockAnterior = producto.getStock();
+        producto.setStock(stockAnterior - cantidad);
+        Producto guardado = productoRepository.save(producto);
+        inventarioService.registrarCambioDeStock(guardado, stockAnterior);
+        return guardado;
     }
 
     private void validar(Producto producto) {

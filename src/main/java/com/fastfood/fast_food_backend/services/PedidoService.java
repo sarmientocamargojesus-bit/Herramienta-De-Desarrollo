@@ -164,6 +164,10 @@ public class PedidoService {
                     .orElseThrow(() -> new RecursoNoEncontradoException(
                             "Producto no encontrado: " + datosDetalle.getProductoId()));
 
+            if (producto.getStock() <= 0) {
+                throw new ReglaNegocioException("El producto está agotado: " + producto.getNombre());
+            }
+
             BigDecimal subtotal = producto.getPrecio()
                     .multiply(BigDecimal.valueOf(datosDetalle.getCantidad()));
 

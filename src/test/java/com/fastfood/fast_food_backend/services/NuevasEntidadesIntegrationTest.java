@@ -2,6 +2,8 @@ package com.fastfood.fast_food_backend.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,6 +34,7 @@ class NuevasEntidadesIntegrationTest {
 
     @Autowired private UsuarioService usuarioService;
     @Autowired private InventarioService inventarioService;
+    @Autowired private ProductoService productoService;
     @Autowired private PagoService pagoService;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private InventarioRepository inventarioRepository;
@@ -83,6 +86,61 @@ class NuevasEntidadesIntegrationTest {
     }
 
     @Test
+    void debeCrearInventarioYMarcarAgotadoAlRegistrarProductoSinStock() {
+        Producto producto = productoService.registrar(producto(0));
+
+        Inventario inventario = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertEquals(0, inventario.getStockMinimo());
+        assertNotNull(inventario.getFechaStockBajo());
+        assertNotNull(inventario.getFechaAgotado());
+    }
+
+    @Test
+    void debeRegistrarStockBajoAlConfigurarUnMinimoIndividual() {
+        Producto producto = productoService.registrar(producto(3));
+        Inventario inventario = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertEquals(0, inventario.getStockMinimo());
+        assertNull(inventario.getFechaStockBajo());
+
+        Inventario nuevosDatos = new Inventario();
+        nuevosDatos.setStockMinimo(5);
+        Inventario actualizado = inventarioService.actualizar(inventario.getId(), nuevosDatos);
+
+        assertEquals(5, actualizado.getStockMinimo());
+        assertNotNull(actualizado.getFechaStockBajo());
+        assertNull(actualizado.getFechaAgotado());
+    }
+
+    @Test
+    void debeRegistrarFechasAlLlegarAlMinimoYAgotarseYLimpiarlasAlReponer() {
+        Producto producto = productoRepository.save(producto(6));
+        Inventario configuracion = new Inventario();
+        configuracion.setProducto(producto);
+        configuracion.setStockMinimo(5);
+        Inventario inventario = inventarioService.registrar(configuracion);
+        assertNull(inventario.getFechaStockBajo());
+        assertNull(inventario.getFechaAgotado());
+
+        productoService.descontarStock(producto.getId(), 1);
+        Inventario bajo = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertNotNull(bajo.getFechaStockBajo());
+        assertNull(bajo.getFechaAgotado());
+        LocalDateTime fechaBajo = bajo.getFechaStockBajo();
+
+        productoService.descontarStock(producto.getId(), 5);
+        Inventario agotado = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertEquals(fechaBajo, agotado.getFechaStockBajo());
+        assertNotNull(agotado.getFechaAgotado());
+
+        Producto reposicion = productoRepository.findById(producto.getId()).orElseThrow();
+        reposicion.setStock(8);
+        productoService.actualizar(producto.getId(), reposicion);
+        Inventario repuesto = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertNull(repuesto.getFechaStockBajo());
+        assertNull(repuesto.getFechaAgotado());
+    }
+
+    @Test
     void debeRegistrarUnPagoSimuladoParaElPedido() {
         Usuario usuario = usuarioRepository.save(usuarioCliente());
         Producto producto = productoRepository.save(producto(10));
@@ -103,6 +161,29 @@ class NuevasEntidadesIntegrationTest {
     }
 
     @Test
+    void debeMarcarAgotamientoCuandoElPagoDescuentaLaUltimaUnidad() {
+        Usuario usuario = usuarioRepository.save(usuarioCliente());
+        Producto producto = productoRepository.save(producto(2));
+        Inventario configuracion = new Inventario();
+        configuracion.setProducto(producto);
+        configuracion.setStockMinimo(1);
+        inventarioService.registrar(configuracion);
+        Pedido pedido = pedidoRepository.save(pedido(usuario));
+        guardarDetalle(pedido, producto, 2);
+        Pago pago = new Pago();
+        pago.setPedido(pedido);
+        pago.setMetodo("YAPE");
+        pago.setMonto(new BigDecimal("25.00"));
+
+        pagoService.registrar(pago);
+
+        assertEquals(0, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+        Inventario inventario = inventarioRepository.findByProductoId(producto.getId()).orElseThrow();
+        assertNotNull(inventario.getFechaStockBajo());
+        assertNotNull(inventario.getFechaAgotado());
+    }
+
+    @Test
     void debeRevertirElPagoCuandoNoExisteStockSuficiente() {
         Usuario usuario = usuarioRepository.save(usuarioCliente());
         Producto producto = productoRepository.save(producto(1));
@@ -118,6 +199,23 @@ class NuevasEntidadesIntegrationTest {
         assertEquals(0, pagoRepository.count());
         assertEquals("PENDIENTE", pedidoRepository.findById(pedido.getId()).orElseThrow().getEstado());
         assertEquals(1, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void debeRechazarPagoSiElMismoProductoSuperaElStockEntreDosDetalles() {
+        Usuario usuario = usuarioRepository.save(usuarioCliente());
+        Producto producto = productoRepository.save(producto(1));
+        Pedido pedido = pedidoRepository.save(pedido(usuario));
+        guardarDetalle(pedido, producto, 1);
+        guardarDetalle(pedido, producto, 1);
+        Pago pago = new Pago();
+        pago.setPedido(pedido);
+        pago.setMetodo("YAPE");
+        pago.setMonto(new BigDecimal("25.00"));
+
+        assertThrows(ReglaNegocioException.class, () -> pagoService.registrar(pago));
+        assertEquals(1, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+        assertEquals(0, pagoRepository.count());
     }
 
     private Producto producto(int stock) {

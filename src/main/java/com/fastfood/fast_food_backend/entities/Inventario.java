@@ -29,6 +29,12 @@ public class Inventario {
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion;
 
+    @Column(name = "fecha_stock_bajo")
+    private LocalDateTime fechaStockBajo;
+
+    @Column(name = "fecha_agotado")
+    private LocalDateTime fechaAgotado;
+
     public Long getId() {
         return id;
     }
@@ -59,5 +65,21 @@ public class Inventario {
 
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    public LocalDateTime getFechaStockBajo() {
+        return fechaStockBajo;
+    }
+
+    public void setFechaStockBajo(LocalDateTime fechaStockBajo) {
+        this.fechaStockBajo = fechaStockBajo;
+    }
+
+    public LocalDateTime getFechaAgotado() {
+        return fechaAgotado;
+    }
+
+    public void setFechaAgotado(LocalDateTime fechaAgotado) {
+        this.fechaAgotado = fechaAgotado;
     }
 }

@@ -34,6 +34,9 @@ class ProductoServiceTest {
     @Mock
     private CategoriaRepository categoriaRepository;
 
+    @Mock
+    private InventarioService inventarioService;
+
     @InjectMocks
     private ProductoService productoService;
 
@@ -48,6 +51,7 @@ class ProductoServiceTest {
 
         assertSame(producto, resultado);
         verify(productoRepository).save(producto);
+        verify(inventarioService).crearParaProductoNuevo(producto);
     }
 
     @Test

@@ -2,7 +2,9 @@ package com.fastfood.fast_food_backend.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +27,19 @@ public class PagoService {
     private final PedidoRepository pedidoRepository;
     private final DetallePedidoRepository detallePedidoRepository;
     private final ProductoRepository productoRepository;
+    private final InventarioService inventarioService;
 
     public PagoService(
             PagoRepository pagoRepository,
             PedidoRepository pedidoRepository,
             DetallePedidoRepository detallePedidoRepository,
-            ProductoRepository productoRepository) {
+            ProductoRepository productoRepository,
+            InventarioService inventarioService) {
         this.pagoRepository = pagoRepository;
         this.pedidoRepository = pedidoRepository;
         this.detallePedidoRepository = detallePedidoRepository;
         this.productoRepository = productoRepository;
+        this.inventarioService = inventarioService;
     }
 
     public List<Pago> listar() {
@@ -69,18 +74,28 @@ public class PagoService {
             throw new ReglaNegocioException("El pedido no contiene productos");
         }
 
+        Map<Long, Integer> cantidades = new LinkedHashMap<>();
+        Map<Long, Producto> productos = new LinkedHashMap<>();
         for (DetallePedido detalle : detalles) {
             Producto producto = detalle.getProducto();
-            if (producto.getStock() < detalle.getCantidad()) {
+            cantidades.merge(producto.getId(), detalle.getCantidad(), Integer::sum);
+            productos.put(producto.getId(), producto);
+        }
+
+        for (Map.Entry<Long, Integer> entrada : cantidades.entrySet()) {
+            Producto producto = productos.get(entrada.getKey());
+            if (producto.getStock() < entrada.getValue()) {
                 throw new ReglaNegocioException(
                         "Stock insuficiente para el producto " + producto.getNombre());
             }
         }
 
-        for (DetallePedido detalle : detalles) {
-            Producto producto = detalle.getProducto();
-            producto.setStock(producto.getStock() - detalle.getCantidad());
+        for (Map.Entry<Long, Integer> entrada : cantidades.entrySet()) {
+            Producto producto = productos.get(entrada.getKey());
+            int stockAnterior = producto.getStock();
+            producto.setStock(stockAnterior - entrada.getValue());
             productoRepository.save(producto);
+            inventarioService.registrarCambioDeStock(producto, stockAnterior);
         }
 
         pedido.setEstado("CONFIRMADO");

@@ -62,12 +62,27 @@ conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 | `pedidos` | Usuario cliente, dirección, teléfono, estado, subtotal, costo de entrega, total y fechas |
 | `detalles_pedido` | Productos, cantidades, precios unitarios y subtotales del pedido |
 | `pagos` | Pago simulado, método, estado, monto y fecha; solo puede existir uno por pedido |
-| `inventarios` | Stock mínimo configurado para cada producto |
+| `inventarios` | Stock mínimo y fechas en que se detectó stock bajo o agotado |
 
 Las categorías `HAMBURGUESAS`, `COMBOS`, `PIQUEOS` y `BEBIDAS` se crean
 automáticamente si todavía no existen. El stock actual permanece en
 `productos`; `inventarios` guarda el límite mínimo utilizado para generar
-alertas.
+alertas. Los productos nuevos reciben automáticamente una configuración de
+inventario con mínimo `0`, que el administrador puede ajustar con
+`PUT /api/inventarios/{id}`. Esto mantiene compatible el JSON actual de
+creación de productos y permite registrar agotamiento desde stock `0`.
+
+`fecha_stock_bajo` se registra al llegar a `stock <= stock_minimo` y
+`fecha_agotado` al llegar a `stock = 0`; ambas se limpian al salir de su
+respectivo estado. `fecha_actualizacion` corresponde a la configuración del
+inventario, no al último movimiento de stock. Las fechas solo registran
+cambios realizados a través de la API; modificar el stock directamente en
+Supabase no las actualiza.
+
+Antes de iniciar esta versión con Supabase, se puede ejecutar la migración
+aditiva de `docs/inventario-fechas-supabase.sql`. Los productos que existían
+antes del cambio necesitan un stock mínimo definido individualmente y una fila
+en `inventarios`; no se inventan fechas históricas que no se registraron.
 
 La tabla `clientes` fue unificada con `usuarios`. Todo registro público recibe
 automáticamente el rol `CLIENTE`, aunque el JSON intente enviar otro rol. Los
@@ -75,8 +90,10 @@ roles permitidos son `CLIENTE`, `EMPLEADO` y `ADMINISTRADOR`; el cambio de rol
 se realiza mediante un endpoint administrativo protegido con Spring Security.
 Los visitantes no se almacenan en la base de datos.
 
-Un usuario con rol `CLIENTE` puede crear todos los pedidos que desee. Cada pedido
-se guarda inicialmente con estado `PENDIENTE` y todavía no descuenta stock. Al
+Un usuario con rol `CLIENTE` puede crear todos los pedidos que desee. Un producto
+con stock `0` no puede añadirse a un pedido: la API informa que está agotado.
+Cada pedido válido se guarda inicialmente con estado `PENDIENTE` y todavía no
+descuenta stock. Al
 registrar su pago simulado, el sistema comprueba el monto y la disponibilidad de
 todos los productos. Si todo es correcto, guarda el pago como `APROBADO`, cambia
 el pedido a `CONFIRMADO` y descuenta el stock dentro de una misma transacción. Si

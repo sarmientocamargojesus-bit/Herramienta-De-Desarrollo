@@ -1,6 +1,7 @@
 package com.fastfood.fast_food_backend.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
 import com.fastfood.fast_food_backend.repositories.DetallePedidoRepository;
 import com.fastfood.fast_food_backend.repositories.PedidoRepository;
@@ -70,6 +72,20 @@ class PedidoTransaccionIntegrationTest {
         assertEquals(new BigDecimal("25.00"), pedidoRepository.sumarTotalPorEstado("PENDIENTE"));
         assertEquals("PENDIENTE", pedido.getEstado());
         assertEquals(10, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void debeRechazarProductoAgotadoAlProcesarPedido() {
+        Usuario usuario = usuarioRepository.save(usuario());
+        Producto producto = productoRepository.save(producto("Hamburguesa", "12.50", 0));
+
+        assertThrows(ReglaNegocioException.class,
+                () -> pedidoService.procesarPedido(
+                        solicitud(usuario.getId(), detalle(producto.getId(), 1))));
+
+        assertEquals(0, pedidoRepository.count());
+        assertEquals(0, detallePedidoRepository.count());
+        assertEquals(0, productoRepository.findById(producto.getId()).orElseThrow().getStock());
     }
 
     @Test
