@@ -30,7 +30,7 @@ import com.jayway.jsonpath.JsonPath;
 @Transactional
 class SeguridadIntegrationTest {
 
-    private static final String CLAVE = "claveSegura123";
+    private static final String CLAVE = "123456";
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UsuarioRepository usuarioRepository;

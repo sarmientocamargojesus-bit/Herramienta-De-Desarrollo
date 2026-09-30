@@ -60,13 +60,16 @@ public class InicializadorDatos implements CommandLineRunner {
         }
 
         String correo = correoAdministrador.trim().toLowerCase();
-        Usuario administrador = usuarioRepository.findByCorreoIgnoreCase(correo).orElseGet(Usuario::new);
-        administrador.setNombre("Administrador");
-        administrador.setCorreo(correo);
+        Usuario administrador = usuarioRepository.findByCorreoIgnoreCase(correo).orElse(null);
+        if (administrador == null) {
+            administrador = new Usuario();
+            administrador.setNombre("Administrador");
+            administrador.setCorreo(correo);
+            administrador.setTelefono("000000000");
+            administrador.setActivo(true);
+        }
         administrador.setContrasena(passwordEncoder.encode(contrasenaAdministrador));
-        administrador.setTelefono("000000000");
         administrador.setRol("ADMINISTRADOR");
-        administrador.setActivo(true);
         usuarioRepository.save(administrador);
     }
 }

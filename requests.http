@@ -2,9 +2,9 @@
 @adminEmail = admin@fastfood.com
 @adminPassword = REEMPLAZAR_CON_LA_CLAVE_DEL_ENV
 @clienteEmail = ana.perez@correo.com
-@clientePassword = claveSegura123
+@clientePassword =123456
 @clienteSeguridadEmail = seguridad.cliente@correo.com
-@clienteSeguridadPassword = claveSegura123
+@clienteSeguridadPassword =123456
 @productoId = 10
 @pedidoId = 1
 @productoPedidoId = 1
@@ -121,7 +121,7 @@ Content-Type: application/json
 {
   "nombre": "Ana Pérez García",
   "correo": "ana.perez@correo.com",
-  "contrasena": "claveSegura123",
+  "contrasena": "123456",
   "telefono": "999111222",
   "direccion": "Av. Principal 123",
   "rol": "ADMINISTRADOR"
@@ -313,7 +313,7 @@ Content-Type: application/json
 {
   "nombre": "Carlos Administrador",
   "correo": "carlos.admin@correo.com",
-  "contrasena": "claveSegura123",
+  "contrasena": "123456",
   "telefono": "999888777",
   "direccion": "Av. Administración 100",
   "rol": "ADMINISTRADOR"

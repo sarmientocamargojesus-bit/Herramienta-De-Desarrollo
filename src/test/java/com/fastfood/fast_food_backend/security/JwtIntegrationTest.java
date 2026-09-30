@@ -27,7 +27,7 @@ class JwtIntegrationTest {
 
     private static final String ADMIN_EMAIL = "jwt.admin@fastfood.test";
     private static final String CLIENTE_EMAIL = "jwt.cliente@fastfood.test";
-    private static final String CONTRASENA = "ClaveSegura123";
+    private static final String CONTRASENA = "123456";
 
     @Autowired
     private MockMvc mockMvc;

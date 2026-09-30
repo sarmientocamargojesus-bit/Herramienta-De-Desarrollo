@@ -55,14 +55,14 @@ class NuevasEntidadesIntegrationTest {
         Usuario usuario = new Usuario();
         usuario.setNombre("Administrador");
         usuario.setCorreo("admin@fastfood.com");
-        usuario.setContrasena("claveSegura123");
+        usuario.setContrasena("123456");
         usuario.setTelefono("999888777");
         usuario.setRol("ADMINISTRADOR");
 
         Usuario guardado = usuarioService.registrar(usuario);
         String hash = usuarioRepository.findById(guardado.getId()).orElseThrow().getContrasena();
 
-        assertFalse(hash.equals("claveSegura123"));
+        assertFalse(hash.equals("123456"));
         assertTrue(hash.startsWith("$2"));
         assertEquals("CLIENTE", guardado.getRol());
 
