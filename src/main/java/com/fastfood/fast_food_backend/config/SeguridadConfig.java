@@ -1,26 +1,26 @@
 package com.fastfood.fast_food_backend.config;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.fastfood.fast_food_backend.exceptions.ApiError;
-
-import tools.jackson.databind.ObjectMapper;
-
-import jakarta.servlet.http.HttpServletResponse;
+import com.fastfood.fast_food_backend.security.ApiSecurityErrorHandler;
+import com.fastfood.fast_food_backend.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -32,47 +32,41 @@ public class SeguridadConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    SecretKey jwtSecretKey(@Value("${app.jwt.secret}") String secret) {
+        byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < 32) {
+            throw new IllegalStateException("JWT_SECRET debe tener como mínimo 32 caracteres");
+        }
+        return new SecretKeySpec(bytes, "HmacSHA256");
+    }
+
+    @Bean
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ApiSecurityErrorHandler apiSecurityErrorHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/usuarios").permitAll()
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/productos/**", "/api/categorias/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/inventarios/**").hasAnyRole("EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/pedidos/**").hasAnyRole("CLIENTE", "EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/pagos/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
                         .anyRequest().permitAll())
-                .httpBasic(basic -> basic.authenticationEntryPoint((request, response, exception) ->
-                        escribirError(response, objectMapper, HttpStatus.UNAUTHORIZED,
-                                "Se requiere autenticación con un correo y una contraseña válidos",
-                                request.getRequestURI())))
                 .exceptionHandling(errors -> errors
-                        .authenticationEntryPoint((request, response, exception) ->
-                                escribirError(response, objectMapper, HttpStatus.UNAUTHORIZED,
-                                        "Se requiere autenticación con un correo y una contraseña válidos",
-                                        request.getRequestURI()))
-                        .accessDeniedHandler((request, response, exception) ->
-                                escribirError(response, objectMapper, HttpStatus.FORBIDDEN,
-                                        "No tiene permisos para realizar esta operación",
-                                        request.getRequestURI())));
+                        .authenticationEntryPoint(apiSecurityErrorHandler)
+                        .accessDeniedHandler(apiSecurityErrorHandler))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    private static void escribirError(
-            HttpServletResponse response,
-            ObjectMapper objectMapper,
-            HttpStatus estado,
-            String mensaje,
-            String ruta) throws IOException {
-        response.setStatus(estado.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        ApiError error = new ApiError(
-                estado.value(), estado.getReasonPhrase(), mensaje, ruta, LocalDateTime.now(), Map.of());
-        objectMapper.writeValue(response.getWriter(), error);
     }
 }

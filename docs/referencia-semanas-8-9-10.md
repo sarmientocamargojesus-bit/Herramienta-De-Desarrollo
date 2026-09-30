@@ -606,5 +606,10 @@ servicios, pero no se implementarán Managed Beans ni el ciclo de vida JSF.
 
 # Estado actual
 
-Este documento es solamente una referencia académica. En esta actualización
-no se agregó Spring Security, React, JSP ni JSF al código del proyecto.
+La semana 8 ya está implementada con Spring Security, BCrypt, roles, permisos
+y autenticación JWT. El backend expone `POST /api/auth/login`, genera tokens
+firmados y exige `Authorization: Bearer` en los endpoints protegidos. Las
+pruebas cubren login, token válido, token alterado, token vencido, `401` y
+`403`.
+
+Las semanas 9 y 10 permanecen como referencia académica: todavía no se agregó

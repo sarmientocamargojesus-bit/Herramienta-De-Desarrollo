@@ -44,7 +44,8 @@ conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 ## Semana 8
 
 - Seguridad mediante Spring Security.
-- Inicio de sesión HTTP Basic usando el correo y la contraseña guardados en `usuarios`.
+- Inicio de sesión mediante `POST /api/auth/login`.
+- Autenticación JWT con tokens Bearer firmados y con expiración.
 - Contraseñas protegidas con BCrypt.
 - Autorización por roles `CLIENTE`, `EMPLEADO` y `ADMINISTRADOR`.
 - Respuestas estandarizadas `401 Unauthorized` y `403 Forbidden`.
@@ -71,9 +72,8 @@ alertas.
 La tabla `clientes` fue unificada con `usuarios`. Todo registro público recibe
 automáticamente el rol `CLIENTE`, aunque el JSON intente enviar otro rol. Los
 roles permitidos son `CLIENTE`, `EMPLEADO` y `ADMINISTRADOR`; el cambio de rol
-se realiza mediante un endpoint separado que será protegido con Spring
-Security en la siguiente etapa. Los visitantes no se almacenan en la base de
-datos.
+se realiza mediante un endpoint administrativo protegido con Spring Security.
+Los visitantes no se almacenan en la base de datos.
 
 Un usuario con rol `CLIENTE` puede crear todos los pedidos que desee. Cada pedido
 se guarda inicialmente con estado `PENDIENTE` y todavía no descuenta stock. Al
@@ -86,6 +86,7 @@ falta stock, responde `409 Conflict` y no guarda ningún cambio.
 
 ```text
 Cliente HTTP
+    -> Filtro JWT de Spring Security
     -> Controller
     -> Service
     -> Repository
@@ -110,12 +111,21 @@ contraseña reales. Los datos exactos deben copiarse desde la opción `Connect`
 del proyecto de Supabase. Spring Boot importa automáticamente este archivo al
 iniciar la aplicación.
 
-Para crear o actualizar automáticamente el administrador inicial, también se
-configuran estas dos variables en `.env`:
+Para crear o actualizar automáticamente el administrador inicial y firmar los
+tokens JWT, también se configuran estas variables en `.env`:
 
 ```properties
 APP_ADMIN_EMAIL=admin@fastfood.com
 APP_ADMIN_PASSWORD=una-clave-segura
+JWT_SECRET=una-clave-aleatoria-de-32-caracteres-o-mas
+JWT_ISSUER=fast-food-api
+JWT_EXPIRATION_MINUTES=60
+```
+
+En PowerShell se puede generar una clave JWT segura con este comando:
+
+```powershell
+[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
 ```
 
 El archivo `.env` está excluido de Git y nunca debe compartirse ni subirse al
@@ -130,10 +140,11 @@ Después se inicia el backend:
 
 La API se ejecuta en `http://localhost:8080`.
 
-En Postman, los endpoints protegidos usan `Authorization > Basic Auth`. El
-usuario es el correo registrado y la contraseña es la original, no el hash.
-Las consultas `GET` de productos y categorías y el registro público
-`POST /api/usuarios` no requieren autenticación.
+En Postman primero se envía el correo y la contraseña a
+`POST /api/auth/login`. La respuesta contiene un token que se coloca en
+`Authorization > Bearer Token` para consumir los endpoints protegidos. Las
+consultas `GET` de productos y categorías, el registro público
+`POST /api/usuarios` y el login no requieren autenticación previa.
 
 Permisos principales:
 
@@ -209,6 +220,7 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 
 | Método | Ruta | Operación |
 |---|---|---|
+| POST | `/api/auth/login` | Validar credenciales y generar un token JWT |
 | GET | `/api/productos` | Listar productos |
 | GET | `/api/productos/{id}` | Buscar por identificador |
 | POST | `/api/productos` | Registrar un producto |
@@ -258,7 +270,9 @@ Ejemplo de producto:
 }
 ```
 
-Las solicitudes manuales se encuentran en `requests.http`.
+Las solicitudes manuales se encuentran en `requests.http`. El archivo incluye
+login de administrador y cliente, captura automática del token en VS Code REST
+Client y ejemplos de consumo mediante `Authorization: Bearer`.
 
 ## Ejecutar las pruebas
 
@@ -267,8 +281,7 @@ Las solicitudes manuales se encuentran en `requests.http`.
 ```
 
 Las pruebas de Service utilizan JUnit y Mockito, y las pruebas de Controller
-utilizan MockMvc. Las pruebas de integración verifican Spring Security, ejecutan las consultas JPQL y
-comprueban tanto el commit como el rollback de la confirmación y el descuento
-de stock. Durante las pruebas
-se utiliza una base H2 en memoria, por lo que no requieren las credenciales de
-Supabase.
+utilizan MockMvc. Las pruebas de integración verifican login, generación y
+validación de JWT, tokens alterados o vencidos, respuestas `401` y `403`, roles,
+consultas JPQL, commit y rollback. Durante las pruebas se utiliza una base H2 en
+memoria, por lo que no requieren las credenciales de Supabase.

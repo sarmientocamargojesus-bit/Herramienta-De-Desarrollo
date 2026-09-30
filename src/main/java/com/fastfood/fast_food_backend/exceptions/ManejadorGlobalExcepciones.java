@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -149,6 +150,18 @@ public class ManejadorGlobalExcepciones {
         return construirRespuesta(
                 HttpStatus.FORBIDDEN,
                 "No tiene permisos para realizar esta operación",
+                request,
+                Map.of());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> manejarAutenticacion(
+            AuthenticationException exception,
+            HttpServletRequest request) {
+        logger.warn("Autenticación rechazada: {}", exception.getMessage());
+        return construirRespuesta(
+                HttpStatus.UNAUTHORIZED,
+                "El correo o la contraseña son incorrectos",
                 request,
                 Map.of());
     }

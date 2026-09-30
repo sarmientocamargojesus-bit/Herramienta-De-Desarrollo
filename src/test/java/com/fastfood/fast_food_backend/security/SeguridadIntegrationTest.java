@@ -1,7 +1,7 @@
 package com.fastfood.fast_food_backend.security;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,14 +13,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.repositories.PedidoRepository;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
+import com.jayway.jsonpath.JsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,7 +66,7 @@ class SeguridadIntegrationTest {
     @Test
     void debeResponder403CuandoClienteIntentaAdministrarUsuarios() throws Exception {
         mockMvc.perform(get("/api/usuarios")
-                        .with(httpBasic(clientePropietario.getCorreo(), CLAVE)))
+                        .header("Authorization", "Bearer " + iniciarSesion(clientePropietario.getCorreo())))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value(403));
     }
@@ -71,14 +74,14 @@ class SeguridadIntegrationTest {
     @Test
     void debePermitirAlAdministradorConsultarUsuarios() throws Exception {
         mockMvc.perform(get("/api/usuarios")
-                        .with(httpBasic(administrador.getCorreo(), CLAVE)))
+                        .header("Authorization", "Bearer " + iniciarSesion(administrador.getCorreo())))
                 .andExpect(status().isOk());
     }
 
     @Test
     void debePermitirAlClienteConsultarSuPedido() throws Exception {
         mockMvc.perform(get("/api/pedidos/{id}", pedido.getId())
-                        .with(httpBasic(clientePropietario.getCorreo(), CLAVE)))
+                        .header("Authorization", "Bearer " + iniciarSesion(clientePropietario.getCorreo())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(pedido.getId()));
     }
@@ -86,9 +89,23 @@ class SeguridadIntegrationTest {
     @Test
     void debeImpedirAlClienteConsultarElPedidoDeOtroUsuario() throws Exception {
         mockMvc.perform(get("/api/pedidos/{id}", pedido.getId())
-                        .with(httpBasic(otroCliente.getCorreo(), CLAVE)))
+                        .header("Authorization", "Bearer " + iniciarSesion(otroCliente.getCorreo())))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value(403));
+    }
+
+    private String iniciarSesion(String correo) throws Exception {
+        MvcResult resultado = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "correo": "%s",
+                                  "contrasena": "%s"
+                                }
+                                """.formatted(correo, CLAVE)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return JsonPath.read(resultado.getResponse().getContentAsString(), "$.token");
     }
 
     private Usuario guardarUsuario(String nombre, String correo, String rol) {
