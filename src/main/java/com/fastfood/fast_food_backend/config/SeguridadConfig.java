@@ -56,6 +56,8 @@ public class SeguridadConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/usuarios").permitAll()
+                        .requestMatchers("/api/carrito", "/api/carrito/**", "/api/checkout")
+                                .hasRole("CLIENTE")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/productos/**", "/api/categorias/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/inventarios/**").hasAnyRole("EMPLEADO", "ADMINISTRADOR")

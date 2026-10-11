@@ -5,13 +5,21 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
 
 import com.fastfood.fast_food_backend.entities.Producto;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     boolean existsByCategoriaReferenciaId(Long categoriaId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Producto p WHERE p.id = :id")
+    Optional<Producto> bloquearPorId(@Param("id") Long id);
 
     @Query("SELECT p FROM Producto p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
     List<Producto> buscarPorNombre(@Param("nombre") String nombre);

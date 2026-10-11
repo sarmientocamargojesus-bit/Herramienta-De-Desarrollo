@@ -442,3 +442,38 @@ Authorization: Bearer {{adminToken}}
 ### 53. Cliente autenticado consulta únicamente sus pedidos - debe responder 200 OK
 GET {{baseUrl}}/api/pedidos/mios
 Authorization: Bearer {{clienteSeguridadToken}}
+
+
+# CARRITO Y CHECKOUT SIMULADO
+# Ejecuta primero el login de cliente (48B). Usa un producto real con stock.
+# Estas solicitudes modifican Supabase; la referencia no representa dinero real.
+
+### 54. Importar una selección hecha como visitante
+POST {{baseUrl}}/api/carrito/importar
+Authorization: Bearer {{clienteSeguridadToken}}
+Content-Type: application/json
+
+[
+  {"productoId": {{productoId}}, "cantidad": 1, "fechaAgregado": "2026-10-10T14:30:00"}
+]
+
+### 55. Ver el carrito del cliente con fecha de agregado
+GET {{baseUrl}}/api/carrito
+Authorization: Bearer {{clienteSeguridadToken}}
+
+### 56. Confirmar el pedido y el pago de prueba en una sola operación
+POST {{baseUrl}}/api/checkout
+Authorization: Bearer {{clienteSeguridadToken}}
+Content-Type: application/json
+
+{
+  "tipoEntrega": "RECOJO",
+  "direccionEntrega": null,
+  "observaciones": "Pedido de prueba",
+  "metodoPago": "YAPE",
+  "referenciaPrueba": "DEMO-APROBADO"
+}
+
+### 57. Verificar que el carrito quedó vacío
+GET {{baseUrl}}/api/carrito
+Authorization: Bearer {{clienteSeguridadToken}}

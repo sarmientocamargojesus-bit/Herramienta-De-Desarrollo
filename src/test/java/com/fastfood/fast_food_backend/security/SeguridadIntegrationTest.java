@@ -79,6 +79,24 @@ class SeguridadIntegrationTest {
     }
 
     @Test
+    void carritoYCheckoutRequierenCuentaDeCliente() throws Exception {
+        mockMvc.perform(get("/api/carrito"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/carrito")
+                        .header("Authorization", "Bearer " + iniciarSesion(administrador.getCorreo())))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/carrito")
+                        .header("Authorization", "Bearer " + iniciarSesion(clientePropietario.getCorreo())))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/checkout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"tipoEntrega":"RECOJO","metodoPago":"YAPE","referenciaPrueba":"DEMO-APROBADO"}
+                                """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void debePermitirAlClienteConsultarSuPedido() throws Exception {
         mockMvc.perform(get("/api/pedidos/{id}", pedido.getId())
                         .header("Authorization", "Bearer " + iniciarSesion(clientePropietario.getCorreo())))

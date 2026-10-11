@@ -202,6 +202,7 @@ ALTER TABLE public.productos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inventarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pagos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pedidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.carrito_items ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL PRIVILEGES
 ON ALL TABLES IN SCHEMA public
@@ -274,6 +275,58 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 | GET/PUT/DELETE | `/api/inventarios/{id}` | Consultar, actualizar o eliminar una configuración |
 | GET | `/api/inventarios/producto/{productoId}` | Consultar inventario por producto |
 | GET | `/api/inventarios/bajo-minimo` | Listar productos cuyo stock llegó al mínimo |
+| GET | `/api/carrito` | Consultar la selección guardada del cliente y la fecha en que agregó cada producto |
+| POST | `/api/carrito/importar` | Asociar al cliente autenticado la selección conservada por el navegador invitado |
+| PUT | `/api/carrito/productos/{productoId}` | Establecer la cantidad de un producto en el carrito |
+| DELETE | `/api/carrito/productos/{productoId}` | Quitar un producto del carrito |
+| POST | `/api/checkout` | Confirmar pedido y pago simulado, descontar stock y vaciar carrito en una transacción |
+
+### Carrito y confirmación del pedido
+
+El carrito de una cuenta se guarda en `carrito_items` con su `fecha_agregado`. La
+selección del visitante debe guardarse en el navegador mientras no haya iniciado
+sesión. Después del login, la futura interfaz Angular debe enviar esa selección
+a `POST /api/carrito/importar` con el JWT y luego consultar `GET /api/carrito`.
+La importación conserva la mayor cantidad por producto para que un reintento no
+duplique unidades; la interfaz debe borrar su copia local tras recibir éxito.
+El backend todavía no contiene una interfaz Angular; por eso este traslado no se
+ejecuta automáticamente desde el navegador en el repositorio actual.
+
+Ejemplo de importación (fecha local del momento en que se agregó al carrito):
+
+```json
+[
+  {"productoId": 2, "cantidad": 2, "fechaAgregado": "2026-10-10T14:30:00"}
+]
+```
+
+Mientras los productos están en el carrito no existe pedido ni se descuenta
+stock. `POST /api/checkout` requiere un cliente autenticado y este cuerpo:
+
+```json
+{
+  "tipoEntrega": "RECOJO",
+  "direccionEntrega": null,
+  "observaciones": "Sin cebolla",
+  "metodoPago": "YAPE",
+  "referenciaPrueba": "DEMO-APROBADO"
+}
+```
+
+También se acepta `TARJETA`. `DEMO-APROBADO` es únicamente un marcador de
+prueba: no se solicita ni almacena número de tarjeta, CVV, clave de Yape o dinero
+real. Al confirmar, la API vuelve a comprobar el stock y el precio del servidor;
+si alcanza, guarda pedido `CONFIRMADO`, pago `APROBADO`, detalles y descuento de
+stock en una sola transacción. Si falta stock, conserva el carrito y no registra
+pedido ni pago. La `fechaAgregado` corresponde al carrito; la `fechaPedido` se
+genera al confirmar el pago simulado. Los endpoints previos
+`/api/pedidos/procesar` y `/api/pagos` se mantienen para no romper las pruebas e
+integraciones anteriores, pero el flujo nuevo debe usar `/api/checkout`.
+
+La tabla nueva se crea mediante la configuración JPA actual. Después de
+crearla, hay que aplicar RLS y revocar el acceso de `anon` y `authenticated`
+en Supabase. El script `docs/carrito-checkout-supabase.sql` también permite
+crear la tabla manualmente y aplicar estas restricciones en un solo paso.
 
 Ejemplo de producto:
 
