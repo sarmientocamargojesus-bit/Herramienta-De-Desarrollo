@@ -1,6 +1,6 @@
 # Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
-Proyecto académico grupal. El avance actual contiene el CRUD de productos, usuarios y pedidos, y los
+ El avance actual contiene el CRUD de productos, usuarios y pedidos, y los
 conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 
 ## Semana 2
