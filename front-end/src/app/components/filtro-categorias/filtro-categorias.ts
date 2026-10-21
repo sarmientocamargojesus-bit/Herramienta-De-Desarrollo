@@ -1,7 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { ProductCategory } from '../../models/product';
-
-type CategoryValue = ProductCategory | 'TODAS';
+type CategoryValue = string;
 
 @Component({
   selector: 'app-filtro-categorias',

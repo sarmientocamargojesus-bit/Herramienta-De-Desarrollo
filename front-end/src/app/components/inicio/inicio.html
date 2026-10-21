@@ -1,0 +1,12 @@
+<app-portada />
+<section class="menu-section" id="menu" aria-labelledby="menu-title"><div class="menu-inner">
+  <div class="section-heading"><div><p class="eyebrow">EL MENÚ</p><h2 id="menu-title">ELIGE TU <em>ANTOJO.</em></h2><p>Productos consultados al backend de Fast Food.</p></div><span class="spark" aria-hidden="true">✳</span></div>
+  <app-mensaje-error [texto]="error()" />
+  @if (aviso()) { <p class="aviso" role="status">{{ aviso() }}</p> }
+  @if (cargando()) { <app-indicador-carga /> }
+  @else {
+    <app-filtro-categorias [categories]="categorias()" [selected]="seleccion()" (categorySelected)="seleccion.set($event)" />
+    <app-catalogo-productos [products]="visibles()" (agregar)="agregar($event)" />
+  }
+</div></section>
+<app-sobre-nosotros />

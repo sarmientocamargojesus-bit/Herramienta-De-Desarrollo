@@ -1,0 +1,1 @@
+@if (abierto()) {<div class="dialogo" role="dialog" aria-modal="true" aria-labelledby="pregunta"><div class="contenido"><h2>{{titulo()}}</h2><p id="pregunta">{{ mensaje() }}</p><div class="acciones"><button type="button" (click)="cancelar.emit()">Cancelar</button><button type="button" class="peligro" (click)="confirmar.emit()">Confirmar</button></div></div></div>}

@@ -1,59 +1,31 @@
-# FrontEnd
+# Fast Food — frontend Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.3.
+Este frontend consume el backend Spring Boot del mismo repositorio. Se creó con Angular CLI y usa componentes independientes, rutas, formularios reactivos y estilos SCSS. No incluye un catálogo de demostración: los productos y las categorías se leen de la API.
 
-## Development server
+## Ejecutar
 
-To start a local development server, run:
+1. Inicia el backend en `http://localhost:8080` con sus variables de entorno configuradas. La base de datos se configura solo en el backend; el navegador no debe conocer las credenciales de Supabase.
+2. En la carpeta `front-end`, ejecuta `npm install` y luego `npm start`.
+3. Abre `http://localhost:4200`. El proxy de desarrollo envía `/api` al backend. No cambies la URL del navegador al puerto 8080 para usar Angular.
 
-```bash
-ng serve
-```
+Para comprobar el frontend: `npm run build` y `npm test -- --watch=false`.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Flujo y permisos
 
-## Code scaffolding
+- Sin iniciar sesión: menú, detalle de producto y carrito local. Los productos del carrito permanecen en ese navegador y guardan fecha y hora de agregado.
+- Cliente: registro, inicio de sesión, importación del carrito local, checkout de prueba, confirmación e historial de pedidos. El checkout usa `/api/checkout`, que valida el stock y crea pedido y pago simulado en el backend. Nunca se capturan datos reales de tarjeta ni claves de Yape.
+- Empleado: consulta pedidos e inventario y puede ajustar el stock mínimo.
+- Administrador: además administra productos, categorías y roles; consulta pagos y usuarios. Cambiar el rol utiliza únicamente `/api/usuarios/{id}/rol`, sin sustituir el nombre ni otros datos.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+El JWT se guarda en `sessionStorage` y se adjunta solo a llamadas del mismo origen bajo `/api/`. Las rutas comprueban el rol para orientar la navegación; el backend conserva la autoridad final sobre cada operación.
 
-```bash
-ng generate component component-name
-```
+## Imágenes
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Las imágenes de `public/assets/demo` son ilustrativas y reutilizables por categoría. El backend actual no tiene un campo ni un endpoint para guardar fotos de productos, por lo que la interfaz de administración aún no permite subirlas. No se simula una carga que no pueda persistirse.
 
-```bash
-ng generate --help
-```
+## Organización
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `src/app/components`: vistas y piezas de interfaz en español. Cada componente generado tiene su propio `.scss`.
+- `src/app/core`: servicios HTTP, sesión, carrito, protección de rutas y tratamiento de errores.
+- `src/app/models`: contratos de datos que corresponden a la API.
+- `src/styles.scss` y `src/styles/_variables.scss`: estilos generales y variables Sass.

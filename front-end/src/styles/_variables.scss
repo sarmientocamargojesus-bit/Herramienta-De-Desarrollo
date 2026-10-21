@@ -1,0 +1,9 @@
+$rojo: #d73520;
+$oscuro: #1d1c1a;
+$crema: #f5f0e7;
+$borde: #ded6c9;
+$texto: #1e1c19;
+
+@mixin movil {
+  @media (max-width: 680px) { @content; }
+}

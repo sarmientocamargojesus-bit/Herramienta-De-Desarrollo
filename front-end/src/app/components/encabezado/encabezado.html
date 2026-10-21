@@ -1,12 +1,18 @@
 <header class="site-header">
-      <a class="brand" href="#inicio" aria-label="Fast Food, ir al inicio"><span class="brand-mark">F<span>F</span></span><span>FAST<br>FOOD</span></a>
+      <a class="brand" routerLink="/" aria-label="Fast Food, ir al inicio"><span class="brand-mark">F<span>F</span></span><span>FAST<br>FOOD</span></a>
       <nav aria-label="Navegación principal">
-        <a href="#inicio">Inicio</a>
-        <a href="#menu">Menú</a>
-        <a href="#nosotros">Nosotros</a>
+        <a routerLink="/">Inicio</a>
+        <a routerLink="/" fragment="menu">Menú</a>
+        <a routerLink="/" fragment="nosotros">Nosotros</a>
       </nav>
       <div class="header-actions">
-        <span class="future-action" title="Se habilitará con el inicio de sesión">Iniciar sesión</span>
-        <span class="bag" title="El carrito se incorporará en la siguiente etapa" aria-label="Carrito, próximamente">Mi pedido <span>0</span></span>
+        @if (sesion.autenticado()) {
+          @if (sesion.rol() === 'CLIENTE') { <a class="future-action" routerLink="/mis-pedidos">Mis pedidos</a> }
+          @else { <a class="future-action" routerLink="/gestion">Gestión</a> }
+          <button type="button" class="logout" (click)="salir()">Salir</button>
+        } @else { <a class="future-action" routerLink="/iniciar-sesion">Iniciar sesión</a> }
+        @if (!sesion.autenticado() || sesion.rol() === 'CLIENTE') {
+          <a class="bag" routerLink="/carrito">Mi pedido <span>{{ carrito.items().length }}</span></a>
+        }
       </div>
     </header>
