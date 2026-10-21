@@ -13,7 +13,7 @@ type CategoryValue = ProductCategory | 'TODAS';
     </div>
   `,
   styles: [`
-    .filters{display:flex;gap:9px;overflow-x:auto;padding:2px 0 10px}.filters button{white-space:nowrap;border:1px solid #d9d1c5;background:transparent;border-radius:4px;padding:12px 21px;color:#38342f;font-size:13px;font-weight:800;cursor:pointer}.filters button:hover,.filters button.active{background:#1d1c1a;border-color:#1d1c1a;color:white}
+    .filters{display:flex;gap:9px;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:2px 0 10px}.filters button{flex:0 0 auto;white-space:nowrap;border:1px solid #d9d1c5;background:transparent;border-radius:4px;padding:12px 21px;color:#38342f;font-size:13px;font-weight:800;cursor:pointer}.filters button:hover,.filters button.active{background:#1d1c1a;border-color:#1d1c1a;color:white}
   `]
 })
 export class FiltroCategorias {
