@@ -3,22 +3,22 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    })
-      .compileComponents();
+    await TestBed.configureTestingModule({ imports: [App] }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
+  it('crea la vista del cliente', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, front-end');
+    const content = fixture.nativeElement as HTMLElement;
+    expect(content.querySelector('h1')?.textContent).toContain('RÁPIDO.');
+    expect(content.querySelectorAll('app-tarjeta-producto').length).toBe(4);
+  });
+
+  it('filtra los productos por categoría', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.componentInstance.selectedCategory.set('BEBIDAS');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.visibleProducts().length).toBe(1);
+    expect(fixture.componentInstance.visibleProducts()[0].nombre).toBe('Limonada Iqueña');
   });
 });
