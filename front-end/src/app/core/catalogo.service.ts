@@ -12,6 +12,12 @@ export class CatalogoService {
   crearProducto(datos: Omit<Producto, 'id' | 'categoriaId'>) { return this.http.post<Producto>('/api/productos', datos); }
   actualizarProducto(id: number, datos: Omit<Producto, 'id' | 'categoriaId'>) { return this.http.put<Producto>(`/api/productos/${id}`, datos); }
   eliminarProducto(id: number) { return this.http.delete<void>(`/api/productos/${id}`); }
+  subirImagen(id: number, archivo: File) {
+    const datos = new FormData();
+    datos.append('archivo', archivo);
+    return this.http.put<void>(`/api/productos/${id}/imagen`, datos);
+  }
+  quitarImagen(id: number) { return this.http.delete<void>(`/api/productos/${id}/imagen`); }
   crearCategoria(datos: Pick<Categoria, 'nombre' | 'descripcion' | 'activo'>) { return this.http.post<Categoria>('/api/categorias', datos); }
   actualizarCategoria(id: number, datos: Pick<Categoria, 'nombre' | 'descripcion' | 'activo'>) { return this.http.put<Categoria>(`/api/categorias/${id}`, datos); }
   eliminarCategoria(id: number) { return this.http.delete<void>(`/api/categorias/${id}`); }

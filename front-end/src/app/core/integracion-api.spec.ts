@@ -20,6 +20,16 @@ describe('Contratos HTTP del frontend', () => {
     peticion.flush([{ id: 1, nombre: 'Prueba', descripcion: '', precio: 10, stock: 2, categoria: 'COMBOS' }]);
   });
 
+  it('envía la foto del producto como multipart al backend', () => {
+    const archivo = new File(['contenido'], 'foto.png', { type: 'image/png' });
+    TestBed.inject(CatalogoService).subirImagen(7, archivo).subscribe();
+    const peticion = http.expectOne('/api/productos/7/imagen');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body instanceof FormData).toBe(true);
+    expect((peticion.request.body as FormData).get('archivo')).toBe(archivo);
+    peticion.flush(null);
+  });
+
   it('confirma el pedido en un solo endpoint sin guardar datos de pago reales', () => {
     TestBed.inject(PedidosService).confirmar({ tipoEntrega: 'RECOJO', direccionEntrega: '', observaciones: '', metodoPago: 'YAPE', referenciaPrueba: 'DEMO-APROBADO' }).subscribe();
     const peticion = http.expectOne('/api/checkout');

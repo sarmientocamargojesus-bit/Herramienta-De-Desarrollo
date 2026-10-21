@@ -63,6 +63,23 @@ conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 | `detalles_pedido` | Productos, cantidades, precios unitarios y subtotales del pedido |
 | `pagos` | Pago simulado, método, estado, monto y fecha; solo puede existir uno por pedido |
 | `inventarios` | Stock mínimo y fechas en que se detectó stock bajo o agotado |
+| `imagenes_producto` | Una foto opcional por producto, guardada aparte como bytes y tipo de contenido |
+
+## Fotos de productos
+
+El administrador puede subir o reemplazar una imagen PNG, JPEG o WebP de hasta
+2 MB con `PUT /api/productos/{id}/imagen` (form-data, campo `archivo`) y quitarla
+con `DELETE` en la misma ruta. El cliente obtiene la imagen con `GET`; si no
+existe, Angular muestra una ilustración de la categoría. El contenido se guarda
+en `imagenes_producto`, separado de `productos`, así que listar el menú no
+transporta los bytes de las fotos. La tabla admite una foto por producto.
+
+Antes de usar esta función en Supabase, ejecuta una vez
+`docs/imagenes-producto-supabase.sql` en SQL Editor. Crea la tabla si todavía no
+existe y bloquea el acceso directo de `anon` y `authenticated`; el backend
+accede por su conexión PostgreSQL y aplica los permisos JWT. No hay que cambiar
+el precio, stock ni los pedidos existentes. El tamaño del archivo también está
+limitado en Spring Boot mediante la configuración multipart.
 
 Las categorías `HAMBURGUESAS`, `COMBOS`, `PIQUEOS` y `BEBIDAS` se crean
 automáticamente si todavía no existen. El stock actual permanece en

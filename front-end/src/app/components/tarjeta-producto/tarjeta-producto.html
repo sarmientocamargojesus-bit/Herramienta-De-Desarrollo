@@ -1,4 +1,4 @@
 <article class="card">
-      <div class="image-wrap"><img [src]="imagenIlustrativa(product().categoria)" [alt]="'Imagen ilustrativa de ' + product().categoria" loading="lazy"><span class="category">{{ product().categoria }}</span></div>
+      <div class="image-wrap"><app-imagen-producto [producto]="product()" /><span class="category">{{ product().categoria }}</span></div>
       <div class="details"><div class="top"><h3><a [routerLink]="['/productos', product().id]">{{ product().nombre }}</a></h3><strong>S/ {{ product().precio.toFixed(2) }}</strong></div><p>{{ product().descripcion }}</p><div class="availability">@if (product().stock > 0) { <span>{{ product().stock }} disponibles</span><button type="button" (click)="agregar.emit(product())">Agregar +</button> } @else { <span>Agotado</span> }</div></div>
     </article>

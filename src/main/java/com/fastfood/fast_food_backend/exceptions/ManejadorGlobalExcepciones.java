@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -140,6 +141,14 @@ public class ManejadorGlobalExcepciones {
             HttpServletRequest request) {
         logger.warn("Datos inválidos: {}", exception.getMessage());
         return construirRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> manejarImagenDemasiadoGrande(
+            MaxUploadSizeExceededException exception,
+            HttpServletRequest request) {
+        return construirRespuesta(HttpStatus.PAYLOAD_TOO_LARGE,
+                "La imagen supera el límite de 2 MB", request, Map.of());
     }
 
     @ExceptionHandler(AccessDeniedException.class)

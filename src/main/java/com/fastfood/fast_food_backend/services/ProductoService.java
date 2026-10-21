@@ -12,6 +12,7 @@ import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
+import com.fastfood.fast_food_backend.repositories.ImagenProductoRepository;
 
 @Service
 public class ProductoService {
@@ -19,12 +20,14 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
     private final InventarioService inventarioService;
+    private final ImagenProductoRepository imagenProductoRepository;
 
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
-            InventarioService inventarioService) {
+            InventarioService inventarioService, ImagenProductoRepository imagenProductoRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.inventarioService = inventarioService;
+        this.imagenProductoRepository = imagenProductoRepository;
     }
 
     public List<Producto> listar() {
@@ -65,6 +68,7 @@ public class ProductoService {
     public void eliminar(Long id) {
         Producto producto = buscarPorId(id);
         inventarioService.eliminarPorProducto(id);
+        imagenProductoRepository.deleteById(id);
         productoRepository.delete(producto);
     }
 

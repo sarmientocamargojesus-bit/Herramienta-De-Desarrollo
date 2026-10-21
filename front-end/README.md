@@ -21,7 +21,7 @@ El JWT se guarda en `sessionStorage` y se adjunta solo a llamadas del mismo orig
 
 ## Imágenes
 
-Las imágenes de `public/assets/demo` son ilustrativas y reutilizables por categoría. El backend actual no tiene un campo ni un endpoint para guardar fotos de productos, por lo que la interfaz de administración aún no permite subirlas. No se simula una carga que no pueda persistirse.
+El administrador puede subir, reemplazar o quitar una foto desde el formulario de producto. Se aceptan PNG, JPEG y WebP de hasta 2 MB. La foto se guarda en la tabla `imagenes_producto` mediante el backend, separada de los datos del catálogo. La imagen se consulta públicamente con `GET /api/productos/{id}/imagen`; subirla o quitarla requiere JWT de administrador. Si no hay foto, se usa la ilustración de `public/assets/demo` correspondiente a la categoría. No se guardan imágenes en el navegador ni en la carpeta del frontend.
 
 ## Organización
 
