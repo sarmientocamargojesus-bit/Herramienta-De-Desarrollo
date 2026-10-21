@@ -1,0 +1,4 @@
+<div class="grid">
+      @for (product of products(); track product.id) { <app-tarjeta-producto [product]="product" /> }
+      @empty { <p>No hay productos de muestra en esta categoría.</p> }
+    </div>
