@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fastfood.fast_food_backend.dto.RegistroUsuarioRequest;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
@@ -46,7 +47,17 @@ public class UsuarioService {
         return usuarioRepository.findByRolIgnoreCase(rol);
     }
 
-    public Usuario registrar(Usuario usuario) {
+    public Usuario registrar(RegistroUsuarioRequest solicitud) {
+        if (solicitud == null) {
+            throw new IllegalArgumentException("Los datos del usuario son obligatorios");
+        }
+        Usuario usuario = new Usuario();
+        usuario.setNombre(solicitud.nombre());
+        usuario.setCorreo(solicitud.correo());
+        usuario.setContrasena(solicitud.contrasena());
+        usuario.setTelefono(solicitud.telefono());
+        usuario.setDireccion(solicitud.direccion());
+        usuario.setActivo(solicitud.activo());
         validar(usuario, true);
         validarCorreoDisponible(usuario.getCorreo(), null);
         usuario.setCorreo(usuario.getCorreo().trim().toLowerCase());

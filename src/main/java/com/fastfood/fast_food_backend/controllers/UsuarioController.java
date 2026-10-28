@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.dto.CambiarRolRequest;
+import com.fastfood.fast_food_backend.dto.RegistroUsuarioRequest;
 import com.fastfood.fast_food_backend.services.UsuarioService;
 
 @RestController
@@ -49,8 +50,8 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> registrar(@RequestBody Usuario usuario) {
-        Usuario registrado = usuarioService.registrar(usuario);
+    public ResponseEntity<Usuario> registrar(@RequestBody RegistroUsuarioRequest solicitud) {
+        Usuario registrado = usuarioService.registrar(solicitud);
         return ResponseEntity.created(URI.create("/api/usuarios/" + registrado.getId())).body(registrado);
     }
 

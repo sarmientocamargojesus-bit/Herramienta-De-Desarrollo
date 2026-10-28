@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.fastfood.fast_food_backend.dto.RegistroUsuarioRequest;
 import com.fastfood.fast_food_backend.entities.DetallePedido;
 import com.fastfood.fast_food_backend.entities.Inventario;
 import com.fastfood.fast_food_backend.entities.Pago;
@@ -55,14 +56,10 @@ class NuevasEntidadesIntegrationTest {
 
     @Test
     void debeGuardarLaContrasenaDelUsuarioConHash() {
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Administrador");
-        usuario.setCorreo("admin@fastfood.com");
-        usuario.setContrasena("123456");
-        usuario.setTelefono("999888777");
-        usuario.setRol("ADMINISTRADOR");
+        RegistroUsuarioRequest solicitud = new RegistroUsuarioRequest(
+                "Administrador", "admin@fastfood.com", "123456", "999888777", null, null);
 
-        Usuario guardado = usuarioService.registrar(usuario);
+        Usuario guardado = usuarioService.registrar(solicitud);
         String hash = usuarioRepository.findById(guardado.getId()).orElseThrow().getContrasena();
 
         assertFalse(hash.equals("123456"));
