@@ -17,10 +17,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.entities.Usuario;
+import com.fastfood.fast_food_backend.entities.Producto;
+import com.fastfood.fast_food_backend.entities.DetallePedido;
+import com.fastfood.fast_food_backend.dto.CrearPedidoRequest;
+import com.fastfood.fast_food_backend.dto.DetallePedidoRequest;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
 import com.fastfood.fast_food_backend.repositories.DetallePedidoRepository;
@@ -47,23 +52,33 @@ class PedidoServiceTest {
 
     @Test
     void debeRegistrarUnPedidoValido() {
-        Pedido pedido = pedido();
+        Producto producto = new Producto();
+        producto.setId(2L);
+        producto.setNombre("Hamburguesa");
+        producto.setPrecio(new BigDecimal("12.50"));
+        producto.setStock(10);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario()));
-        when(pedidoRepository.save(pedido)).thenReturn(pedido);
+        when(productoRepository.findById(2L)).thenReturn(Optional.of(producto));
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
 
-        Pedido resultado = pedidoService.registrar(pedido);
+        Pedido resultado = pedidoService.registrar(solicitud());
 
-        assertSame(pedido, resultado);
+        assertEquals("PENDIENTE", resultado.getEstado());
+        assertEquals(new BigDecimal("25.00"), resultado.getTotal());
+        assertEquals(BigDecimal.ZERO, resultado.getCostoEntrega());
         assertNotNull(resultado.getFecha());
-        verify(pedidoRepository).save(pedido);
+        assertEquals(10, producto.getStock());
+        ArgumentCaptor<DetallePedido> linea = ArgumentCaptor.forClass(DetallePedido.class);
+        verify(detallePedidoRepository).save(linea.capture());
+        assertEquals(2, linea.getValue().getCantidad());
+        assertEquals(new BigDecimal("12.50"), linea.getValue().getPrecioUnitario());
     }
 
     @Test
     void debeRechazarPedidoDeUsuarioInexistente() {
-        Pedido pedido = pedido();
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RecursoNoEncontradoException.class, () -> pedidoService.registrar(pedido));
+        assertThrows(RecursoNoEncontradoException.class, () -> pedidoService.registrar(solicitud()));
 
         verify(pedidoRepository, never()).save(any());
     }
@@ -89,6 +104,14 @@ class PedidoServiceTest {
 
         assertEquals(1, resultado.size());
         assertSame(pedido, resultado.get(0));
+    }
+
+    private CrearPedidoRequest solicitud() {
+        DetallePedidoRequest detalle = new DetallePedidoRequest();
+        detalle.setProductoId(2L);
+        detalle.setCantidad(2);
+        return new CrearPedidoRequest(new CrearPedidoRequest.UsuarioReferencia(1L), null,
+                "RECOJO", null, "Sin mayonesa", List.of(detalle));
     }
 
     private Pedido pedido() {

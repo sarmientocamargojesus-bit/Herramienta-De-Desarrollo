@@ -1,15 +1,16 @@
 package com.fastfood.fast_food_backend.dto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProcesarPedidoRequest {
 
     private Long usuarioId;
     private String tipoEntrega;
     private String direccionEntrega;
     private String observaciones;
-    private BigDecimal costoEntrega;
     private List<DetallePedidoRequest> detalles;
 
     public Long getUsuarioId() {
@@ -42,14 +43,6 @@ public class ProcesarPedidoRequest {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
-    }
-
-    public BigDecimal getCostoEntrega() {
-        return costoEntrega;
-    }
-
-    public void setCostoEntrega(BigDecimal costoEntrega) {
-        this.costoEntrega = costoEntrega;
     }
 
     public List<DetallePedidoRequest> getDetalles() {

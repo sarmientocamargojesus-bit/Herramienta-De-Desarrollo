@@ -160,7 +160,8 @@ Content-Type: application/json
   "activo": true
 }
 
-### 14. Registrar pedido - primero debe existir el usuario CLIENTE indicado
+### 14. Registrar pedido PENDIENTE con productos - debe responder 201 Created
+# Deben existir el usuario CLIENTE y el producto indicado. La API calcula los importes.
 POST {{baseUrl}}/api/pedidos
 Authorization: Bearer {{clienteToken}}
 Content-Type: application/json
@@ -169,13 +170,12 @@ Content-Type: application/json
   "usuario": {
     "id": {{usuarioId}}
   },
-  "estado": "PENDIENTE",
-  "subtotal": 20.00,
-  "costoEntrega": 5.00,
-  "total": 25.00,
   "tipoEntrega": "DOMICILIO",
   "direccionEntrega": "Av. Nueva 456",
-  "observaciones": "Sin mayonesa"
+  "observaciones": "Sin mayonesa",
+  "detalles": [
+    { "productoId": {{productoPedidoId}}, "cantidad": 2 }
+  ]
 }
 
 ### 15. Listar pedidos - debe responder 200 OK
@@ -190,19 +190,14 @@ Authorization: Bearer {{clienteToken}}
 GET {{baseUrl}}/api/pedidos/estado/PENDIENTE
 Authorization: Bearer {{adminToken}}
 
-### 18. Actualizar pedido - debe responder 200 OK
+### 18. Actualizar datos de entrega del pedido - debe responder 200 OK
+# Este endpoint conserva el estado, el cliente, las fechas de creación y los importes.
 PUT {{baseUrl}}/api/pedidos/{{pedidoId}}
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "usuario": {
-    "id": {{usuarioId}}
-  },
-  "estado": "EN_PREPARACION",
-  "subtotal": 20.00,
-  "costoEntrega": 5.00,
-  "total": 25.00,
+  "telefono": "999111222",
   "tipoEntrega": "DOMICILIO",
   "direccionEntrega": "Av. Nueva 456",
   "observaciones": "Sin mayonesa"

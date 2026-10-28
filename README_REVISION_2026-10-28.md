@@ -197,7 +197,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | Punto | Problema | Estado actual |
 | --- | --- | --- |
 | 1 | Sobrescritura de cuentas desde el registro público | Resuelto y verificado el 28 de octubre de 2026. |
-| 2 | Confirmación de pedidos sin productos ni pago | Pendiente. |
+| 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado el 28 de octubre de 2026. |
 | 3 | Venta simultánea de la última unidad por el pago antiguo | Pendiente. |
 | 4 | Bloqueo al cambiar de domicilio a recojo | Pendiente. |
 | 5 | Desincronización al renombrar categorías | Pendiente. |
@@ -259,4 +259,76 @@ La opción `-o` utiliza las dependencias ya descargadas en Maven; en un equipo q
 - [RegistroUsuarioIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/RegistroUsuarioIntegrationTest.java).
 - [NuevasEntidadesIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/services/NuevasEntidadesIntegrationTest.java).
 
-El siguiente punto pendiente es el **2: controlar la confirmación de pedidos**. Su implementación queda pendiente de la indicación del usuario.
+Al cerrar el punto 1, el siguiente punto pendiente era el **2: controlar la confirmación de pedidos**. Su corrección se documenta a continuación.
+
+### Punto 2. Control de creación y edición de pedidos
+
+**Fecha de corrección:** 28 de octubre de 2026.
+**Estado:** resuelto y verificado.
+
+#### Qué se hizo para corregirlo
+
+1. Se agregaron `CrearPedidoRequest` y `ActualizarPedidoRequest`. Los controladores reciben los datos permitidos de cada operación en lugar de aceptar una entidad JPA completa.
+2. `POST /api/pedidos` ahora exige detalles con identificador de producto y cantidad positiva. Se reutiliza la operación de creación de `/api/pedidos/procesar`, que construye un pedido nuevo con estado PENDIENTE y obtiene los precios desde el catálogo. Se ignoran el ID, el estado, las fechas y los importes enviados en el cuerpo.
+3. Ambas rutas calculan subtotal y total en el servidor. El costo de entrega actual es 0, igual que en el checkout que utiliza Angular; el cliente ya no puede elegir ese importe en la solicitud. No se agregó una tarifa nueva.
+4. Se validaron los tipos de entrega RECOJO y DOMICILIO y las líneas vacías, nulas o con cantidades inválidas. Un producto inexistente devuelve 404 y revierte la creación del pedido y sus detalles.
+5. `PUT /api/pedidos/{id}` quedó limitado a teléfono, tipo de entrega, dirección y observaciones. Conserva cliente, productos, estado, importes, precios históricos y fecha de creación. Los campos adicionales recibidos se ignoran. Se bloquea la fila durante esta edición para actualizar los datos de entrega sobre el pedido vigente.
+6. Se adaptó la comprobación de propiedad del pedido al nuevo DTO. Un cliente sigue sin poder crear pedidos para otra cuenta; el administrador y el empleado conservan sus permisos de gestión.
+7. Se actualizaron las solicitudes 14 y 18 de `requests.http` y se añadió al README general el cuerpo de creación válido y el alcance de la edición.
+
+#### Comportamiento después del cambio
+
+Un intento de crear un pedido CONFIRMADO sin productos devuelve 400 y no se guarda. Si la solicitud incluye productos válidos y además envía un estado o total inventado, esos campos se ignoran: el servidor crea un pedido PENDIENTE y calcula los importes con los precios del catálogo.
+
+Un ID enviado en la creación tampoco actualiza un pedido existente. El nuevo pedido recibe su propio identificador. Un pedido de otra cuenta conserva su propietario y sus detalles.
+
+La creación de un pedido pendiente no reserva ni descuenta stock. La confirmación se realiza al aprobar el pago simulado de `/api/pagos`, o mediante la operación completa de `/api/checkout`. Ambos caminos de compra pasaron sus comprobaciones funcionales. La corrección de pagos simultáneos del endpoint antiguo sigue correspondiendo al punto 3.
+
+La edición de entrega no confirma un pedido pendiente ni devuelve uno pagado al estado PENDIENTE. Tampoco cambia la compra cuando se actualiza el precio del producto en el catálogo: los detalles conservan su precio unitario histórico. Este PUT no se utiliza para pasar a preparación o entrega.
+
+El frontend actual continúa utilizando `/api/checkout` para la compra y las mismas rutas de consulta. La corrección no requiere un script de modificación del esquema de Supabase.
+
+#### Pruebas realizadas
+
+Se agregó `PedidoIntegridadIntegrationTest`, con 14 casos ejecutados por MockMvc contra la API real de Spring Boot y H2. No hay una transacción de prueba envolviendo las solicitudes: así se comprueba que la transacción del servicio se revierte realmente cuando falla la creación.
+
+| Caso | Resultado |
+| --- | --- |
+| Pedido CONFIRMADO sin productos | 400 y ningún pedido creado. |
+| Estado, total, costo y precios de línea manipulados | Se ignoraron; pedido PENDIENTE, subtotal y total calculados desde el catálogo, costo de entrega 0. |
+| ID de un pedido existente enviado en la creación | Se creó un pedido diferente; el original conservó propietario y detalles. |
+| Cliente que intenta crear un pedido para otra cuenta | 403 y ningún pedido creado. |
+| Detalles vacíos, línea nula o cantidad 0 | Los tres casos respondieron 400 sin crear pedidos. |
+| Producto inexistente después de una línea válida | 404; la base de datos no conservó pedido ni detalles parciales. |
+| Importes manipulados en `/api/pedidos/procesar` | Pedido PENDIENTE con importes calculados por el servidor. |
+| Tipo de entrega inexistente | 400 y ningún pedido creado. |
+| Edición con estado, cliente, fecha, importes y productos manipulados | Se conservaron los datos originales; solo se actualizó la observación permitida. |
+| Edición parcial de teléfono, entrega y dirección | 200, conservando estado e importes. |
+| Edición de un pedido pagado después de cambiar el precio del catálogo | Se conservaron estado CONFIRMADO, importe del pago, precio histórico y stock. |
+| Creación por la ruta antigua y posterior pago simulado | Pedido confirmado, pago aprobado y descuento correcto de stock. |
+
+Antes de corregir el código, 13 de los 14 casos fallaron y reprodujeron los problemas; la comprobación de propiedad ya funcionaba. Después del cambio, pasaron los 14. También pasaron las pruebas unitarias y transaccionales existentes de pedidos: **21 comprobaciones centradas en pedidos**.
+
+Finalmente se ejecutó la suite completa del backend principal: **75 pruebas, 0 fallos, 0 errores y 0 omitidas**. Incluye las pruebas de registro del punto 1, seguridad, JWT, checkout, pagos, stock e imágenes. Se utilizó H2 con la importación de `.env` deshabilitada; las pruebas no modificaron los datos de Supabase.
+
+Comando utilizado desde la raíz del proyecto, con las dependencias ya descargadas:
+
+```powershell
+.\mvnw.cmd -o "-Dspring.config.import=" test
+```
+
+#### Archivos involucrados
+
+- [CrearPedidoRequest.java](src/main/java/com/fastfood/fast_food_backend/dto/CrearPedidoRequest.java).
+- [ActualizarPedidoRequest.java](src/main/java/com/fastfood/fast_food_backend/dto/ActualizarPedidoRequest.java).
+- [ProcesarPedidoRequest.java](src/main/java/com/fastfood/fast_food_backend/dto/ProcesarPedidoRequest.java).
+- [DetallePedidoRequest.java](src/main/java/com/fastfood/fast_food_backend/dto/DetallePedidoRequest.java).
+- [PedidoController.java](src/main/java/com/fastfood/fast_food_backend/controllers/PedidoController.java).
+- [PedidoService.java](src/main/java/com/fastfood/fast_food_backend/services/PedidoService.java).
+- [AutorizacionPedido.java](src/main/java/com/fastfood/fast_food_backend/security/AutorizacionPedido.java).
+- [PedidoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/PedidoRepository.java).
+- [PedidoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PedidoIntegridadIntegrationTest.java).
+- [PedidoServiceTest.java](src/test/java/com/fastfood/fast_food_backend/services/PedidoServiceTest.java).
+- [Solicitudes de API](requests.http) y [README general](README.md).
+
+El siguiente punto pendiente es el **3: proteger el stock ante pagos simultáneos en el endpoint antiguo**. Se trabajará cuando el usuario lo indique.

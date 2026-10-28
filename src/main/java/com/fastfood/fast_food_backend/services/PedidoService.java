@@ -3,12 +3,15 @@ package com.fastfood.fast_food_backend.services;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastfood.fast_food_backend.dto.DetallePedidoRequest;
 import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
+import com.fastfood.fast_food_backend.dto.CrearPedidoRequest;
+import com.fastfood.fast_food_backend.dto.ActualizarPedidoRequest;
 import com.fastfood.fast_food_backend.entities.DetallePedido;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.entities.Pedido;
@@ -48,46 +51,52 @@ public class PedidoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + id));
     }
 
-    public Pedido registrar(Pedido pedido) {
-        Usuario usuario = obtenerClienteActivo(pedido.getUsuario() != null ? pedido.getUsuario().getId() : null);
-        pedido.setUsuario(usuario);
-        completarDatosEconomicos(pedido);
-        if (pedido.getTelefono() == null || pedido.getTelefono().isBlank()) {
-            pedido.setTelefono(usuario.getTelefono());
+    @Transactional
+    public Pedido registrar(CrearPedidoRequest solicitud) {
+        if (solicitud == null) {
+            throw new IllegalArgumentException("Los datos del pedido son obligatorios");
         }
-        completarDireccion(pedido, usuario);
-        if (pedido.getFecha() == null) {
-            pedido.setFecha(LocalDateTime.now());
+        ProcesarPedidoRequest datos = new ProcesarPedidoRequest();
+        datos.setUsuarioId(solicitud.usuario() != null ? solicitud.usuario().id() : null);
+        datos.setTipoEntrega(solicitud.tipoEntrega());
+        datos.setDireccionEntrega(solicitud.direccionEntrega());
+        datos.setObservaciones(solicitud.observaciones());
+        datos.setDetalles(solicitud.detalles());
+        Pedido pedido = procesarPedido(datos);
+        if (solicitud.telefono() != null && !solicitud.telefono().isBlank()) {
+            pedido.setTelefono(solicitud.telefono().trim());
         }
-        pedido.setFechaActualizacion(LocalDateTime.now());
-        validar(pedido);
-        return pedidoRepository.save(pedido);
+        return pedido;
     }
 
-    public Pedido actualizar(Long id, Pedido datosPedido) {
-        Pedido pedido = buscarPorId(id);
-        Usuario usuario = obtenerClienteActivo(
-                datosPedido.getUsuario() != null ? datosPedido.getUsuario().getId() : null);
-        datosPedido.setUsuario(usuario);
-        completarDatosEconomicos(datosPedido);
-        if (datosPedido.getTelefono() == null || datosPedido.getTelefono().isBlank()) {
-            datosPedido.setTelefono(usuario.getTelefono());
+    @Transactional
+    public Pedido actualizar(Long id, ActualizarPedidoRequest solicitud) {
+        if (solicitud == null) {
+            throw new IllegalArgumentException("Los datos del pedido son obligatorios");
         }
-        completarDireccion(datosPedido, usuario);
-        validar(datosPedido);
-
-        pedido.setUsuario(usuario);
-        pedido.setTelefono(datosPedido.getTelefono());
-        pedido.setEstado(datosPedido.getEstado());
-        pedido.setSubtotal(datosPedido.getSubtotal());
-        pedido.setCostoEntrega(datosPedido.getCostoEntrega());
-        pedido.setTotal(datosPedido.getTotal());
-        pedido.setTipoEntrega(datosPedido.getTipoEntrega());
-        pedido.setDireccionEntrega(datosPedido.getDireccionEntrega());
-        pedido.setObservaciones(datosPedido.getObservaciones());
-        if (datosPedido.getFecha() != null) {
-            pedido.setFecha(datosPedido.getFecha());
+        Pedido pedido = pedidoRepository.bloquearPorId(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + id));
+        if (solicitud.telefono() != null) {
+            if (solicitud.telefono().isBlank()) {
+                throw new IllegalArgumentException("El teléfono del pedido no puede estar vacío");
+            }
+            pedido.setTelefono(solicitud.telefono().trim());
         }
+        if (solicitud.tipoEntrega() != null) {
+            pedido.setTipoEntrega(normalizarTipoEntrega(solicitud.tipoEntrega()));
+        }
+        if ("RECOJO".equals(pedido.getTipoEntrega())) {
+            pedido.setDireccionEntrega(null);
+        } else {
+            if (solicitud.direccionEntrega() != null) {
+                pedido.setDireccionEntrega(solicitud.direccionEntrega());
+            }
+            completarDireccion(pedido, pedido.getUsuario());
+        }
+        if (solicitud.observaciones() != null) {
+            pedido.setObservaciones(solicitud.observaciones());
+        }
+        validar(pedido);
         pedido.setFechaActualizacion(LocalDateTime.now());
         return pedidoRepository.save(pedido);
     }
@@ -140,11 +149,10 @@ public class PedidoService {
         pedido.setFechaActualizacion(LocalDateTime.now());
         pedido.setEstado("PENDIENTE");
         pedido.setSubtotal(BigDecimal.ZERO);
-        BigDecimal costoEntrega = solicitud.getCostoEntrega() == null
-                ? BigDecimal.ZERO : solicitud.getCostoEntrega();
+        BigDecimal costoEntrega = BigDecimal.ZERO;
         pedido.setCostoEntrega(costoEntrega);
         pedido.setTotal(BigDecimal.ZERO);
-        pedido.setTipoEntrega(solicitud.getTipoEntrega());
+        pedido.setTipoEntrega(normalizarTipoEntrega(solicitud.getTipoEntrega()));
         pedido.setDireccionEntrega(solicitud.getDireccionEntrega());
         completarDireccion(pedido, usuario);
         if ("DOMICILIO".equalsIgnoreCase(pedido.getTipoEntrega())
@@ -156,10 +164,6 @@ public class PedidoService {
 
         BigDecimal total = BigDecimal.ZERO;
         for (DetallePedidoRequest datosDetalle : solicitud.getDetalles()) {
-            if (datosDetalle.getProductoId() == null || datosDetalle.getCantidad() <= 0) {
-                throw new IllegalArgumentException("Cada detalle debe tener producto y cantidad mayor que cero");
-            }
-
             Producto producto = productoRepository.findById(datosDetalle.getProductoId())
                     .orElseThrow(() -> new RecursoNoEncontradoException(
                             "Producto no encontrado: " + datosDetalle.getProductoId()));
@@ -185,6 +189,7 @@ public class PedidoService {
         pedido.setSubtotal(total);
         pedido.setTotal(total.add(costoEntrega));
         pedido.setFechaActualizacion(LocalDateTime.now());
+        validar(pedido);
         return pedidoRepository.save(pedido);
     }
 
@@ -239,28 +244,27 @@ public class PedidoService {
         if (solicitud.getUsuarioId() == null) {
             throw new IllegalArgumentException("El usuario del pedido es obligatorio");
         }
-        if (solicitud.getTipoEntrega() == null || solicitud.getTipoEntrega().isBlank()) {
-            throw new IllegalArgumentException("El tipo de entrega es obligatorio");
-        }
+        normalizarTipoEntrega(solicitud.getTipoEntrega());
         if (solicitud.getDetalles() == null || solicitud.getDetalles().isEmpty()) {
             throw new IllegalArgumentException("El pedido debe contener al menos un producto");
         }
-        if (solicitud.getCostoEntrega() != null
-                && solicitud.getCostoEntrega().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El costo de entrega no puede ser negativo");
+        for (DetallePedidoRequest detalle : solicitud.getDetalles()) {
+            if (detalle == null || detalle.getProductoId() == null || detalle.getProductoId() < 1
+                    || detalle.getCantidad() <= 0) {
+                throw new IllegalArgumentException("Cada detalle debe tener producto y cantidad mayor que cero");
+            }
         }
     }
 
-    private void completarDatosEconomicos(Pedido pedido) {
-        if (pedido.getCostoEntrega() == null) {
-            pedido.setCostoEntrega(BigDecimal.ZERO);
+    private String normalizarTipoEntrega(String tipoEntrega) {
+        if (tipoEntrega == null || tipoEntrega.isBlank()) {
+            throw new IllegalArgumentException("El tipo de entrega es obligatorio");
         }
-        if (pedido.getSubtotal() == null && pedido.getTotal() != null) {
-            pedido.setSubtotal(pedido.getTotal().subtract(pedido.getCostoEntrega()));
+        String normalizado = tipoEntrega.trim().toUpperCase(Locale.ROOT);
+        if (!"RECOJO".equals(normalizado) && !"DOMICILIO".equals(normalizado)) {
+            throw new IllegalArgumentException("El tipo de entrega debe ser RECOJO o DOMICILIO");
         }
-        if (pedido.getTotal() == null && pedido.getSubtotal() != null) {
-            pedido.setTotal(pedido.getSubtotal().add(pedido.getCostoEntrega()));
-        }
+        return normalizado;
     }
 
     private void completarDireccion(Pedido pedido, Usuario usuario) {

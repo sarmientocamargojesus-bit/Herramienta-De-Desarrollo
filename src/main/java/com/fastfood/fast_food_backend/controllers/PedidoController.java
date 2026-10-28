@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.entities.DetallePedido;
 import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
+import com.fastfood.fast_food_backend.dto.CrearPedidoRequest;
+import com.fastfood.fast_food_backend.dto.ActualizarPedidoRequest;
 import com.fastfood.fast_food_backend.services.PedidoService;
 
 @RestController
@@ -44,17 +46,17 @@ public class PedidoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('EMPLEADO','ADMINISTRADOR') or @autorizacionPedido.puedeCrearPedido(#pedido, authentication)")
-    public ResponseEntity<Pedido> registrar(@RequestBody Pedido pedido) {
-        Pedido pedidoRegistrado = pedidoService.registrar(pedido);
+    @PreAuthorize("hasAnyRole('EMPLEADO','ADMINISTRADOR') or @autorizacionPedido.puedeCrearPedido(#solicitud, authentication)")
+    public ResponseEntity<Pedido> registrar(@RequestBody CrearPedidoRequest solicitud) {
+        Pedido pedidoRegistrado = pedidoService.registrar(solicitud);
         URI ubicacion = URI.create("/api/pedidos/" + pedidoRegistrado.getId());
         return ResponseEntity.created(ubicacion).body(pedidoRegistrado);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('EMPLEADO','ADMINISTRADOR')")
-    public Pedido actualizar(@PathVariable Long id, @RequestBody Pedido pedido) {
-        return pedidoService.actualizar(id, pedido);
+    public Pedido actualizar(@PathVariable Long id, @RequestBody ActualizarPedidoRequest solicitud) {
+        return pedidoService.actualizar(id, solicitud);
     }
 
     @DeleteMapping("/{id}")

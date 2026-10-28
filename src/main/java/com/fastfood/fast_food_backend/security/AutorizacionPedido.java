@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.fastfood.fast_food_backend.entities.Pago;
 import com.fastfood.fast_food_backend.entities.Pedido;
 import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
+import com.fastfood.fast_food_backend.dto.CrearPedidoRequest;
 import com.fastfood.fast_food_backend.repositories.PagoRepository;
 import com.fastfood.fast_food_backend.repositories.PedidoRepository;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
@@ -61,9 +62,9 @@ public class AutorizacionPedido {
                 && esPropietario(pago.getPedido().getId(), authentication);
     }
 
-    public boolean puedeCrearPedido(Pedido pedido, Authentication authentication) {
-        return pedido != null && pedido.getUsuario() != null
-                && esMismoUsuario(pedido.getUsuario().getId(), authentication);
+    public boolean puedeCrearPedido(CrearPedidoRequest solicitud, Authentication authentication) {
+        return solicitud != null && solicitud.usuario() != null
+                && esMismoUsuario(solicitud.usuario().id(), authentication);
     }
 
     public boolean puedeProcesarPedido(ProcesarPedidoRequest solicitud, Authentication authentication) {

@@ -361,6 +361,42 @@ Las solicitudes manuales se encuentran en `requests.http`. El archivo incluye
 login de administrador y cliente, captura automática del token en VS Code REST
 Client y ejemplos de consumo mediante `Authorization: Bearer`.
 
+## Creación y edición de pedidos por la API
+
+Angular utiliza `/api/checkout` para confirmar el carrito y su pago simulado.
+Las rutas de creación anteriores siguen disponibles, pero siempre generan
+pedidos `PENDIENTE` con productos. `POST /api/pedidos` recibe este cuerpo:
+
+```json
+{
+  "usuario": { "id": 3 },
+  "tipoEntrega": "RECOJO",
+  "observaciones": "Sin cebolla",
+  "detalles": [
+    { "productoId": 2, "cantidad": 2 }
+  ]
+}
+```
+
+Los identificadores del ejemplo deben reemplazarse por un cliente y un producto
+existentes. Un cliente solo puede crear pedidos para su propia cuenta.
+`POST /api/pedidos/procesar` utiliza los mismos detalles y entrega, con
+`usuarioId` en lugar de `usuario`. Ambas rutas calculan los precios y totales
+desde el catálogo. El costo de entrega actual es `0`, igual que en el checkout;
+los importes, estados, fechas e identificadores del pedido enviados en el JSON
+no se utilizan. Los pedidos pendientes no reservan ni descuentan stock.
+
+La confirmación se realiza mediante el pago simulado de `/api/pagos` o a través
+del checkout. El pago comprueba los productos y la disponibilidad antes de
+confirmar y descontar stock. La creación sin productos devuelve `400`.
+
+`PUT /api/pedidos/{id}` permite al administrador o al empleado editar únicamente
+teléfono, tipo de entrega, dirección y observaciones. Los datos omitidos se
+conservan; para recojo se limpia la dirección de entrega. Esta operación no
+cambia el cliente, los productos, el estado, el precio histórico, los importes
+ni la fecha de creación del pedido. No es una ruta de confirmación ni de cambio
+a preparación o entrega.
+
 ## Ejecutar las pruebas
 
 ```powershell
