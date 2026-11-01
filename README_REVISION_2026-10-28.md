@@ -208,9 +208,10 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
 | 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
 | 12 | Mensaje de sesión vencida al fallar el login | Resuelto y verificado el 1 de noviembre de 2026. |
-| 13 | Respuesta 500 cuando falta el archivo de imagen | Pendiente. |
+| 13 | Respuesta 500 cuando falta el archivo de imagen | Resuelto y verificado el 1 de noviembre de 2026. |
 | 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -471,5 +472,38 @@ Antes de corregir el código fallaron los casos de checkout, detalle desde gesti
 - [checkout.ts](front-end/src/app/components/checkout/checkout.ts), [checkout.html](front-end/src/app/components/checkout/checkout.html) y [checkout.spec.ts](front-end/src/app/components/checkout/checkout.spec.ts).
 - [detalle-pedido.ts](front-end/src/app/components/detalle-pedido/detalle-pedido.ts), [detalle-pedido.html](front-end/src/app/components/detalle-pedido/detalle-pedido.html) y [detalle-pedido.spec.ts](front-end/src/app/components/detalle-pedido/detalle-pedido.spec.ts).
 - [inicio-sesion.ts](front-end/src/app/components/inicio-sesion/inicio-sesion.ts) e [inicio-sesion.spec.ts](front-end/src/app/components/inicio-sesion/inicio-sesion.spec.ts).
+
+### Puntos 13 y 16. Errores de solicitud respondidos como 500
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resueltos y verificados.
+
+**Problema:** `ManejadorGlobalExcepciones` no tenía reglas para varios errores que corresponden a quien envía la solicitud. Esos errores llegaban al manejador general, que respondía 500 «Ha ocurrido un error interno en el servidor» y registraba un error grave en el log. Ocurría al subir una imagen sin el campo `archivo` (punto 13), al omitir parámetros obligatorios como `nombre` en `/api/productos/buscar` o `maximo` en `/api/productos/rango-precios`, al usar un método HTTP que la ruta no admite y al enviar un tipo de contenido incompatible (punto 16).
+
+#### Qué se hizo para corregirlo
+
+Se agregaron cuatro manejadores con el mismo formato `ApiError` que utilizan los demás:
+
+| Situación | Respuesta |
+| --- | --- |
+| Falta un parámetro obligatorio | 400 «Falta el parámetro obligatorio 'nombre'» |
+| Falta el archivo en una solicitud multipart | 400 «Falta el archivo de imagen en el campo 'archivo'» |
+| Método HTTP no admitido por la ruta | 405 «El método PATCH no está permitido en esta ruta» |
+| Tipo de contenido incompatible | 415 «El tipo de contenido enviado no es compatible con esta ruta» |
+
+Las solicitudes válidas, los permisos, la lógica de negocio y el frontend no cambian. Los errores que no pertenecen a estos casos siguen respondiendo 500.
+
+#### Pruebas realizadas
+
+Se agregó `SolicitudIncompletaTest`, con 5 casos mediante MockMvc: búsqueda sin `nombre`, rango sin `maximo`, imagen sin archivo, imagen enviada como JSON y `PATCH` sobre un producto. Las rutas protegidas se probaron con un token real de administrador.
+
+Antes de corregir el código, los 5 casos respondieron 500. Después del cambio respondieron 400, 400, 400, 415 y 405 según corresponde.
+
+Suite completa del backend: **95 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+#### Archivos involucrados
+
+- [ManejadorGlobalExcepciones.java](src/main/java/com/fastfood/fast_food_backend/exceptions/ManejadorGlobalExcepciones.java).
+- [SolicitudIncompletaTest.java](src/test/java/com/fastfood/fast_food_backend/controllers/SolicitudIncompletaTest.java).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

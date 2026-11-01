@@ -12,13 +12,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -141,6 +145,42 @@ public class ManejadorGlobalExcepciones {
             HttpServletRequest request) {
         logger.warn("Datos inválidos: {}", exception.getMessage());
         return construirRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> manejarParametroFaltante(
+            MissingServletRequestParameterException exception,
+            HttpServletRequest request) {
+        String mensaje = "Falta el parámetro obligatorio '" + exception.getParameterName() + "'";
+        logger.warn("Parámetro faltante: {}", exception.getParameterName());
+        return construirRespuesta(HttpStatus.BAD_REQUEST, mensaje, request, Map.of());
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiError> manejarArchivoFaltante(
+            MissingServletRequestPartException exception,
+            HttpServletRequest request) {
+        String mensaje = "Falta el archivo de imagen en el campo '" + exception.getRequestPartName() + "'";
+        logger.warn("Parte multipart faltante: {}", exception.getRequestPartName());
+        return construirRespuesta(HttpStatus.BAD_REQUEST, mensaje, request, Map.of());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError> manejarMetodoNoPermitido(
+            HttpRequestMethodNotSupportedException exception,
+            HttpServletRequest request) {
+        logger.warn("Método {} no permitido en {}", exception.getMethod(), request.getRequestURI());
+        return construirRespuesta(HttpStatus.METHOD_NOT_ALLOWED,
+                "El método " + exception.getMethod() + " no está permitido en esta ruta", request, Map.of());
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiError> manejarTipoContenidoNoSoportado(
+            HttpMediaTypeNotSupportedException exception,
+            HttpServletRequest request) {
+        logger.warn("Tipo de contenido no soportado: {}", exception.getContentType());
+        return construirRespuesta(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "El tipo de contenido enviado no es compatible con esta ruta", request, Map.of());
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
