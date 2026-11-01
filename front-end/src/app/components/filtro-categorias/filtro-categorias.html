@@ -1,5 +1,12 @@
 <div class="filters" role="group" aria-label="Filtrar productos por categoría">
-      @for (category of categories(); track category.value) {
-        <button type="button" [class.active]="selected() === category.value" [attr.aria-pressed]="selected() === category.value" (click)="categorySelected.emit(category.value)">{{ category.label }}</button>
-      }
-    </div>
+  @for (category of categories(); track category.value) {
+    <button
+      type="button"
+      [class.active]="selected() === category.value"
+      [attr.aria-pressed]="selected() === category.value"
+      (click)="categorySelected.emit(category.value)"
+    >
+      {{ category.label }}
+    </button>
+  }
+</div>

@@ -1,6 +1,7 @@
 package com.fastfood.fast_food_backend.services;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,7 +61,7 @@ public class UsuarioService {
         usuario.setActivo(solicitud.activo());
         validar(usuario, true);
         validarCorreoDisponible(usuario.getCorreo(), null);
-        usuario.setCorreo(usuario.getCorreo().trim().toLowerCase());
+        usuario.setCorreo(usuario.getCorreo().trim().toLowerCase(Locale.ROOT));
         usuario.setRol(ROL_PREDETERMINADO);
         usuario.setActivo(usuario.getActivo() == null ? true : usuario.getActivo());
         usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
@@ -72,7 +73,7 @@ public class UsuarioService {
         validar(datos, false);
         validarCorreoDisponible(datos.getCorreo(), id);
         usuario.setNombre(datos.getNombre());
-        usuario.setCorreo(datos.getCorreo().trim().toLowerCase());
+        usuario.setCorreo(datos.getCorreo().trim().toLowerCase(Locale.ROOT));
         usuario.setTelefono(datos.getTelefono());
         usuario.setDireccion(datos.getDireccion());
         if (datos.getActivo() != null) {
@@ -88,7 +89,7 @@ public class UsuarioService {
         if (nuevoRol == null || nuevoRol.isBlank()) {
             throw new IllegalArgumentException("El nuevo rol es obligatorio");
         }
-        String rolNormalizado = nuevoRol.trim().toUpperCase();
+        String rolNormalizado = nuevoRol.trim().toUpperCase(Locale.ROOT);
         if (!ROLES_PERMITIDOS.contains(rolNormalizado)) {
             throw new IllegalArgumentException("Rol no permitido: " + nuevoRol);
         }

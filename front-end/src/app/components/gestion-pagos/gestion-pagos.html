@@ -1,1 +1,33 @@
-<section class="pagina"><h1>Pagos simulados</h1><p class="subtitulo">Se crean con el checkout; esta pantalla solo los consulta. No contiene datos reales de pago.</p><app-mensaje-error [texto]="error()" /><div class="panel tabla-contenedor"><table class="tabla"><thead><tr><th>ID</th><th>Pedido</th><th>Método</th><th>Estado</th><th>Monto</th><th>Fecha</th></tr></thead><tbody>@for(p of pagos();track p.id){<tr><td>#{{p.id}}</td><td>#{{p.pedido.id}}</td><td>{{p.metodo}}</td><td>{{p.estado}}</td><td>S/ {{p.monto.toFixed(2)}}</td><td>{{p.fecha}}</td></tr>}</tbody></table></div></section>
+<section class="pagina">
+  <h1>Pagos simulados</h1>
+  <p class="subtitulo">
+    Se crean con el checkout; esta pantalla solo los consulta. No contiene datos reales de pago.
+  </p>
+  <app-mensaje-error [texto]="error()" />
+  <div class="panel tabla-contenedor">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Pedido</th>
+          <th>Método</th>
+          <th>Estado</th>
+          <th>Monto</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pagos(); track p.id) {
+          <tr>
+            <td>#{{ p.id }}</td>
+            <td>#{{ p.pedido.id }}</td>
+            <td>{{ p.metodo }}</td>
+            <td>{{ p.estado }}</td>
+            <td>S/ {{ p.monto.toFixed(2) }}</td>
+            <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

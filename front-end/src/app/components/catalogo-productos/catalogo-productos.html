@@ -1,4 +1,7 @@
 <div class="grid">
-      @for (product of products(); track product.id) { <app-tarjeta-producto [product]="product" (agregar)="agregar.emit($event)" /> }
-      @empty { <p>No hay productos en esta categoría.</p> }
-    </div>
+  @for (product of products(); track product.id) {
+    <app-tarjeta-producto [product]="product" (agregar)="agregar.emit($event)" />
+  } @empty {
+    <p>No hay productos en esta categoría.</p>
+  }
+</div>

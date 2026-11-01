@@ -1,6 +1,7 @@
 package com.fastfood.fast_food_backend.services;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ public class CategoriaService {
         if (categoria.getActivo() == null) {
             categoria.setActivo(true);
         }
-        categoria.setNombre(categoria.getNombre().trim().toUpperCase());
+        categoria.setNombre(categoria.getNombre().trim().toUpperCase(Locale.ROOT));
         return categoriaRepository.save(categoria);
     }
 
@@ -52,7 +53,7 @@ public class CategoriaService {
         Categoria categoria = buscarPorId(id);
         validar(datos);
         validarNombreDisponible(datos.getNombre(), id);
-        categoria.setNombre(datos.getNombre().trim().toUpperCase());
+        categoria.setNombre(datos.getNombre().trim().toUpperCase(Locale.ROOT));
         categoria.setDescripcion(datos.getDescripcion());
         if (datos.getActivo() != null) {
             categoria.setActivo(datos.getActivo());

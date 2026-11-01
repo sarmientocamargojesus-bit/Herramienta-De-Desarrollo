@@ -1,5 +1,7 @@
 package com.fastfood.fast_food_backend.security;
 
+import java.util.Locale;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +27,7 @@ public class UsuarioDetailsService implements UserDetailsService {
 
         return User.withUsername(usuario.getCorreo())
                 .password(usuario.getContrasena())
-                .roles(usuario.getRol().toUpperCase())
+                .roles(usuario.getRol().toUpperCase(Locale.ROOT))
                 .disabled(!Boolean.TRUE.equals(usuario.getActivo()))
                 .build();
     }

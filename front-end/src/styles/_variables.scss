@@ -5,5 +5,7 @@ $borde: #ded6c9;
 $texto: #1e1c19;
 
 @mixin movil {
-  @media (max-width: 680px) { @content; }
+  @media (max-width: 680px) {
+    @content;
+  }
 }

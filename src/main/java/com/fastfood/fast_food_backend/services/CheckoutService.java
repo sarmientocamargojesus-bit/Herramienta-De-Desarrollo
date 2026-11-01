@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -86,7 +87,7 @@ public class CheckoutService {
         pedido.setSubtotal(subtotal);
         pedido.setCostoEntrega(BigDecimal.ZERO);
         pedido.setTotal(subtotal);
-        pedido.setTipoEntrega(solicitud.tipoEntrega().trim().toUpperCase());
+        pedido.setTipoEntrega(solicitud.tipoEntrega().trim().toUpperCase(Locale.ROOT));
         pedido.setDireccionEntrega("DOMICILIO".equals(pedido.getTipoEntrega())
                 ? direccion(solicitud.direccionEntrega(), usuario.getDireccion()) : null);
         pedido.setObservaciones(solicitud.observaciones());
@@ -110,7 +111,7 @@ public class CheckoutService {
 
         Pago pago = new Pago();
         pago.setPedido(pedido);
-        pago.setMetodo(solicitud.metodoPago().trim().toUpperCase());
+        pago.setMetodo(solicitud.metodoPago().trim().toUpperCase(Locale.ROOT));
         pago.setEstado("APROBADO");
         pago.setMonto(subtotal);
         pago.setFecha(ahora);
@@ -125,8 +126,8 @@ public class CheckoutService {
         if (solicitud == null || solicitud.tipoEntrega() == null || solicitud.metodoPago() == null) {
             throw new IllegalArgumentException("Indica la entrega y el método de pago");
         }
-        String entrega = solicitud.tipoEntrega().trim().toUpperCase();
-        String metodo = solicitud.metodoPago().trim().toUpperCase();
+        String entrega = solicitud.tipoEntrega().trim().toUpperCase(Locale.ROOT);
+        String metodo = solicitud.metodoPago().trim().toUpperCase(Locale.ROOT);
         if (!"RECOJO".equals(entrega) && !"DOMICILIO".equals(entrega)) {
             throw new IllegalArgumentException("El tipo de entrega debe ser RECOJO o DOMICILIO");
         }

@@ -1,5 +1,7 @@
 package com.fastfood.fast_food_backend.services;
 
+import java.util.Locale;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,7 +33,7 @@ public class AutenticacionService {
 
         Authentication authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken.unauthenticated(
-                        solicitud.getCorreo().trim().toLowerCase(),
+                        solicitud.getCorreo().trim().toLowerCase(Locale.ROOT),
                         solicitud.getContrasena()));
 
         return jwtService.generar(authentication);

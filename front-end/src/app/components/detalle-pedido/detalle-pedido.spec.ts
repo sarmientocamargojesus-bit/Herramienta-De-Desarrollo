@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { DetallePedido } from "./detalle-pedido";
@@ -36,6 +36,19 @@ describe("DetallePedido", () => {
     const enlace = harness.routeNativeElement!.querySelector('a') as HTMLAnchorElement;
     expect(enlace.getAttribute('href')).toBe('/gestion/pedidos');
     expect(enlace.textContent).toContain('Pedidos');
+  });
+
+  it("muestra la fecha del pedido en formato legible", async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/mis-pedidos/5', DetallePedido);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/pedidos/5').flush({
+      id: 5, fecha: '2026-10-21T10:05:00', estado: 'CONFIRMADO', tipoEntrega: 'RECOJO',
+      subtotal: 25, costoEntrega: 0, total: 25
+    });
+    http.expectOne('/api/pedidos/5/detalles').flush([]);
+    harness.detectChanges();
+    expect(harness.routeNativeElement!.querySelector('.subtitulo')!.textContent).toContain('21/10/2026 10:05');
   });
 
   it("desde la cuenta del cliente regresa a mis pedidos", async () => {

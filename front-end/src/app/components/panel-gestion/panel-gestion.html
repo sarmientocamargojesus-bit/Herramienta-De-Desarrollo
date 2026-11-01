@@ -1,1 +1,18 @@
-<div class="gestion"><aside class="barra"><a class="marca" routerLink="/">FAST FOOD <small>Gestión</small></a><p class="rol">{{sesion.rol()}}</p><nav aria-label="Navegación de gestión"><a routerLink="/gestion/pedidos" routerLinkActive="activo">Pedidos</a><a routerLink="/gestion/inventario" routerLinkActive="activo">Inventario</a>@if(sesion.rol()==='ADMINISTRADOR'){<a routerLink="/gestion/productos" routerLinkActive="activo">Productos</a><a routerLink="/gestion/categorias" routerLinkActive="activo">Categorías</a><a routerLink="/gestion/pagos" routerLinkActive="activo">Pagos</a><a routerLink="/gestion/usuarios" routerLinkActive="activo">Usuarios</a>}</nav><a routerLink="/">Ver tienda</a><button type="button" (click)="salir()">Cerrar sesión</button></aside><main class="contenido"><router-outlet /></main></div>
+<div class="gestion">
+  <aside class="barra">
+    <a class="marca" routerLink="/">FAST FOOD <small>Gestión</small></a>
+    <p class="rol">{{ sesion.rol() }}</p>
+    <nav aria-label="Navegación de gestión">
+      <a routerLink="/gestion/pedidos" routerLinkActive="activo">Pedidos</a
+      ><a routerLink="/gestion/inventario" routerLinkActive="activo">Inventario</a>
+      @if (sesion.rol() === 'ADMINISTRADOR') {
+        <a routerLink="/gestion/productos" routerLinkActive="activo">Productos</a
+        ><a routerLink="/gestion/categorias" routerLinkActive="activo">Categorías</a
+        ><a routerLink="/gestion/pagos" routerLinkActive="activo">Pagos</a
+        ><a routerLink="/gestion/usuarios" routerLinkActive="activo">Usuarios</a>
+      }
+    </nav>
+    <a routerLink="/">Ver tienda</a><button type="button" (click)="salir()">Cerrar sesión</button>
+  </aside>
+  <main class="contenido"><router-outlet /></main>
+</div>

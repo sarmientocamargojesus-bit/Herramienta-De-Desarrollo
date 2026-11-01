@@ -1,6 +1,6 @@
 package com.fastfood.fast_food_backend.config;
 
-import java.util.List;
+import java.util.Locale;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +67,7 @@ public class InicializadorDatos implements CommandLineRunner {
             return;
         }
 
-        String correo = correoAdministrador.trim().toLowerCase();
+        String correo = correoAdministrador.trim().toLowerCase(Locale.ROOT);
         Usuario administrador = usuarioRepository.findByCorreoIgnoreCase(correo).orElse(null);
         if (administrador == null) {
             administrador = new Usuario();

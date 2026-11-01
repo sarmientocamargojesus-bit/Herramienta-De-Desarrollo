@@ -663,4 +663,24 @@ Suite completa del backend: **104 pruebas, 0 fallos, 0 errores y 0 omitidas**, c
 - [JwtAuthenticationFilter.java](src/main/java/com/fastfood/fast_food_backend/security/JwtAuthenticationFilter.java).
 - [TokenVigenteIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/TokenVigenteIntegrationTest.java).
 
+### Mantenimiento M1 a M4
+
+**Fecha:** 1 de noviembre de 2026.
+**Estado:** aplicado y verificado. Estos cambios no corrigen fallos ni modifican la lógica del proyecto.
+
+| Tarea | Qué se hizo |
+| --- | --- |
+| M1. Detalles de código | Se quitó el import sin uso de `List` en `InicializadorDatos`. Las conversiones a mayúsculas y minúsculas de correos, roles, categorías, entregas y métodos de pago usan `Locale.ROOT`, para que no dependan del idioma configurado en el equipo. |
+| M2. Formato de fechas | Carrito, confirmación, Mis pedidos, detalle de pedido, gestión de pedidos, pagos e inventario muestran las fechas como `21/10/2026 10:05` mediante `DatePipe`. Las fechas de inventario vacías siguen mostrando `—`. |
+| M3. Formato de plantillas y estilos | Los archivos HTML y SCSS de `front-end/src` se formatearon con Prettier, usando el `.prettierrc` existente. Solo cambian saltos de línea y sangrías. |
+| M4. Consultas SQL en la terminal | `spring.jpa.show-sql` toma el valor de `JPA_SHOW_SQL` y es `false` por defecto. Se documentó la variable en `.env.example` y en el README general. |
+
+#### Verificación
+
+- Backend: **104 pruebas, 0 fallos, 0 errores y 0 omitidas**.
+- Frontend: **46 pruebas correctas en 37 archivos** y compilación de producción correcta. Se agregó una prueba que comprueba el formato de fecha en el detalle de pedido.
+- En el navegador se revisaron inicio, carrito, inicio de sesión y registro después del formateo. El carrito mostró la fecha `01/11/2026 18:30`.
+
+No se aplicaron M5 (pruebas de comportamiento en Angular), M6 (`strict` en TypeScript) ni M7 (migraciones en lugar de `ddl-auto=update`).
+
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

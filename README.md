@@ -179,6 +179,9 @@ JWT_ISSUER=fast-food-api
 JWT_EXPIRATION_MINUTES=60
 ```
 
+Las consultas SQL de Hibernate no se imprimen en la terminal por defecto. Para
+verlas durante una depuración se agrega `JPA_SHOW_SQL=true` en `.env`.
+
 En PowerShell se puede generar una clave JWT segura con este comando:
 
 ```powershell

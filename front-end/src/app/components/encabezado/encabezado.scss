@@ -1,10 +1,123 @@
-.site-header{height:88px;display:flex;align-items:center;justify-content:space-between;gap:24px;max-width:1240px;margin:auto;padding:0 28px}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#171716;font-weight:950;font-size:17px;line-height:.85;letter-spacing:-.07em}
-    .brand-mark{display:grid;place-items:center;width:42px;height:42px;background:#e53a23;color:white;transform:rotate(-12deg);font-size:19px;letter-spacing:-.14em}
-    .brand-mark span{color:#ffd365}
-    nav{display:flex;gap:36px}nav a{color:#24211c;text-decoration:none;font-weight:750;font-size:14px}nav a:hover{color:#cf2d1b}
-    .header-actions{display:flex;align-items:center;gap:18px;font-size:13px;font-weight:800}.future-action{color:#6d665e;text-decoration:none}.bag{background:#1d1c1a;color:#fff;padding:13px 17px;border-radius:6px;white-space:nowrap;text-decoration:none}.bag span{color:#ffd365;margin-left:8px}.logout{border:0;background:transparent;color:#6d665e;font-size:13px;font-weight:800;cursor:pointer}
-    .future-action{white-space:nowrap}
-    // En móvil los accesos de cuenta se mantienen visibles con un tamaño compacto.
-    @media(max-width:760px){.site-header{height:auto;min-height:78px;flex-wrap:wrap;padding:15px 20px;gap:14px}nav{order:3;width:100%;justify-content:space-between;gap:10px}.header-actions{margin-left:auto;gap:12px;flex-wrap:wrap;justify-content:flex-end}.bag{padding:10px 12px}}
-    @media(max-width:400px){.site-header{padding:12px 16px;gap:10px}.header-actions{gap:10px;font-size:12px}.logout{font-size:12px}.bag{padding:9px 10px}}
+.site-header {
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1240px;
+  margin: auto;
+  padding: 0 28px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #171716;
+  font-weight: 950;
+  font-size: 17px;
+  line-height: 0.85;
+  letter-spacing: -0.07em;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: #e53a23;
+  color: white;
+  transform: rotate(-12deg);
+  font-size: 19px;
+  letter-spacing: -0.14em;
+}
+.brand-mark span {
+  color: #ffd365;
+}
+nav {
+  display: flex;
+  gap: 36px;
+}
+nav a {
+  color: #24211c;
+  text-decoration: none;
+  font-weight: 750;
+  font-size: 14px;
+}
+nav a:hover {
+  color: #cf2d1b;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.future-action {
+  color: #6d665e;
+  text-decoration: none;
+}
+.bag {
+  background: #1d1c1a;
+  color: #fff;
+  padding: 13px 17px;
+  border-radius: 6px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.bag span {
+  color: #ffd365;
+  margin-left: 8px;
+}
+.logout {
+  border: 0;
+  background: transparent;
+  color: #6d665e;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.future-action {
+  white-space: nowrap;
+}
+// En móvil los accesos de cuenta se mantienen visibles con un tamaño compacto.
+@media (max-width: 760px) {
+  .site-header {
+    height: auto;
+    min-height: 78px;
+    flex-wrap: wrap;
+    padding: 15px 20px;
+    gap: 14px;
+  }
+  nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .header-actions {
+    margin-left: auto;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .bag {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 400px) {
+  .site-header {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .header-actions {
+    gap: 10px;
+    font-size: 12px;
+  }
+  .logout {
+    font-size: 12px;
+  }
+  .bag {
+    padding: 9px 10px;
+  }
+}

@@ -1,1 +1,22 @@
-<section class="pagina"><h1>Mis pedidos</h1><p class="subtitulo">Consulta lo que ya confirmaste.</p><app-mensaje-error [texto]="error()" />@if(cargando()){<p>Cargando…</p>}@else if(!pedidos().length){<p class="vacio">Aún no tienes pedidos confirmados. <a routerLink="/">Ver menú</a></p>}@else{<div class="tarjetas">@for(p of pedidos(); track p.id){<article class="tarjeta-resumen"><strong>Pedido #{{p.id}}</strong><p>{{p.fecha}}</p><p class="estado">{{p.estado}}</p><p>Total: S/ {{p.total.toFixed(2)}}</p><a [routerLink]="['/mis-pedidos',p.id]">Ver detalle →</a></article>}</div>}</section>
+<section class="pagina">
+  <h1>Mis pedidos</h1>
+  <p class="subtitulo">Consulta lo que ya confirmaste.</p>
+  <app-mensaje-error [texto]="error()" />
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (!pedidos().length) {
+    <p class="vacio">Aún no tienes pedidos confirmados. <a routerLink="/">Ver menú</a></p>
+  } @else {
+    <div class="tarjetas">
+      @for (p of pedidos(); track p.id) {
+        <article class="tarjeta-resumen">
+          <strong>Pedido #{{ p.id }}</strong>
+          <p>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p class="estado">{{ p.estado }}</p>
+          <p>Total: S/ {{ p.total.toFixed(2) }}</p>
+          <a [routerLink]="['/mis-pedidos', p.id]">Ver detalle →</a>
+        </article>
+      }
+    </div>
+  }
+</section>

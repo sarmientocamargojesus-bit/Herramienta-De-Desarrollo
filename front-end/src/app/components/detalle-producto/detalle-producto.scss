@@ -1,1 +1,21 @@
-.detalle{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:25px;align-items:center}.detalle app-imagen-producto{aspect-ratio:4/3;border-radius:7px}.precio{font-size:2rem;font-weight:900;color:#c43621}@media(max-width:700px){.detalle{grid-template-columns:1fr}}
+.detalle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 25px;
+  align-items: center;
+}
+.detalle app-imagen-producto {
+  aspect-ratio: 4/3;
+  border-radius: 7px;
+}
+.precio {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #c43621;
+}
+@media (max-width: 700px) {
+  .detalle {
+    grid-template-columns: 1fr;
+  }
+}

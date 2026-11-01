@@ -1,1 +1,17 @@
-<section class="pagina"><app-mensaje-error [texto]="error()" />@if(pedido(); as p){<div class="panel"><p class="exito">Pedido confirmado</p><h1>¡Gracias por tu pedido!</h1><p>Pedido #{{p.id}} · {{p.estado}}</p><p>Fecha: {{p.fecha}}</p><p>Total: S/ {{p.total.toFixed(2)}}</p><p>El pago fue simulado para este proyecto.</p><div class="acciones"><a class="boton primario" [routerLink]="['/mis-pedidos',p.id]">Ver detalle</a><a class="boton secundario" routerLink="/">Volver al menú</a></div></div>}</section>
+<section class="pagina">
+  <app-mensaje-error [texto]="error()" />
+  @if (pedido(); as p) {
+    <div class="panel">
+      <p class="exito">Pedido confirmado</p>
+      <h1>¡Gracias por tu pedido!</h1>
+      <p>Pedido #{{ p.id }} · {{ p.estado }}</p>
+      <p>Fecha: {{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
+      <p>Total: S/ {{ p.total.toFixed(2) }}</p>
+      <p>El pago fue simulado para este proyecto.</p>
+      <div class="acciones">
+        <a class="boton primario" [routerLink]="['/mis-pedidos', p.id]">Ver detalle</a
+        ><a class="boton secundario" routerLink="/">Volver al menú</a>
+      </div>
+    </div>
+  }
+</section>

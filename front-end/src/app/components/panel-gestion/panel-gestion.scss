@@ -1,1 +1,76 @@
-.gestion{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh;background:#f8f4ee}.barra{background:#211b18;color:white;padding:26px 16px;display:flex;flex-direction:column;gap:12px}.barra a,.barra button{color:white;text-decoration:none;text-align:left;background:none;border:0;padding:10px 12px;cursor:pointer;border-radius:4px;font-weight:700}.barra nav{display:grid}.barra nav a:hover,.barra nav .activo{background:#c33620}.marca{font-size:20px;font-weight:900;letter-spacing:-.04em}.marca small{display:block;font-size:12px;font-weight:500;letter-spacing:0}.rol{font-size:11px;letter-spacing:.12em;color:#e7c6b7;margin-left:12px}.contenido{min-width:0}.contenido ::ng-deep .pagina{max-width:1300px}@media(max-width:700px){.gestion{grid-template-columns:1fr}.barra{gap:5px;padding:12px}.barra nav{display:flex;overflow-x:auto;gap:4px}.barra nav a{white-space:nowrap}.contenido ::ng-deep .pagina{padding-top:24px}}
+.gestion {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f8f4ee;
+}
+.barra {
+  background: #211b18;
+  color: white;
+  padding: 26px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.barra a,
+.barra button {
+  color: white;
+  text-decoration: none;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.barra nav {
+  display: grid;
+}
+.barra nav a:hover,
+.barra nav .activo {
+  background: #c33620;
+}
+.marca {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.marca small {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.rol {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #e7c6b7;
+  margin-left: 12px;
+}
+.contenido {
+  min-width: 0;
+}
+.contenido ::ng-deep .pagina {
+  max-width: 1300px;
+}
+@media (max-width: 700px) {
+  .gestion {
+    grid-template-columns: 1fr;
+  }
+  .barra {
+    gap: 5px;
+    padding: 12px;
+  }
+  .barra nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+  }
+  .barra nav a {
+    white-space: nowrap;
+  }
+  .contenido ::ng-deep .pagina {
+    padding-top: 24px;
+  }
+}
