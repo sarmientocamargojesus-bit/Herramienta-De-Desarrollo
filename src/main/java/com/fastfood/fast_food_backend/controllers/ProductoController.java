@@ -46,8 +46,9 @@ public class ProductoController {
     }
 
     @PutMapping("/{id}")
-    public Producto actualizar(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoService.actualizar(id, producto);
+    public Producto actualizar(@PathVariable Long id, @RequestBody Producto producto,
+            @RequestParam(required = false) Integer stockAnterior) {
+        return productoService.actualizar(id, producto, stockAnterior);
     }
 
     @DeleteMapping("/{id}")

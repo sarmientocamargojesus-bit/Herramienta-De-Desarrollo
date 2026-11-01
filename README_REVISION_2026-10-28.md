@@ -214,6 +214,8 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 17 | Fotos descargadas en cada visita y errores 404 por productos sin foto (hallazgo del 1 de noviembre) | Resuelto y verificado con pruebas el 1 de noviembre de 2026. |
 | 18 | La página seguía mostrando la sesión iniciada después de vencer o rechazarse el token (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 19 | Edición de stock y descuento manual sin bloqueo frente a ventas simultáneas (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 20 | Eliminar un pago dejaba el pedido confirmado y no devolvía el stock (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -743,5 +745,77 @@ En el navegador se simuló una sesión de cliente que vencía en 15 segundos. An
 - [sesion.service.ts](front-end/src/app/core/sesion.service.ts) y [sesion.service.spec.ts](front-end/src/app/core/sesion.service.spec.ts).
 - [autenticacion.interceptor.ts](front-end/src/app/core/autenticacion.interceptor.ts).
 - [carrito.service.ts](front-end/src/app/core/carrito.service.ts).
+
+### Punto 19. Edición de stock frente a ventas simultáneas
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+**Problema:** el checkout y los pagos bloquean el producto, pero la edición del producto y `PUT /api/productos/{id}/descontar-stock` no lo hacían. Dos descuentos simultáneos podían vender la misma unidad. Además, el formulario de edición envía el stock que mostraba al abrirse: si se vendían unidades mientras el administrador editaba, al guardar se restauraba el stock anterior y se perdían las ventas en el inventario.
+
+#### Qué se hizo para corregirlo
+
+1. `ProductoService.descontarStock` y `ProductoService.actualizar` bloquean el producto con `bloquearPorId`, igual que el checkout y los pagos.
+2. `PUT /api/productos/{id}` acepta el parámetro opcional `stockAnterior`. Si se envía y no coincide con el stock actual, la API responde 409 «El stock cambió mientras editabas: ahora hay N. Revisa el valor y vuelve a guardar» y no guarda ningún cambio. Si no se envía, como en `requests.http` o Postman, la edición funciona como antes.
+3. El formulario de Angular envía como `stockAnterior` el stock que tenía el producto al abrirse.
+4. No cambian el JSON del producto, el checkout, los pagos, los permisos ni Supabase.
+
+#### Pruebas realizadas
+
+Se agregó `StockConcurrenteIntegrationTest` y una prueba de contrato en Angular.
+
+| Caso | Resultado |
+| --- | --- |
+| Editar con `stockAnterior=10` después de vender 2 unidades | 409; el producto conserva stock 8 y su precio. |
+| Editar con el stock vigente | 200 con los nuevos valores. |
+| Editar sin `stockAnterior` | 200, igual que antes. |
+| Dos descuentos simultáneos sobre stock 1 (5 repeticiones) | Uno se aprueba y otro se rechaza; stock final 0. |
+| Angular al editar | Envía `stockAnterior` en la petición. |
+
+Antes de corregir el código fallaron la edición con stock desactualizado y las 5 repeticiones del descuento simultáneo. Después del cambio pasaron. Las dos pruebas unitarias de `descontarStock` se ajustaron para simular `bloquearPorId` en lugar de `findById`. Backend: **114 pruebas** sin fallos. Frontend: **53 pruebas correctas en 38 archivos** y compilación de producción correcta. No se probó en el navegador con el backend en ejecución.
+
+#### Archivos involucrados
+
+- [ProductoService.java](src/main/java/com/fastfood/fast_food_backend/services/ProductoService.java) y [ProductoController.java](src/main/java/com/fastfood/fast_food_backend/controllers/ProductoController.java).
+- [StockConcurrenteIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/services/StockConcurrenteIntegrationTest.java) y [ProductoServiceTest.java](src/test/java/com/fastfood/fast_food_backend/services/ProductoServiceTest.java).
+- [catalogo.service.ts](front-end/src/app/core/catalogo.service.ts), [formulario-producto.ts](front-end/src/app/components/formulario-producto/formulario-producto.ts) e [integracion-api.spec.ts](front-end/src/app/core/integracion-api.spec.ts).
+- [README general](README.md).
+
+### Punto 20. Eliminar un pago
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+**Problema:** `DELETE /api/pagos/{id}`, disponible solo para el administrador, borraba el pago, pero el pedido seguía CONFIRMADO y el stock descontado no se devolvía. El inventario quedaba con unidades vendidas sin pago asociado.
+
+**Decisión del usuario:** eliminar un pago lo anula. El stock se devuelve y el pedido pasa a **CANCELADO**, de modo que conserva su historial y no puede volver a pagarse.
+
+#### Qué se hizo para corregirlo
+
+1. `PagoService.eliminar` es transaccional y bloquea el pedido y sus productos en orden de ID, igual que la confirmación del pago.
+2. Si el pedido estaba CONFIRMADO, devuelve a cada producto la cantidad vendida y actualiza las fechas de alerta del inventario.
+3. El pedido pasa a CANCELADO con la fecha de actualización del momento y luego se elimina el pago.
+4. Un pedido CANCELADO no puede volver a pagarse, porque solo se aceptan pagos de pedidos PENDIENTE. El pedido puede eliminarse después, como en la solicitud 46 de `requests.http`.
+5. No cambian el endpoint, los permisos, el checkout, el frontend ni Supabase.
+
+#### Pruebas realizadas
+
+Se agregó un caso a `PagoIntegridadIntegrationTest`: un pedido con dos productos se paga, y el administrador elimina el pago.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Respuesta de la eliminación | 204. |
+| Estado del pedido | CANCELADO. |
+| Stock de ambos productos | Recupera las unidades vendidas: de 0 a 3 y de 3 a 5. |
+| Pago | Eliminado. |
+| Intento de pagar otra vez el pedido | 409 y el stock no cambia. |
+
+Antes de corregir el código, el pedido seguía CONFIRMADO. Después del cambio la prueba pasó. Backend: **115 pruebas, 0 fallos, 0 errores y 0 omitidas**.
+
+#### Archivos involucrados
+
+- [PagoService.java](src/main/java/com/fastfood/fast_food_backend/services/PagoService.java).
+- [PagoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PagoIntegridadIntegrationTest.java).
+- [README general](README.md) y [Solicitudes de API](requests.http).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

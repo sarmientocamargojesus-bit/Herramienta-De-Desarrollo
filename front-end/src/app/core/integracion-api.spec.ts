@@ -20,6 +20,16 @@ describe('Contratos HTTP del frontend', () => {
     peticion.flush([{ id: 1, nombre: 'Prueba', descripcion: '', precio: 10, stock: 2, categoria: 'COMBOS' }]);
   });
 
+  it('envía el stock que se veía al editar un producto', () => {
+    const datos = { nombre: 'Prueba', descripcion: '', precio: 10, stock: 5, categoria: 'COMBOS' };
+    TestBed.inject(CatalogoService).actualizarProducto(3, datos, 8).subscribe();
+    const peticion = http.expectOne(req => req.url === '/api/productos/3');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.params.get('stockAnterior')).toBe('8');
+    expect(peticion.request.body).toEqual(datos);
+    peticion.flush({ id: 3, ...datos });
+  });
+
   it('envía la foto del producto como multipart al backend', () => {
     const archivo = new File(['contenido'], 'foto.png', { type: 'image/png' });
     TestBed.inject(CatalogoService).subirImagen(7, archivo).subscribe();

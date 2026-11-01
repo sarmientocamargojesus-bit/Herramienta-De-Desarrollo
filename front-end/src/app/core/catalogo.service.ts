@@ -10,7 +10,11 @@ export class CatalogoService {
   categorias() { return this.http.get<Categoria[]>('/api/categorias/activas'); }
   todasCategorias() { return this.http.get<Categoria[]>('/api/categorias'); }
   crearProducto(datos: Omit<Producto, 'id' | 'categoriaId'>) { return this.http.post<Producto>('/api/productos', datos); }
-  actualizarProducto(id: number, datos: Omit<Producto, 'id' | 'categoriaId'>) { return this.http.put<Producto>(`/api/productos/${id}`, datos); }
+  // stockAnterior es el stock que se mostró al abrir el formulario; el backend rechaza la edición si una venta lo cambió.
+  actualizarProducto(id: number, datos: Omit<Producto, 'id' | 'categoriaId'>, stockAnterior?: number) {
+    const params = stockAnterior === undefined ? undefined : { stockAnterior };
+    return this.http.put<Producto>(`/api/productos/${id}`, datos, { params });
+  }
   eliminarProducto(id: number) { return this.http.delete<void>(`/api/productos/${id}`); }
   subirImagen(id: number, archivo: File) {
     const datos = new FormData();

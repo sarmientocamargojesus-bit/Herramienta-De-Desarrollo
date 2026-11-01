@@ -52,7 +52,17 @@ public class ProductoService {
 
     @Transactional
     public Producto actualizar(Long id, Producto datosProducto) {
-        Producto producto = buscarPorId(id);
+        return actualizar(id, datosProducto, null);
+    }
+
+    // stockEsperado es el stock que veía quien edita; si una venta lo cambió, se rechaza para no devolver unidades.
+    @Transactional
+    public Producto actualizar(Long id, Producto datosProducto, Integer stockEsperado) {
+        Producto producto = bloquear(id);
+        if (stockEsperado != null && producto.getStock() != stockEsperado) {
+            throw new ReglaNegocioException("El stock cambió mientras editabas: ahora hay " + producto.getStock()
+                    + ". Revisa el valor y vuelve a guardar");
+        }
         int stockAnterior = producto.getStock();
         producto.setNombre(datosProducto.getNombre());
         producto.setDescripcion(datosProducto.getDescripcion());
@@ -104,7 +114,7 @@ public class ProductoService {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
         }
 
-        Producto producto = buscarPorId(id);
+        Producto producto = bloquear(id);
         if (producto.getStock() < cantidad) {
             throw new ReglaNegocioException(
                     "Stock insuficiente para el producto " + producto.getNombre());
@@ -115,6 +125,12 @@ public class ProductoService {
         Producto guardado = productoRepository.save(producto);
         inventarioService.registrarCambioDeStock(guardado, stockAnterior);
         return guardado;
+    }
+
+    // Mismo bloqueo que usan el checkout y los pagos: las operaciones de stock sobre el producto se atienden en orden.
+    private Producto bloquear(Long id) {
+        return productoRepository.bloquearPorId(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + id));
     }
 
     private void validar(Producto producto) {

@@ -56,7 +56,7 @@ export class FormularioProducto implements OnInit {
     this.error.set('');
     const datos = this.form.getRawValue();
     const id = this.id();
-    const peticion = id ? this.servicio.actualizarProducto(id, datos) : this.servicio.crearProducto(datos);
+    const peticion = id ? this.servicio.actualizarProducto(id, datos, this.producto()?.stock) : this.servicio.crearProducto(datos);
     peticion.subscribe({
       next: producto => {
         this.id.set(producto.id);

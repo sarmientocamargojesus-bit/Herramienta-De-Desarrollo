@@ -109,7 +109,7 @@ class ProductoServiceTest {
     @Test
     void debeDescontarStockDisponible() {
         Producto producto = producto("Hamburguesa", "12.50", 10);
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+        when(productoRepository.bloquearPorId(1L)).thenReturn(Optional.of(producto));
         when(productoRepository.save(producto)).thenReturn(producto);
 
         Producto resultado = productoService.descontarStock(1L, 3);
@@ -121,7 +121,7 @@ class ProductoServiceTest {
     @Test
     void debeRechazarDescuentoConStockInsuficiente() {
         Producto producto = producto("Hamburguesa", "12.50", 2);
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+        when(productoRepository.bloquearPorId(1L)).thenReturn(Optional.of(producto));
 
         assertThrows(ReglaNegocioException.class, () -> productoService.descontarStock(1L, 3));
 

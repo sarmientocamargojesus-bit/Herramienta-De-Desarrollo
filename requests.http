@@ -376,6 +376,7 @@ Content-Type: application/json
 }
 
 ### 44. Eliminar pago al finalizar las pruebas - debe responder 204
+# Anula el pago: devuelve el stock de sus productos y deja el pedido CANCELADO.
 DELETE {{baseUrl}}/api/pagos/{{pagoId}}
 Authorization: Bearer {{adminToken}}
 

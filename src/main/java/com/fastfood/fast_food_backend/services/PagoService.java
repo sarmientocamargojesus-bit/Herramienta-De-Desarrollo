@@ -28,6 +28,7 @@ public class PagoService {
     // Mismos métodos simulados que acepta el checkout.
     private static final Set<String> METODOS_PERMITIDOS = Set.of("YAPE", "TARJETA");
     private static final String ESTADO_APROBADO = "APROBADO";
+    private static final String ESTADO_CANCELADO = "CANCELADO";
 
     private final PagoRepository pagoRepository;
     private final PedidoRepository pedidoRepository;
@@ -145,8 +146,31 @@ public class PagoService {
         return pagoRepository.save(pago);
     }
 
+    // Eliminar un pago lo anula: el pedido confirmado devuelve su stock y queda CANCELADO.
+    @Transactional
     public void eliminar(Long id) {
-        pagoRepository.delete(buscarPorId(id));
+        Pago pago = buscarPorId(id);
+        Long pedidoId = pago.getPedido().getId();
+        Pedido pedido = pedidoRepository.bloquearPorId(pedidoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + pedidoId));
+        if ("CONFIRMADO".equalsIgnoreCase(pedido.getEstado())) {
+            Map<Long, Producto> productos = new LinkedHashMap<>();
+            for (Long productoId : detallePedidoRepository.buscarProductoIdsPorPedidoId(pedidoId)) {
+                productos.put(productoId, productoRepository.bloquearPorId(productoId)
+                        .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + productoId)));
+            }
+            for (DetallePedido detalle : detallePedidoRepository.buscarPorPedidoId(pedidoId)) {
+                Producto producto = productos.get(detalle.getProducto().getId());
+                int stockAnterior = producto.getStock();
+                producto.setStock(stockAnterior + detalle.getCantidad());
+                productoRepository.save(producto);
+                inventarioService.registrarCambioDeStock(producto, stockAnterior);
+            }
+        }
+        pedido.setEstado(ESTADO_CANCELADO);
+        pedido.setFechaActualizacion(LocalDateTime.now());
+        pedidoRepository.save(pedido);
+        pagoRepository.delete(pago);
     }
 
     private void validar(Pago pago) {

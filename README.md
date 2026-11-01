@@ -302,7 +302,7 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 | GET | `/api/productos` | Listar productos |
 | GET | `/api/productos/{id}` | Buscar por identificador |
 | POST | `/api/productos` | Registrar un producto |
-| PUT | `/api/productos/{id}` | Actualizar un producto |
+| PUT | `/api/productos/{id}` | Actualizar un producto; `?stockAnterior=...` opcional rechaza con `409` si una venta cambió el stock mientras se editaba |
 | DELETE | `/api/productos/{id}` | Eliminar un producto |
 | GET | `/api/productos/buscar?nombre=...` | JPQL: buscar por nombre |
 | GET | `/api/productos/disponibles` | JPQL: buscar con stock |
@@ -331,7 +331,7 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 | GET | `/api/usuarios/correo?correo=...` | Buscar usuario por correo |
 | GET | `/api/usuarios/rol/{rol}` | Buscar usuarios por rol |
 | GET/POST | `/api/pagos` | Listar pagos o confirmar un pedido mediante un pago simulado |
-| GET/PUT/DELETE | `/api/pagos/{id}` | Consultar, actualizar o eliminar un pago |
+| GET/PUT/DELETE | `/api/pagos/{id}` | Consultar o actualizar un pago; eliminarlo lo anula: devuelve el stock y deja el pedido `CANCELADO` |
 | GET | `/api/pagos/pedido/{pedidoId}` | Consultar el pago de un pedido |
 | GET/POST | `/api/inventarios` | Listar o configurar inventarios |
 | GET/PUT/DELETE | `/api/inventarios/{id}` | Consultar, actualizar o eliminar una configuración |

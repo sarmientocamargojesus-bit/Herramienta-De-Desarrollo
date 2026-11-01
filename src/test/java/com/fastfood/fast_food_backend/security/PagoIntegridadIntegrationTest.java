@@ -2,6 +2,7 @@ package com.fastfood.fast_food_backend.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -191,6 +192,44 @@ class PagoIntegridadIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.metodo").value("TARJETA"))
                 .andExpect(jsonPath("$.estado").value("APROBADO"));
+    }
+
+    @Test
+    void eliminarPagoDevuelveElStockYCancelaElPedido() throws Exception {
+        Usuario admin = usuario("admin.anulacion@fastfood.test");
+        admin.setRol("ADMINISTRADOR");
+        usuarios.save(admin);
+        Producto hamburguesa = producto(3);
+        Producto otro = producto(5);
+        ProcesarPedidoRequest solicitud = new ProcesarPedidoRequest();
+        solicitud.setUsuarioId(cliente.getId());
+        solicitud.setTipoEntrega("RECOJO");
+        DetallePedidoRequest linea1 = new DetallePedidoRequest();
+        linea1.setProductoId(hamburguesa.getId());
+        linea1.setCantidad(3);
+        DetallePedidoRequest linea2 = new DetallePedidoRequest();
+        linea2.setProductoId(otro.getId());
+        linea2.setCantidad(2);
+        solicitud.setDetalles(List.of(linea1, linea2));
+        Pedido pedido = pedidoService.procesarPedido(solicitud);
+        Pago pago = pagoService.registrar(pago(pedido));
+        assertEquals(0, productos.findById(hamburguesa.getId()).orElseThrow().getStock());
+
+        mockMvc.perform(delete("/api/pagos/{id}", pago.getId()).header("Authorization", bearer(login(admin))))
+                .andExpect(status().isNoContent());
+
+        assertEquals("CANCELADO", pedidos.findById(pedido.getId()).orElseThrow().getEstado());
+        assertEquals(3, productos.findById(hamburguesa.getId()).orElseThrow().getStock());
+        assertEquals(5, productos.findById(otro.getId()).orElseThrow().getStock());
+        assertEquals(0, pagos.count());
+
+        // Un pedido cancelado no se puede volver a pagar.
+        mockMvc.perform(post("/api/pagos").header("Authorization", bearer(login(cliente)))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"pedido":{"id":%d},"metodo":"YAPE","monto":62.5}
+                                """.formatted(pedido.getId())))
+                .andExpect(status().isConflict());
+        assertEquals(3, productos.findById(hamburguesa.getId()).orElseThrow().getStock());
     }
 
     private List<Object> pagarAlMismoTiempo(Pedido primero, Pedido segundo) throws Exception {
