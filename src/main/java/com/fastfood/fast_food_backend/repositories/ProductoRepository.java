@@ -37,9 +37,6 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
             @Param("precioMinimo") BigDecimal precioMinimo,
             @Param("precioMaximo") BigDecimal precioMaximo);
 
-    @Query("SELECT p FROM Producto p WHERE NOT EXISTS (SELECT i FROM Inventario i WHERE i.producto = p) ORDER BY p.id")
-    List<Producto> buscarSinInventario();
-
     @Query("SELECT p FROM Producto p ORDER BY p.precio DESC")
     List<Producto> ordenarPorPrecioDescendente();
 }

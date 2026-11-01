@@ -201,7 +201,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 5 | Desincronización al renombrar categorías | Resuelto y verificado el 1 de noviembre de 2026. |
-| 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
+| 6 | Inventarios pendientes para los productos existentes | Se registrará manualmente en Supabase con stock mínimo 5; se retiró el completado automático del código. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Resuelto y verificado el 1 de noviembre de 2026. |
 | 8 | Tokens anteriores conservan permisos retirados | Resuelto y verificado el 1 de noviembre de 2026. |
 | 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -513,11 +513,26 @@ Suite completa del backend: **95 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 ### Punto 6. Inventarios de los productos existentes
 
 **Fecha de corrección:** 1 de noviembre de 2026.
-**Estado:** resuelto en el código y verificado con H2. Se aplicará a Supabase la próxima vez que se inicie el backend con el archivo `.env`.
+**Estado actual:** pendiente de registro manual en Supabase. El completado automático descrito abajo **se retiró del código** el mismo día por decisión del usuario, que prefiere insertar las filas directamente en la base de datos.
 
 **Decisión del usuario:** los productos que no tienen configuración de inventario reciben un stock mínimo de **5**. Los productos creados desde la aplicación conservan su regla actual de mínimo 0, ajustable desde el panel.
 
-#### Qué se hizo para corregirlo
+#### Retiro del completado automático
+
+Se eliminaron `ProductoRepository.buscarSinInventario`, `InventarioService.completarFaltantes`, la llamada de `InicializadorDatos` y sus pruebas (`InventarioFaltanteIntegrationTest` y el caso agregado a `InicializadorDatosTest`). `crearParaProductoNuevo` volvió a su forma anterior, sin cambios de comportamiento. El backend ya no escribe en `inventarios` al iniciar. Suite completa del backend después del retiro: **112 pruebas, 0 fallos, 0 errores y 0 omitidas**.
+
+Para registrar los inventarios faltantes, se puede ejecutar en el SQL Editor de Supabase una inserción equivalente a la regla anterior:
+
+```sql
+INSERT INTO public.inventarios (producto_id, stock_minimo, fecha_actualizacion, fecha_stock_bajo, fecha_agotado)
+SELECT p.id, 5, now(),
+       CASE WHEN p.stock <= 5 THEN now() END,
+       CASE WHEN p.stock = 0 THEN now() END
+FROM public.productos p
+WHERE NOT EXISTS (SELECT 1 FROM public.inventarios i WHERE i.producto_id = p.id);
+```
+
+#### Implementación retirada (registro histórico)
 
 1. `ProductoRepository.buscarSinInventario` obtiene los productos que no tienen una fila en `inventarios`.
 2. `InventarioService.completarFaltantes` crea la configuración de esos productos con el mínimo indicado. `crearParaProductoNuevo` utiliza la misma lógica con mínimo 0, de modo que su comportamiento no cambia.
