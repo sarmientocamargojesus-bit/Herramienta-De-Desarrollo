@@ -60,14 +60,24 @@ public class PagoService {
     public Pago registrar(Pago pago) {
         validar(pago);
         Long pedidoId = pago.getPedido().getId();
+        // El bloqueo del pedido hace que dos pagos del mismo pedido se atiendan uno después del otro.
+        Pedido pedido = pedidoRepository.bloquearPorId(pedidoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + pedidoId));
         if (pagoRepository.existsByPedidoId(pedidoId)) {
             throw new ReglaNegocioException("El pedido ya tiene un pago registrado");
         }
-        Pedido pedido = buscarPedido(pedidoId);
         if (!"PENDIENTE".equalsIgnoreCase(pedido.getEstado())) {
             throw new ReglaNegocioException("Solo se pueden pagar pedidos con estado PENDIENTE");
         }
         validarMonto(pago.getMonto(), pedido);
+
+        // Igual que en el checkout: se bloquean los productos en orden estable antes de leer su stock,
+        // para que dos pagos simultáneos no descuenten la misma unidad.
+        Map<Long, Producto> productos = new LinkedHashMap<>();
+        for (Long productoId : detallePedidoRepository.buscarProductoIdsPorPedidoId(pedidoId)) {
+            productos.put(productoId, productoRepository.bloquearPorId(productoId)
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + productoId)));
+        }
 
         List<DetallePedido> detalles = detallePedidoRepository.buscarPorPedidoId(pedidoId);
         if (detalles.isEmpty()) {
@@ -75,11 +85,8 @@ public class PagoService {
         }
 
         Map<Long, Integer> cantidades = new LinkedHashMap<>();
-        Map<Long, Producto> productos = new LinkedHashMap<>();
         for (DetallePedido detalle : detalles) {
-            Producto producto = detalle.getProducto();
-            cantidades.merge(producto.getId(), detalle.getCantidad(), Integer::sum);
-            productos.put(producto.getId(), producto);
+            cantidades.merge(detalle.getProducto().getId(), detalle.getCantidad(), Integer::sum);
         }
 
         for (Map.Entry<Long, Integer> entrada : cantidades.entrySet()) {
@@ -102,11 +109,14 @@ public class PagoService {
         pedido.setFechaActualizacion(LocalDateTime.now());
         pedidoRepository.save(pedido);
 
-        pago.setPedido(pedido);
-        pago.setMetodo(pago.getMetodo().trim().toUpperCase());
-        pago.setEstado("APROBADO");
-        pago.setFecha(LocalDateTime.now());
-        return pagoRepository.save(pago);
+        // Siempre se crea un pago nuevo: un id enviado en el JSON no puede actualizar el pago de otro pedido.
+        Pago nuevo = new Pago();
+        nuevo.setPedido(pedido);
+        nuevo.setMetodo(pago.getMetodo().trim().toUpperCase());
+        nuevo.setEstado("APROBADO");
+        nuevo.setMonto(pago.getMonto());
+        nuevo.setFecha(LocalDateTime.now());
+        return pagoRepository.save(nuevo);
     }
 
     public Pago actualizar(Long id, Pago datos) {
@@ -138,11 +148,6 @@ public class PagoService {
         if (pago.getMonto() == null || pago.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El monto del pago debe ser mayor que cero");
         }
-    }
-
-    private Pedido buscarPedido(Long id) {
-        return pedidoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + id));
     }
 
     private void validarMonto(BigDecimal monto, Pedido pedido) {

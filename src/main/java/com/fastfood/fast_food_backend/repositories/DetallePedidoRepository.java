@@ -12,4 +12,7 @@ public interface DetallePedidoRepository extends JpaRepository<DetallePedido, Lo
 
     @Query("SELECT d FROM DetallePedido d JOIN d.pedido p WHERE p.id = :pedidoId ORDER BY d.id")
     List<DetallePedido> buscarPorPedidoId(@Param("pedidoId") Long pedidoId);
+
+    @Query("SELECT DISTINCT d.producto.id FROM DetallePedido d WHERE d.pedido.id = :pedidoId ORDER BY d.producto.id")
+    List<Long> buscarProductoIdsPorPedidoId(@Param("pedidoId") Long pedidoId);
 }

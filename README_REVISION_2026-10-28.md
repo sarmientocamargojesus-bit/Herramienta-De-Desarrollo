@@ -198,7 +198,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | --- | --- | --- |
 | 1 | Sobrescritura de cuentas desde el registro público | Resuelto y verificado el 28 de octubre de 2026. |
 | 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado el 28 de octubre de 2026. |
-| 3 | Venta simultánea de la última unidad por el pago antiguo | Pendiente. |
+| 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 4 | Bloqueo al cambiar de domicilio a recojo | Pendiente. |
 | 5 | Desincronización al renombrar categorías | Pendiente. |
 | 6 | Inventarios pendientes para los productos existentes | Pendiente de definir los mínimos individuales y registrarlos. |
@@ -209,6 +209,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 11 | Métodos de pago inexistentes aceptados | Pendiente. |
 | 12 | Mensaje de sesión vencida al fallar el login | Pendiente. |
 | 13 | Respuesta 500 cuando falta el archivo de imagen | Pendiente. |
+| 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -331,4 +332,44 @@ Comando utilizado desde la raíz del proyecto, con las dependencias ya descargad
 - [PedidoServiceTest.java](src/test/java/com/fastfood/fast_food_backend/services/PedidoServiceTest.java).
 - [Solicitudes de API](requests.http) y [README general](README.md).
 
-El siguiente punto pendiente es el **3: proteger el stock ante pagos simultáneos en el endpoint antiguo**. Se trabajará cuando el usuario lo indique.
+### Punto 3 y punto 14. Pagos simultáneos y pago con ID de otro pago
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resueltos y verificados.
+
+El punto 14 se encontró en una revisión posterior del código. Se corrigió junto con el punto 3 porque ambos están en `PagoService.registrar`.
+
+**Problema del punto 14:** `POST /api/pagos` guardaba la entidad `Pago` recibida tal como llegaba. Si un cliente enviaba el `id` de un pago existente de otra cuenta junto con su propio pedido pendiente, ese pago se movía a su pedido y el pedido original quedaba sin pago. Es el mismo tipo de fallo que el punto 1.
+
+#### Qué se hizo para corregirlo
+
+1. `PagoService.registrar` bloquea primero el pedido con `PedidoRepository.bloquearPorId`. Luego comprueba que no tenga pago y que siga PENDIENTE. Dos pagos del mismo pedido se atienden uno después del otro.
+2. Se agregó `DetallePedidoRepository.buscarProductoIdsPorPedidoId`, que obtiene solo los identificadores de los productos del pedido. Con ellos se bloquean los productos en orden de ID, igual que en el checkout, antes de leer el stock. Así, el segundo pago espera al primero y lee el stock ya descontado.
+3. El servicio construye siempre un `Pago` nuevo con el pedido bloqueado, el método, el monto validado, el estado APROBADO y la fecha del servidor. Se ignoran el ID, el estado y la fecha enviados en el JSON.
+4. No cambian el JSON de `/api/pagos`, el checkout, el frontend ni el esquema de Supabase. El pago sigue siendo simulado. La validación de métodos de pago corresponde al punto 11 y sigue pendiente.
+
+#### Pruebas realizadas
+
+Se agregó `PagoIntegridadIntegrationTest`, con 7 ejecuciones contra H2 y sin una transacción de prueba envolvente, para que cada pago use su propia transacción como en la API real.
+
+| Caso | Resultado |
+| --- | --- |
+| Dos pagos simultáneos de pedidos distintos sobre un producto con stock 1 (5 repeticiones) | Uno aprobado y otro rechazado con stock insuficiente; stock final 0, un pago y un pedido CONFIRMADO. |
+| Dos pagos simultáneos del mismo pedido | Solo se registra un pago y el stock se descuenta una vez. |
+| Pago con el ID de un pago de otra cuenta, más estado y fecha manipulados | Respuesta 201 con un ID nuevo y estado APROBADO; el pago original conserva su pedido. |
+
+Antes de corregir el código, las 5 repeticiones del pago simultáneo fallaron: los dos pagos se aprobaron. El caso del ID ajeno también falló, porque se devolvió y modificó el pago existente. Después del cambio pasaron los 7.
+
+Suite completa del backend: **82 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+```powershell
+.\mvnw.cmd -o "-Dspring.config.import=" test
+```
+
+#### Archivos involucrados
+
+- [PagoService.java](src/main/java/com/fastfood/fast_food_backend/services/PagoService.java).
+- [DetallePedidoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/DetallePedidoRepository.java).
+- [PagoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PagoIntegridadIntegrationTest.java).
+
+El siguiente punto pendiente es el **4: bloqueo al cambiar de domicilio a recojo en el checkout**. Se trabajará cuando el usuario lo indique.
