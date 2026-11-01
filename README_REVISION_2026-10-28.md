@@ -206,7 +206,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
 | 9 | Accesos de cuenta ocultos en móvil | Pendiente. |
 | 10 | Regreso incorrecto del detalle administrativo de pedidos | Pendiente. |
-| 11 | Métodos de pago inexistentes aceptados | Pendiente. |
+| 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
 | 12 | Mensaje de sesión vencida al fallar el login | Pendiente. |
 | 13 | Respuesta 500 cuando falta el archivo de imagen | Pendiente. |
 | 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -346,7 +346,7 @@ El punto 14 se encontró en una revisión posterior del código. Se corrigió ju
 1. `PagoService.registrar` bloquea primero el pedido con `PedidoRepository.bloquearPorId`. Luego comprueba que no tenga pago y que siga PENDIENTE. Dos pagos del mismo pedido se atienden uno después del otro.
 2. Se agregó `DetallePedidoRepository.buscarProductoIdsPorPedidoId`, que obtiene solo los identificadores de los productos del pedido. Con ellos se bloquean los productos en orden de ID, igual que en el checkout, antes de leer el stock. Así, el segundo pago espera al primero y lee el stock ya descontado.
 3. El servicio construye siempre un `Pago` nuevo con el pedido bloqueado, el método, el monto validado, el estado APROBADO y la fecha del servidor. Se ignoran el ID, el estado y la fecha enviados en el JSON.
-4. No cambian el JSON de `/api/pagos`, el checkout, el frontend ni el esquema de Supabase. El pago sigue siendo simulado. La validación de métodos de pago corresponde al punto 11 y sigue pendiente.
+4. No cambian el JSON de `/api/pagos`, el checkout, el frontend ni el esquema de Supabase. El pago sigue siendo simulado. La validación de métodos de pago corresponde al punto 11 y se documenta en su propio apartado.
 
 #### Pruebas realizadas
 
@@ -371,5 +371,40 @@ Suite completa del backend: **82 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 - [PagoService.java](src/main/java/com/fastfood/fast_food_backend/services/PagoService.java).
 - [DetallePedidoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/DetallePedidoRepository.java).
 - [PagoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PagoIntegridadIntegrationTest.java).
+
+### Punto 11. Métodos y estados de pago inexistentes
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+#### Qué se hizo para corregirlo
+
+1. `PagoService` aplica la misma regla que el checkout: el pago simulado solo admite `YAPE` o `TARJETA`. El método se normaliza sin importar mayúsculas ni espacios. Cualquier otro valor responde 400 con el mensaje «El pago simulado solo admite TARJETA o YAPE».
+2. La validación ocurre antes de bloquear el pedido y descontar el stock. Un pago con método inexistente deja el pedido PENDIENTE, no guarda pago y no modifica el stock.
+3. La edición `PUT /api/pagos/{id}` valida el método con la misma regla y solo acepta el estado `APROBADO`, que es el único estado que crea el sistema. Antes se podía guardar cualquier texto.
+4. En `requests.http`, la solicitud 43 (pago duplicado) usaba `EFECTIVO`. Se cambió a `YAPE` para que siga comprobando el 409 por pago duplicado y no se rechace antes por el método.
+5. No cambian el JSON de `/api/pagos`, el checkout, el frontend ni Supabase. El endpoint antiguo no exige la referencia `DEMO-APROBADO` para mantener la compatibilidad con las solicitudes existentes. La eliminación de pagos no cambia.
+
+#### Pruebas realizadas
+
+Se agregaron 5 ejecuciones a `PagoIntegridadIntegrationTest`.
+
+| Caso | Resultado |
+| --- | --- |
+| Pago con `METODO_INEXISTENTE` | 400; pedido PENDIENTE, stock sin cambios y ningún pago guardado. |
+| Pago con ` tarjeta ` en minúsculas y con espacios | 201; se guarda como `TARJETA` y se descuenta el stock. |
+| Edición con método `BITCOIN` | 400; el pago conserva método y estado. |
+| Edición con estado `LO_QUE_SEA` | 400; el pago conserva método y estado. |
+| Edición con `tarjeta` y `aprobado` | 200; se guardan normalizados como `TARJETA` y `APROBADO`. |
+
+Antes de corregir el código fallaron los 3 casos de rechazo: el pago se aceptó con 201 y la edición con 200. Después del cambio pasaron todos.
+
+Suite completa del backend: **87 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+#### Archivos involucrados
+
+- [PagoService.java](src/main/java/com/fastfood/fast_food_backend/services/PagoService.java).
+- [PagoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PagoIntegridadIntegrationTest.java).
+- [Solicitudes de API](requests.http).
 
 El siguiente punto pendiente es el **4: bloqueo al cambiar de domicilio a recojo en el checkout**. Se trabajará cuando el usuario lo indique.

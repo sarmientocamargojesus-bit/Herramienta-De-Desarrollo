@@ -371,7 +371,7 @@ Content-Type: application/json
   "pedido": {
     "id": {{pedidoProcesadoId}}
   },
-  "metodo": "EFECTIVO",
+  "metodo": "YAPE",
   "monto": 37.00
 }
 

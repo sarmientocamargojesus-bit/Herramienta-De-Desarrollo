@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,10 @@ import com.fastfood.fast_food_backend.repositories.ProductoRepository;
 
 @Service
 public class PagoService {
+
+    // Mismos métodos simulados que acepta el checkout.
+    private static final Set<String> METODOS_PERMITIDOS = Set.of("YAPE", "TARJETA");
+    private static final String ESTADO_APROBADO = "APROBADO";
 
     private final PagoRepository pagoRepository;
     private final PedidoRepository pedidoRepository;
@@ -112,8 +118,8 @@ public class PagoService {
         // Siempre se crea un pago nuevo: un id enviado en el JSON no puede actualizar el pago de otro pedido.
         Pago nuevo = new Pago();
         nuevo.setPedido(pedido);
-        nuevo.setMetodo(pago.getMetodo().trim().toUpperCase());
-        nuevo.setEstado("APROBADO");
+        nuevo.setMetodo(normalizarMetodo(pago.getMetodo()));
+        nuevo.setEstado(ESTADO_APROBADO);
         nuevo.setMonto(pago.getMonto());
         nuevo.setFecha(LocalDateTime.now());
         return pagoRepository.save(nuevo);
@@ -125,10 +131,15 @@ public class PagoService {
                 || datos.getEstado() == null || datos.getEstado().isBlank()) {
             throw new IllegalArgumentException("El método y el estado del pago son obligatorios");
         }
+        String metodo = normalizarMetodo(datos.getMetodo());
+        String estado = datos.getEstado().trim().toUpperCase(Locale.ROOT);
+        if (!ESTADO_APROBADO.equals(estado)) {
+            throw new IllegalArgumentException("El estado del pago simulado solo puede ser APROBADO");
+        }
         BigDecimal monto = datos.getMonto() == null ? pago.getMonto() : datos.getMonto();
         validarMonto(monto, pago.getPedido());
-        pago.setMetodo(datos.getMetodo().trim().toUpperCase());
-        pago.setEstado(datos.getEstado().trim().toUpperCase());
+        pago.setMetodo(metodo);
+        pago.setEstado(estado);
         pago.setMonto(monto);
         pago.setFecha(datos.getFecha() == null ? pago.getFecha() : datos.getFecha());
         return pagoRepository.save(pago);
@@ -145,9 +156,18 @@ public class PagoService {
         if (pago.getMetodo() == null || pago.getMetodo().isBlank()) {
             throw new IllegalArgumentException("El método de pago es obligatorio");
         }
+        normalizarMetodo(pago.getMetodo());
         if (pago.getMonto() == null || pago.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El monto del pago debe ser mayor que cero");
         }
+    }
+
+    private String normalizarMetodo(String metodo) {
+        String normalizado = metodo.trim().toUpperCase(Locale.ROOT);
+        if (!METODOS_PERMITIDOS.contains(normalizado)) {
+            throw new IllegalArgumentException("El pago simulado solo admite TARJETA o YAPE");
+        }
+        return normalizado;
     }
 
     private void validarMonto(BigDecimal monto, Pedido pedido) {

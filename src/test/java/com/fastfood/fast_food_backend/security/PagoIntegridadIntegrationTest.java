@@ -3,6 +3,7 @@ package com.fastfood.fast_food_backend.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -122,6 +125,72 @@ class PagoIntegridadIntegrationTest {
         assertEquals(pagoAjeno.getId(), pagos.findByPedidoId(pedidoAjeno.getId()).orElseThrow().getId());
         assertEquals(2, pagos.count());
         assertEquals(6, productos.findById(producto.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void metodoInexistenteNoConfirmaElPedidoNiDescuentaStock() throws Exception {
+        Producto producto = producto(10);
+        Pedido pedido = pendiente(cliente, producto, 2);
+
+        mockMvc.perform(post("/api/pagos").header("Authorization", bearer(login(cliente)))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"pedido":{"id":%d},"metodo":"METODO_INEXISTENTE","monto":25}
+                                """.formatted(pedido.getId())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El pago simulado solo admite TARJETA o YAPE"));
+
+        assertEquals("PENDIENTE", pedidos.findById(pedido.getId()).orElseThrow().getEstado());
+        assertEquals(10, productos.findById(producto.getId()).orElseThrow().getStock());
+        assertEquals(0, pagos.count());
+    }
+
+    @Test
+    void metodoValidoEnMinusculasSeGuardaNormalizado() throws Exception {
+        Producto producto = producto(10);
+        Pedido pedido = pendiente(cliente, producto, 2);
+
+        mockMvc.perform(post("/api/pagos").header("Authorization", bearer(login(cliente)))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"pedido":{"id":%d},"metodo":" tarjeta ","monto":25}
+                                """.formatted(pedido.getId())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.metodo").value("TARJETA"));
+        assertEquals(8, productos.findById(producto.getId()).orElseThrow().getStock());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"BITCOIN,APROBADO", "YAPE,LO_QUE_SEA"})
+    void edicionNoAceptaMetodoNiEstadoInexistentes(String metodo, String estado) throws Exception {
+        Usuario admin = usuario("admin.pago@fastfood.test");
+        admin.setRol("ADMINISTRADOR");
+        usuarios.save(admin);
+        Pago pago = pagoService.registrar(pago(pendiente(cliente, producto(10), 2)));
+
+        mockMvc.perform(put("/api/pagos/{id}", pago.getId()).header("Authorization", bearer(login(admin)))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"metodo":"%s","estado":"%s"}
+                                """.formatted(metodo, estado)))
+                .andExpect(status().isBadRequest());
+
+        Pago guardado = pagos.findById(pago.getId()).orElseThrow();
+        assertEquals("YAPE", guardado.getMetodo());
+        assertEquals("APROBADO", guardado.getEstado());
+    }
+
+    @Test
+    void edicionConMetodoYEstadoValidosSigueFuncionando() throws Exception {
+        Usuario admin = usuario("admin.pago@fastfood.test");
+        admin.setRol("ADMINISTRADOR");
+        usuarios.save(admin);
+        Pago pago = pagoService.registrar(pago(pendiente(cliente, producto(10), 2)));
+
+        mockMvc.perform(put("/api/pagos/{id}", pago.getId()).header("Authorization", bearer(login(admin)))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"metodo":"tarjeta","estado":"aprobado"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.metodo").value("TARJETA"))
+                .andExpect(jsonPath("$.estado").value("APROBADO"));
     }
 
     private List<Object> pagarAlMismoTiempo(Pedido primero, Pedido segundo) throws Exception {
