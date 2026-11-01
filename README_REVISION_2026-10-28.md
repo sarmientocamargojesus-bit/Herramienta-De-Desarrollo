@@ -204,7 +204,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Pendiente. |
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
-| 9 | Accesos de cuenta ocultos en móvil | Pendiente. |
+| 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado el 1 de noviembre de 2026. |
 | 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
 | 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
 | 12 | Mensaje de sesión vencida al fallar el login | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -570,5 +570,32 @@ Suite completa del backend: **99 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 - [CategoriaService.java](src/main/java/com/fastfood/fast_food_backend/services/CategoriaService.java).
 - [ProductoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/ProductoRepository.java).
 - [RegistroCatalogoIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/RegistroCatalogoIntegrationTest.java).
+
+### Punto 9. Accesos de cuenta en pantallas pequeñas
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado en el navegador.
+
+#### Qué se hizo para corregirlo
+
+1. En `encabezado.scss` se eliminó la regla que ocultaba `.future-action` por debajo de 760 px. Iniciar sesión, Mis pedidos y Gestión vuelven a mostrarse en móvil.
+2. En móvil, los accesos de cuenta y el botón del carrito usan espacios y rellenos más compactos y pueden pasar a una segunda línea alineada a la derecha. Por debajo de 400 px se reduce también el tamaño del texto.
+3. No cambian el HTML, la lógica de sesión, las rutas ni la vista de escritorio.
+
+#### Pruebas realizadas
+
+Se ejecutó Angular en el navegador integrado y se midió el encabezado con sesión de visitante, cliente y administrador. La sesión de cliente y de administrador se simuló en `sessionStorage` solo para revisar la presentación.
+
+| Ancho | Visitante | Cliente | Administrador | Desplazamiento horizontal |
+| --- | --- | --- | --- | --- |
+| 320 px | Iniciar sesión y Mi pedido visibles | Mis pedidos, Salir y Mi pedido visibles | Gestión y Salir visibles | No |
+| 375 px | — | — | Gestión y Salir visibles | No |
+| 768 px | — | — | Vista de escritorio sin cambios | No |
+
+Frontend: **43 pruebas correctas en 36 archivos** y compilación de producción correcta.
+
+#### Archivos involucrados
+
+- [encabezado.scss](front-end/src/app/components/encabezado/encabezado.scss).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.
