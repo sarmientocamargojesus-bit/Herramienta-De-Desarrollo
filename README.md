@@ -1,7 +1,9 @@
 # Fast Food - Sistema Web de Gestión de Pedidos y Ventas
 
- El avance actual contiene el CRUD de productos, usuarios y pedidos, y los
-conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
+El avance actual contiene la API REST en Spring Boot (catálogo, usuarios,
+pedidos, carrito, checkout con pago simulado e inventario) y el frontend
+Angular de la carpeta `front-end`, que la consume. Aplica los conceptos
+estudiados durante las semanas 2, 3, 6, 7, 8 y 12.
 
 ## Semana 2
 
@@ -52,6 +54,21 @@ conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 - Un cliente solo puede consultar sus propios pedidos y pagos.
 - Pruebas automáticas de autenticación, roles y propiedad de pedidos.
 
+## Semana 12
+
+- Frontend Angular con componentes independientes que consume la API REST.
+- Sistema de rutas en `front-end/src/app/app.routes.ts` con carga diferida de cada vista.
+- Navegación con `routerLink` y `router-outlet` en la zona del cliente y en el panel de gestión.
+- Parámetros de ruta: `productos/:id`, `mis-pedidos/:id`, `gestion/pedidos/:id` y rutas de edición.
+- Rutas hijas dentro de `/gestion`: productos, categorías, inventario, pedidos, pagos y usuarios.
+- Navegación programática con `Router` después del login, del checkout y de guardar formularios.
+- Comunicación padre → hijo con `input()` y hijo → padre con `output()`, equivalentes actuales de
+  `@Input` y `@Output` con `EventEmitter`: `Inicio` → `CatalogoProductos` → `TarjetaProducto`.
+- Comunicación entre hermanos mediante el padre: `FiltroCategorias` emite la categoría e `Inicio`
+  actualiza los productos que recibe `CatalogoProductos`.
+- Servicios compartidos `CarritoService` y `SesionService` para el carrito y la sesión.
+- Guard de roles que orienta la navegación; el backend mantiene la autorización final.
+
 ## Modelo de datos del sistema
 
 | Tabla | Propósito |
@@ -64,6 +81,7 @@ conceptos estudiados durante las semanas 2, 3, 6, 7 y 8.
 | `pagos` | Pago simulado, método, estado, monto y fecha; solo puede existir uno por pedido |
 | `inventarios` | Stock mínimo y fechas en que se detectó stock bajo o agotado |
 | `imagenes_producto` | Una foto opcional por producto, guardada aparte como bytes y tipo de contenido |
+| `carrito_items` | Productos, cantidades y fecha de agregado del carrito de cada cliente; uno por producto |
 
 ## Fotos de productos
 
@@ -119,7 +137,8 @@ falta stock, responde `409 Conflict` y no guarda ningún cambio.
 ## Estructura
 
 ```text
-Cliente HTTP
+Navegador con Angular (front-end, puerto 4200)
+    -> Proxy de desarrollo /api
     -> Filtro JWT de Spring Security
     -> Controller
     -> Service
@@ -173,6 +192,19 @@ Después se inicia el backend:
 ```
 
 La API se ejecuta en `http://localhost:8080`.
+
+Con el backend iniciado, se inicia el frontend desde la carpeta `front-end`:
+
+```powershell
+cd front-end
+npm install
+npm start
+```
+
+La aplicación se abre en `http://localhost:4200`. El proxy de desarrollo envía
+las solicitudes `/api` al backend, por lo que el navegador nunca conoce las
+credenciales de Supabase. El detalle del frontend está en
+[front-end/README.md](front-end/README.md).
 
 En Postman primero se envía el correo y la contraseña a
 `POST /api/auth/login`. La respuesta contiene un token que se coloca en
@@ -266,6 +298,8 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 | GET | `/api/productos/rango-precios?minimo=...&maximo=...` | JPQL: filtrar por rango y stock |
 | GET | `/api/productos/ordenados-precio` | JPQL: ordenar por precio |
 | PUT | `/api/productos/{id}/descontar-stock?cantidad=...` | Actualización transaccional de stock |
+| GET | `/api/productos/{id}/imagen` | Obtener la foto del producto (público) |
+| PUT/DELETE | `/api/productos/{id}/imagen` | Subir, reemplazar o quitar la foto (administrador) |
 | GET | `/api/pedidos` | Listar pedidos |
 | GET | `/api/pedidos/{id}` | Buscar pedido por identificador |
 | POST | `/api/pedidos` | Registrar un pedido |
@@ -300,14 +334,13 @@ publicarse en GitHub. actualmente ese acceso directo no forma parte de la arquit
 
 ### Carrito y confirmación del pedido
 
-El carrito de una cuenta se guarda en `carrito_items` con su `fecha_agregado`. La
-selección del visitante debe guardarse en el navegador mientras no haya iniciado
-sesión. Después del login, la futura interfaz Angular debe enviar esa selección
-a `POST /api/carrito/importar` con el JWT y luego consultar `GET /api/carrito`.
-La importación conserva la mayor cantidad por producto para que un reintento no
-duplique unidades; la interfaz debe borrar su copia local tras recibir éxito.
-El backend todavía no contiene una interfaz Angular; por eso este traslado no se
-ejecuta automáticamente desde el navegador en el repositorio actual.
+El carrito de una cuenta se guarda en `carrito_items` con su `fecha_agregado`.
+Mientras el visitante no inicia sesión, Angular guarda su selección en el
+`localStorage` del navegador. Después del login como cliente, Angular envía esa
+selección a `POST /api/carrito/importar` con el JWT, borra la copia local al
+recibir la respuesta correcta y consulta `GET /api/carrito`. La importación
+conserva la mayor cantidad por producto para que un reintento no duplique
+unidades.
 
 Ejemplo de importación (fecha local del momento en que se agregó al carrito):
 
@@ -408,3 +441,19 @@ utilizan MockMvc. Las pruebas de integración verifican login, generación y
 validación de JWT, tokens alterados o vencidos, respuestas `401` y `403`, roles,
 consultas JPQL, commit y rollback. Durante las pruebas se utiliza una base H2 en
 memoria, por lo que no requieren las credenciales de Supabase.
+
+Para asegurar que las pruebas no lean el archivo `.env`, se puede ejecutar:
+
+```powershell
+.\mvnw.cmd "-Dspring.config.import=" test
+```
+
+Las pruebas y la compilación del frontend se ejecutan desde `front-end`:
+
+```powershell
+npm test -- --watch=false
+npm run build
+```
+
+Los problemas encontrados en la revisión del proyecto y el estado de cada
+corrección se registran en [README_REVISION_2026-10-28.md](README_REVISION_2026-10-28.md).
