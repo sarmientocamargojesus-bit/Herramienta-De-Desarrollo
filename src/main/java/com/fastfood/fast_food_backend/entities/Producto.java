@@ -2,6 +2,8 @@ package com.fastfood.fast_food_backend.entities;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.Formula;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -40,6 +42,10 @@ public class Producto {
     @JoinColumn(name = "categoria_id")
     private Categoria categoriaReferencia;
 
+    // Se calcula al leer el producto; permite que Angular no pida una foto que no existe.
+    @Formula("(case when exists (select 1 from imagenes_producto i where i.producto_id = id) then true else false end)")
+    private boolean tieneImagen;
+
     public Long getId() {
         return id;
     }
@@ -74,6 +80,11 @@ public class Producto {
 
     public int getStock() {
         return stock;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public boolean isTieneImagen() {
+        return tieneImagen;
     }
 
     public void setStock(int stock) {

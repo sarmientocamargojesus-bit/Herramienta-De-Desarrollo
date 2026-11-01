@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,9 @@ public class ImagenProductoController {
     public ResponseEntity<byte[]> obtener(@PathVariable Long productoId) {
         ImagenProducto imagen = servicio.buscar(productoId);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
+                // El navegador guarda la foto y la revalida con el ETag: si no cambió, recibe 304 sin descargarla.
+                .cacheControl(CacheControl.noCache())
+                .eTag(DigestUtils.md5DigestAsHex(imagen.getDatos()))
                 .contentType(MediaType.parseMediaType(imagen.getTipoContenido()))
                 .body(imagen.getDatos());
     }

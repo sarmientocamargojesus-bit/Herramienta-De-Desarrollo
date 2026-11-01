@@ -212,6 +212,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 17 | Fotos descargadas en cada visita y errores 404 por productos sin foto (hallazgo del 1 de noviembre) | Resuelto y verificado con pruebas el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -682,5 +683,38 @@ Suite completa del backend: **104 pruebas, 0 fallos, 0 errores y 0 omitidas**, c
 - En el navegador se revisaron inicio, carrito, inicio de sesión y registro después del formateo. El carrito mostró la fecha `01/11/2026 18:30`.
 
 No se aplicaron M5 (pruebas de comportamiento en Angular), M6 (`strict` en TypeScript) ni M7 (migraciones en lugar de `ddl-auto=update`).
+
+### Punto 17. Carga de fotos de productos
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado con pruebas automáticas.
+
+**Problema:** cada tarjeta del menú pedía `GET /api/productos/{id}/imagen`. Los productos sin foto respondían 404 y llenaban la consola del navegador con errores antes de mostrar la ilustración de la categoría. Además, la foto se enviaba con `Cache-Control: no-store`, por lo que se descargaba completa en cada visita.
+
+#### Qué se hizo para corregirlo
+
+1. `Producto` incluye `tieneImagen`, un campo de solo lectura calculado por Hibernate al consultar el producto, que comprueba si existe una fila en `imagenes_producto`. No se agregó ninguna columna y el valor recibido en el JSON se ignora.
+2. `ImagenProducto` en Angular usa directamente la ilustración de la categoría cuando `tieneImagen` es `false`. Si la foto acaba de subirse o quitarse en el formulario, vuelve a consultar al backend, porque el producto cargado puede ser anterior al cambio. Si el campo no llega, conserva el comportamiento anterior.
+3. La respuesta de la foto usa `Cache-Control: no-cache` y un `ETag` calculado con el contenido. El navegador guarda la foto y la revalida: si no cambió, recibe `304` sin descargarla; si el administrador la reemplaza, recibe la nueva.
+4. No cambian la subida, el reemplazo, la eliminación, los permisos ni el límite de 2 MB de las fotos.
+
+#### Pruebas realizadas
+
+| Caso | Resultado |
+| --- | --- |
+| Consultar un producto antes y después de subir su foto | `tieneImagen` cambia de `false` a `true`, también en el listado. |
+| Pedir la foto con el `ETag` recibido | 304. |
+| Pedir la foto con el `ETag` anterior después de reemplazarla | 200 con la nueva foto. |
+| Componente con un producto sin foto | Muestra la ilustración sin consultar el backend. |
+| Componente después de cambiar la foto | Consulta el backend. |
+
+Antes de corregir el código fallaron las pruebas del backend y la del componente sin foto. Después del cambio pasaron. Backend: **106 pruebas** sin fallos. Frontend: **48 pruebas correctas en 37 archivos** y compilación de producción correcta. No se probó en el navegador con el backend en ejecución.
+
+#### Archivos involucrados
+
+- [Producto.java](src/main/java/com/fastfood/fast_food_backend/entities/Producto.java) e [ImagenProductoController.java](src/main/java/com/fastfood/fast_food_backend/controllers/ImagenProductoController.java).
+- [ImagenProductoCacheIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/controllers/ImagenProductoCacheIntegrationTest.java).
+- [product.ts](front-end/src/app/models/product.ts), [imagen-producto.ts](front-end/src/app/components/imagen-producto/imagen-producto.ts) e [imagen-producto.spec.ts](front-end/src/app/components/imagen-producto/imagen-producto.spec.ts).
+- [README general](README.md).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

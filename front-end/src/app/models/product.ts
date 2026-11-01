@@ -6,6 +6,7 @@ export interface Producto {
   stock: number;
   categoria: string;
   categoriaId?: number;
+  tieneImagen?: boolean;
 }
 
 export interface Categoria { id: number; nombre: string; descripcion: string; activo: boolean; }

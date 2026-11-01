@@ -87,10 +87,14 @@ estudiados durante las semanas 2, 3, 6, 7, 8 y 12.
 
 El administrador puede subir o reemplazar una imagen PNG, JPEG o WebP de hasta
 2 MB con `PUT /api/productos/{id}/imagen` (form-data, campo `archivo`) y quitarla
-con `DELETE` en la misma ruta. El cliente obtiene la imagen con `GET`; si no
-existe, Angular muestra una ilustración de la categoría. El contenido se guarda
-en `imagenes_producto`, separado de `productos`, así que listar el menú no
-transporta los bytes de las fotos. La tabla admite una foto por producto.
+con `DELETE` en la misma ruta. El cliente obtiene la imagen con `GET`. Cada
+producto incluye en su JSON el campo de solo lectura `tieneImagen`; si es
+`false`, Angular muestra directamente una ilustración de la categoría sin pedir
+la foto. La respuesta de la imagen incluye un `ETag` y `Cache-Control: no-cache`:
+el navegador conserva la foto y, si no cambió, el backend responde `304` sin
+volver a enviarla. El contenido se guarda en `imagenes_producto`, separado de
+`productos`, así que listar el menú no transporta los bytes de las fotos. La
+tabla admite una foto por producto.
 
 Antes de usar esta función en Supabase, ejecuta una vez
 `docs/imagenes-producto-supabase.sql` en SQL Editor. Crea la tabla si todavía no
