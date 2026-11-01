@@ -21,6 +21,7 @@ import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
+import com.fastfood.fast_food_backend.services.InventarioService;
 
 @ExtendWith(MockitoExtension.class)
 class InicializadorDatosTest {
@@ -28,6 +29,18 @@ class InicializadorDatosTest {
     @Mock private CategoriaRepository categoriaRepository;
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private InventarioService inventarioService;
+
+    @Test
+    void completaLosInventariosFaltantesConMinimoCinco() {
+        when(categoriaRepository.findByNombreIgnoreCase(anyString())).thenReturn(Optional.of(new Categoria()));
+
+        InicializadorDatos inicializador = new InicializadorDatos(
+                categoriaRepository, usuarioRepository, passwordEncoder, inventarioService);
+        inicializador.run();
+
+        verify(inventarioService).completarFaltantes(5);
+    }
 
     @Test
     void conservaDatosDelUsuarioExistenteAlPromoverlo() {
@@ -81,7 +94,7 @@ class InicializadorDatosTest {
 
     private InicializadorDatos nuevoInicializador(String correo) {
         InicializadorDatos inicializador = new InicializadorDatos(
-                categoriaRepository, usuarioRepository, passwordEncoder);
+                categoriaRepository, usuarioRepository, passwordEncoder, inventarioService);
         ReflectionTestUtils.setField(inicializador, "correoAdministrador", correo);
         ReflectionTestUtils.setField(inicializador, "contrasenaAdministrador", "clave-elegida");
         return inicializador;

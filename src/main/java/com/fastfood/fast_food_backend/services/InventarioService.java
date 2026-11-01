@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fastfood.fast_food_backend.entities.Inventario;
 import com.fastfood.fast_food_backend.entities.Producto;
@@ -65,13 +66,29 @@ public class InventarioService {
     }
 
     public Inventario crearParaProductoNuevo(Producto producto) {
+        return crearConfiguracion(producto, 0);
+    }
+
+    // Crea la configuración de los productos que todavía no la tienen. No modifica productos ni
+    // configuraciones existentes, por lo que puede ejecutarse en cada arranque.
+    @Transactional
+    public int completarFaltantes(int stockMinimo) {
+        List<Producto> pendientes = productoRepository.buscarSinInventario();
+        pendientes.forEach(producto -> crearConfiguracion(producto, stockMinimo));
+        return pendientes.size();
+    }
+
+    private Inventario crearConfiguracion(Producto producto, int stockMinimo) {
         Inventario inventario = new Inventario();
         inventario.setProducto(producto);
-        inventario.setStockMinimo(0);
+        inventario.setStockMinimo(stockMinimo);
         LocalDateTime ahora = LocalDateTime.now();
         inventario.setFechaActualizacion(ahora);
-        if (producto.getStock() == 0) {
+        // Las fechas registran el momento en que se detecta el estado; no se inventan fechas anteriores.
+        if (producto.getStock() <= stockMinimo) {
             inventario.setFechaStockBajo(ahora);
+        }
+        if (producto.getStock() == 0) {
             inventario.setFechaAgotado(ahora);
         }
         return inventarioRepository.save(inventario);

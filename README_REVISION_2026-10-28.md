@@ -201,7 +201,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 5 | Desincronización al renombrar categorías | Pendiente. |
-| 6 | Inventarios pendientes para los productos existentes | Pendiente de definir los mínimos individuales y registrarlos. |
+| 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Pendiente. |
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
 | 9 | Accesos de cuenta ocultos en móvil | Pendiente. |
@@ -505,5 +505,38 @@ Suite completa del backend: **95 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 - [ManejadorGlobalExcepciones.java](src/main/java/com/fastfood/fast_food_backend/exceptions/ManejadorGlobalExcepciones.java).
 - [SolicitudIncompletaTest.java](src/test/java/com/fastfood/fast_food_backend/controllers/SolicitudIncompletaTest.java).
+
+### Punto 6. Inventarios de los productos existentes
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto en el código y verificado con H2. Se aplicará a Supabase la próxima vez que se inicie el backend con el archivo `.env`.
+
+**Decisión del usuario:** los productos que no tienen configuración de inventario reciben un stock mínimo de **5**. Los productos creados desde la aplicación conservan su regla actual de mínimo 0, ajustable desde el panel.
+
+#### Qué se hizo para corregirlo
+
+1. `ProductoRepository.buscarSinInventario` obtiene los productos que no tienen una fila en `inventarios`.
+2. `InventarioService.completarFaltantes` crea la configuración de esos productos con el mínimo indicado. `crearParaProductoNuevo` utiliza la misma lógica con mínimo 0, de modo que su comportamiento no cambia.
+3. `InicializadorDatos` ejecuta `completarFaltantes(5)` al iniciar el backend, después de las categorías y del administrador.
+4. Solo se agregan filas. No se modifican el stock, los precios, los pedidos ni las configuraciones de inventario que ya existen. En los arranques siguientes no se crean filas porque todos los productos ya tienen configuración.
+5. Las fechas de stock bajo y agotado se registran con el momento en que se detecta el estado: stock menor o igual que 5 para stock bajo y stock 0 para agotado. No se inventan fechas históricas.
+
+#### Pruebas realizadas
+
+| Caso | Resultado |
+| --- | --- |
+| Productos sin inventario con stock 20, 3 y 0, y un producto ya configurado con mínimo 2 | Se crearon 3 configuraciones con mínimo 5; las fechas correspondieron a cada stock y la configuración existente conservó su mínimo y fechas. |
+| Ejecutar el completado dos veces | La segunda ejecución no creó filas. |
+| Arranque de la aplicación | `InicializadorDatos` solicita el completado con mínimo 5. |
+
+Suite completa del backend: **98 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada. No se ejecutó contra Supabase.
+
+#### Archivos involucrados
+
+- [ProductoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/ProductoRepository.java).
+- [InventarioService.java](src/main/java/com/fastfood/fast_food_backend/services/InventarioService.java).
+- [InicializadorDatos.java](src/main/java/com/fastfood/fast_food_backend/config/InicializadorDatos.java).
+- [InventarioFaltanteIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/services/InventarioFaltanteIntegrationTest.java) e [InicializadorDatosTest.java](src/test/java/com/fastfood/fast_food_backend/config/InicializadorDatosTest.java).
+- [README general](README.md).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

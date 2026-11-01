@@ -115,9 +115,13 @@ cambios realizados a través de la API; modificar el stock directamente en
 Supabase no las actualiza.
 
 Antes de iniciar esta versión con Supabase, se puede ejecutar la migración
-aditiva de `docs/inventario-fechas-supabase.sql`. Los productos que existían
-antes del cambio necesitan un stock mínimo definido individualmente y una fila
-en `inventarios`; no se inventan fechas históricas que no se registraron.
+aditiva de `docs/inventario-fechas-supabase.sql`. Al iniciar, el backend crea
+automáticamente la fila de `inventarios` de cada producto que todavía no la
+tiene, con stock mínimo `5`. No modifica los productos ni las configuraciones
+existentes, y en los arranques siguientes no vuelve a crear filas. Las fechas
+de stock bajo o agotado corresponden al momento en que se detecta el estado; no
+se inventan fechas históricas que no se registraron. El mínimo de cada producto
+se puede ajustar después desde Gestión → Inventario.
 
 La tabla `clientes` fue unificada con `usuarios`. Todo registro público recibe
 automáticamente el rol `CLIENTE`, aunque el JSON intente enviar otro rol. Los

@@ -11,13 +11,18 @@ import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.entities.Usuario;
 import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
 import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
+import com.fastfood.fast_food_backend.services.InventarioService;
 
 @Component
 public class InicializadorDatos implements CommandLineRunner {
 
+    // Mínimo asignado a los productos que existían antes de crear la tabla de inventarios.
+    static final int STOCK_MINIMO_PRODUCTOS_EXISTENTES = 5;
+
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final InventarioService inventarioService;
 
     @Value("${APP_ADMIN_EMAIL:}")
     private String correoAdministrador;
@@ -28,10 +33,12 @@ public class InicializadorDatos implements CommandLineRunner {
     public InicializadorDatos(
             CategoriaRepository categoriaRepository,
             UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            InventarioService inventarioService) {
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.inventarioService = inventarioService;
     }
 
     @Override
@@ -41,6 +48,7 @@ public class InicializadorDatos implements CommandLineRunner {
         crearSiNoExiste("PIQUEOS", "Piqueos y acompañamientos");
         crearSiNoExiste("BEBIDAS", "Bebidas del menú");
         crearAdministradorInicial();
+        inventarioService.completarFaltantes(STOCK_MINIMO_PRODUCTOS_EXISTENTES);
     }
 
     private void crearSiNoExiste(String nombre, String descripcion) {
