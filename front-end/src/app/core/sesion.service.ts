@@ -24,12 +24,14 @@ export class SesionService {
   readonly sesion = this.estado.asReadonly();
   readonly autenticado = computed(() => !!this.token());
   readonly rol = computed(() => this.token() ? this.estado()?.rol ?? null : null);
+  private temporizador?: ReturnType<typeof setTimeout>;
 
+  constructor() { this.programarVencimiento(); }
+
+  // No modifica el estado: se usa dentro de computed. El cierre al vencer lo hace el temporizador.
   token(): string | null {
     const sesion = this.estado();
-    if (!sesion) return null;
-    if (sesion.venceEn <= Date.now()) { this.salir(); return null; }
-    return sesion.token;
+    return sesion && sesion.venceEn > Date.now() ? sesion.token : null;
   }
 
   iniciar(correo: string, contrasena: string) {
@@ -37,6 +39,7 @@ export class SesionService {
       const sesion: SesionGuardada = { ...respuesta, venceEn: Date.now() + respuesta.expiraEnSegundos * 1000 };
       sessionStorage.setItem(CLAVE, JSON.stringify(sesion));
       this.estado.set(sesion);
+      this.programarVencimiento();
     }));
   }
 
@@ -45,7 +48,15 @@ export class SesionService {
   }
 
   salir(): void {
+    clearTimeout(this.temporizador);
     sessionStorage.removeItem(CLAVE);
     this.estado.set(null);
+  }
+
+  // Cierra la sesión en la página cuando vence el token, aunque no se haga ninguna petición.
+  private programarVencimiento(): void {
+    clearTimeout(this.temporizador);
+    const sesion = this.estado();
+    if (sesion) this.temporizador = setTimeout(() => this.salir(), Math.max(0, sesion.venceEn - Date.now()));
   }
 }

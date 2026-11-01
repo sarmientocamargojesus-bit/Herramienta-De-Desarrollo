@@ -213,6 +213,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 17 | Fotos descargadas en cada visita y errores 404 por productos sin foto (hallazgo del 1 de noviembre) | Resuelto y verificado con pruebas el 1 de noviembre de 2026. |
+| 18 | La página seguía mostrando la sesión iniciada después de vencer o rechazarse el token (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -716,5 +717,31 @@ Antes de corregir el código fallaron las pruebas del backend y la del component
 - [ImagenProductoCacheIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/controllers/ImagenProductoCacheIntegrationTest.java).
 - [product.ts](front-end/src/app/models/product.ts), [imagen-producto.ts](front-end/src/app/components/imagen-producto/imagen-producto.ts) e [imagen-producto.spec.ts](front-end/src/app/components/imagen-producto/imagen-producto.spec.ts).
 - [README general](README.md).
+
+### Punto 18. Sesión vencida o rechazada en Angular
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+**Problema:** cuando el token vencía, el encabezado seguía mostrando Mis pedidos, Gestión y Salir hasta que se hacía una petición. Si el backend rechazaba el token con 401, por ejemplo por cambio de rol o cuenta desactivada (punto 8), Angular mostraba el aviso, pero conservaba la sesión.
+
+#### Qué se hizo para corregirlo
+
+1. `SesionService` programa el cierre de la sesión para el momento exacto en que vence el token, al iniciar sesión y al recargar la página. `token()` ya no modifica el estado, porque se utiliza dentro de valores calculados.
+2. `autenticacionInterceptor` cierra la sesión cuando el backend responde 401 a una petición que llevaba token. El componente recibe el error como antes y muestra su aviso. Un 403 no cierra la sesión.
+3. `CarritoService` vuelve a mostrar el carrito guardado en el navegador cuando termina la sesión del cliente, para que el contador del encabezado no conserve las unidades de la cuenta.
+4. No cambian el backend, el login, la duración de la sesión ni las rutas protegidas.
+
+#### Pruebas realizadas
+
+Se agregó `sesion.service.spec.ts` con 4 casos: cierre al vencer el token, cierre por 401, conservación de la sesión ante un 403 y carrito del navegador al cerrar la sesión. Antes de corregir el código fallaron los casos de vencimiento, 401 y carrito. Después del cambio pasaron. Frontend: **52 pruebas correctas en 38 archivos** y compilación de producción correcta.
+
+En el navegador se simuló una sesión de cliente que vencía en 15 segundos. Antes del vencimiento el encabezado mostró Mis pedidos y Salir; después, sin recargar ni hacer peticiones, mostró Iniciar sesión y se eliminó la sesión guardada.
+
+#### Archivos involucrados
+
+- [sesion.service.ts](front-end/src/app/core/sesion.service.ts) y [sesion.service.spec.ts](front-end/src/app/core/sesion.service.spec.ts).
+- [autenticacion.interceptor.ts](front-end/src/app/core/autenticacion.interceptor.ts).
+- [carrito.service.ts](front-end/src/app/core/carrito.service.ts).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

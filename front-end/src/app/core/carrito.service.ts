@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { from, lastValueFrom, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoItem, Producto } from '../models/product';
 import { SesionService } from './sesion.service';
@@ -26,6 +26,11 @@ export class CarritoService {
   readonly items = signal<CarritoItem[]>(leerInvitado());
 
   private ultimaOperacion: Promise<unknown> = Promise.resolve();
+
+  constructor() {
+    // Si la sesión del cliente termina (salida, vencimiento o 401), se muestra el carrito del navegador.
+    effect(() => { if (!this.esCliente()) this.items.set(leerInvitado()); });
+  }
 
   private esCliente(): boolean { return this.sesion.rol() === 'CLIENTE'; }
   // Los cambios del carrito del cliente se ejecutan uno después de otro: así cada clic parte de la
