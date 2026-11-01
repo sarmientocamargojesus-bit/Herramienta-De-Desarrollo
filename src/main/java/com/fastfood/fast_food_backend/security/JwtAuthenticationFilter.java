@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fastfood.fast_food_backend.exceptions.ApiError;
+import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,10 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService, ObjectMapper objectMapper) {
+    public JwtAuthenticationFilter(JwtService jwtService, ObjectMapper objectMapper,
+            UsuarioRepository usuarioRepository) {
         this.jwtService = jwtService;
         this.objectMapper = objectMapper;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -50,6 +54,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = authorization.substring(PREFIJO_BEARER.length()).trim();
             JwtService.JwtClaims claims = jwtService.validarYLeer(token);
+            // El token conserva el rol del login; se exige que la cuenta siga activa y con ese mismo rol.
+            boolean vigente = usuarioRepository.findByCorreoIgnoreCase(claims.correo())
+                    .filter(usuario -> Boolean.TRUE.equals(usuario.getActivo()))
+                    .filter(usuario -> claims.rol().equalsIgnoreCase(usuario.getRol()))
+                    .isPresent();
+            if (!vigente) {
+                SecurityContextHolder.clearContext();
+                escribirRespuestaNoAutorizada(request, response,
+                        "La sesión ya no es válida. Inicia sesión nuevamente");
+                return;
+            }
             var authority = new SimpleGrantedAuthority("ROLE_" + claims.rol());
             var authentication = UsernamePasswordAuthenticationToken.authenticated(
                     claims.correo(), token, List.of(authority));
@@ -57,18 +72,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (IllegalArgumentException exception) {
             SecurityContextHolder.clearContext();
-            escribirRespuestaNoAutorizada(request, response);
+            escribirRespuestaNoAutorizada(request, response, "El token JWT es inválido o está vencido");
         }
     }
 
     private void escribirRespuestaNoAutorizada(
             HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+            HttpServletResponse response,
+            String mensaje) throws IOException {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         ApiError error = new ApiError(
                 status.value(),
                 status.getReasonPhrase(),
-                "El token JWT es inválido o está vencido",
+                mensaje,
                 request.getRequestURI(),
                 LocalDateTime.now(),
                 Map.of());

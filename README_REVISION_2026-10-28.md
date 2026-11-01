@@ -203,7 +203,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 5 | Desincronización al renombrar categorías | Resuelto y verificado el 1 de noviembre de 2026. |
 | 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Resuelto y verificado el 1 de noviembre de 2026. |
-| 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
+| 8 | Tokens anteriores conservan permisos retirados | Resuelto y verificado el 1 de noviembre de 2026. |
 | 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado el 1 de noviembre de 2026. |
 | 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
 | 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -625,5 +625,42 @@ Antes de corregir el código, la primera prueba falló: las dos operaciones cons
 
 - [carrito.service.ts](front-end/src/app/core/carrito.service.ts).
 - [carrito.service.spec.ts](front-end/src/app/core/carrito.service.spec.ts).
+
+### Punto 8. Tokens con permisos retirados
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+**Decisión:** retirar permisos debe surtir efecto de inmediato, sin esperar a que venza el token de 60 minutos.
+
+#### Qué se hizo para corregirlo
+
+1. `JwtAuthenticationFilter` sigue validando la firma, el emisor y la vigencia del token como antes.
+2. Después, consulta la cuenta por el correo del token y exige que exista, que esté activa y que su rol actual sea igual al rol del token. Si no se cumple, responde 401 con el mensaje «La sesión ya no es válida. Inicia sesión nuevamente», y el usuario debe volver a iniciar sesión para recibir un token con su rol vigente.
+3. Esto agrega una consulta por correo a cada solicitud que envía un token. Las rutas públicas sin token no cambian.
+4. No cambian el formato del token, el login, la duración de la sesión, los permisos por rol ni el frontend. En Angular, ese 401 muestra el aviso existente de sesión inválida o vencida.
+
+Efecto adicional: si el administrador cambia el correo de una cuenta, el token anterior de esa cuenta también deja de ser válido, porque identifica al usuario por su correo.
+
+#### Pruebas realizadas
+
+Se agregó `TokenVigenteIntegrationTest`, con 5 casos mediante MockMvc.
+
+| Caso | Resultado |
+| --- | --- |
+| Empleado vigente consulta inventarios | 200. |
+| El administrador cambia el rol del empleado a CLIENTE con `PUT /api/usuarios/{id}/rol` | El token anterior responde 401; un login nuevo recibe el rol CLIENTE y responde 403 en inventarios. |
+| Cuenta desactivada | El token anterior responde 401. |
+| Cuenta eliminada | El token anterior responde 401. |
+| Consulta pública sin token | Sigue respondiendo 200. |
+
+Antes de corregir el código fallaron los 3 casos de permisos retirados: el token anterior respondió 200. Después del cambio pasaron los 5.
+
+Suite completa del backend: **104 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+#### Archivos involucrados
+
+- [JwtAuthenticationFilter.java](src/main/java/com/fastfood/fast_food_backend/security/JwtAuthenticationFilter.java).
+- [TokenVigenteIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/TokenVigenteIntegrationTest.java).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.
