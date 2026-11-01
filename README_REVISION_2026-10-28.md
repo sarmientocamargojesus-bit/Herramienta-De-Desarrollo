@@ -202,7 +202,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 5 | Desincronización al renombrar categorías | Resuelto y verificado el 1 de noviembre de 2026. |
 | 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
-| 7 | Pérdida de unidades por clics rápidos en el carrito | Pendiente. |
+| 7 | Pérdida de unidades por clics rápidos en el carrito | Resuelto y verificado el 1 de noviembre de 2026. |
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
 | 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado el 1 de noviembre de 2026. |
 | 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -597,5 +597,33 @@ Frontend: **43 pruebas correctas en 36 archivos** y compilación de producción 
 #### Archivos involucrados
 
 - [encabezado.scss](front-end/src/app/components/encabezado/encabezado.scss).
+
+### Punto 7. Clics rápidos en Agregar
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado con pruebas de Angular.
+
+#### Qué se hizo para corregirlo
+
+1. Para un cliente con sesión, `CarritoService.agregar` consulta el carrito, suma la cantidad y guarda el total. Con dos clics rápidos, ambas operaciones leían el carrito al mismo tiempo, calculaban 1 y el carrito terminaba con una unidad.
+2. Se agregó `enOrden` en `CarritoService`: agregar, cambiar la cantidad y quitar se ejecutan una después de otra. La segunda operación empieza cuando termina la primera y parte de la cantidad ya guardada.
+3. Si una operación falla, el componente recibe el error como antes y las siguientes operaciones continúan.
+4. No cambian el backend, la validación de stock del servidor, la API ni el carrito del visitante, que ya se actualizaba en el navegador de forma inmediata.
+
+#### Pruebas realizadas
+
+Se agregó `carrito.service.spec.ts` con sesión de cliente simulada y respuestas HTTP controladas.
+
+| Caso | Resultado |
+| --- | --- |
+| Dos llamadas seguidas a Agregar | La segunda consulta empieza después de la primera; se guardan 1 y luego 2 unidades. |
+| Una operación que falla antes de Agregar | Se informa el error y la operación siguiente se ejecuta normalmente. |
+
+Antes de corregir el código, la primera prueba falló: las dos operaciones consultaron el carrito al mismo tiempo. Después del cambio pasaron ambas. Frontend: **45 pruebas correctas en 37 archivos** y compilación de producción correcta. No se probó con el backend en ejecución.
+
+#### Archivos involucrados
+
+- [carrito.service.ts](front-end/src/app/core/carrito.service.ts).
+- [carrito.service.spec.ts](front-end/src/app/core/carrito.service.spec.ts).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

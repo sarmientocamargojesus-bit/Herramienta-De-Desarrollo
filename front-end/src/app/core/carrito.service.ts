@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, of, switchMap, tap } from 'rxjs';
+import { from, lastValueFrom, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoItem, Producto } from '../models/product';
 import { SesionService } from './sesion.service';
 
@@ -25,7 +25,16 @@ export class CarritoService {
   private readonly sesion = inject(SesionService);
   readonly items = signal<CarritoItem[]>(leerInvitado());
 
+  private ultimaOperacion: Promise<unknown> = Promise.resolve();
+
   private esCliente(): boolean { return this.sesion.rol() === 'CLIENTE'; }
+  // Los cambios del carrito del cliente se ejecutan uno después de otro: así cada clic parte de la
+  // cantidad ya guardada por el anterior. Un error no detiene las operaciones siguientes.
+  private enOrden<T>(operacion: () => Observable<T>): Observable<T> {
+    const ejecucion = this.ultimaOperacion.catch(() => undefined).then(() => lastValueFrom(operacion()));
+    this.ultimaOperacion = ejecucion;
+    return from(ejecucion);
+  }
   private guardarInvitado(items: CarritoItem[]): void {
     localStorage.setItem(CLAVE, JSON.stringify(items));
     this.items.set(items);
@@ -43,13 +52,13 @@ export class CarritoService {
   agregar(producto: Producto, cantidad = 1): Observable<CarritoItem[]> {
     if (producto.stock < cantidad || cantidad < 1) throw new Error('El producto no tiene stock suficiente.');
     if (this.esCliente()) {
-      return this.cargar().pipe(
+      return this.enOrden(() => this.cargar().pipe(
         switchMap(items => {
           const actual = items.find(item => item.productoId === producto.id)?.cantidad ?? 0;
           return this.http.put<CarritoItem>(`/api/carrito/productos/${producto.id}`, { productoId: producto.id, cantidad: actual + cantidad });
         }),
         switchMap(() => this.cargar())
-      );
+      ));
     }
     const actuales = leerInvitado();
     const anterior = actuales.find(item => item.productoId === producto.id);
@@ -64,16 +73,16 @@ export class CarritoService {
 
   establecer(item: CarritoItem, cantidad: number): Observable<CarritoItem[]> {
     if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > Math.min(100, item.stock)) throw new Error('La cantidad supera el stock disponible.');
-    if (this.esCliente()) return this.http.put<CarritoItem>(`/api/carrito/productos/${item.productoId}`, { productoId: item.productoId, cantidad })
-      .pipe(switchMap(() => this.cargar()));
+    if (this.esCliente()) return this.enOrden(() => this.http.put<CarritoItem>(`/api/carrito/productos/${item.productoId}`, { productoId: item.productoId, cantidad })
+      .pipe(switchMap(() => this.cargar())));
     const nuevos = leerInvitado().map(actual => actual.productoId === item.productoId ? { ...actual, cantidad } : actual);
     this.guardarInvitado(nuevos);
     return of(nuevos);
   }
 
   quitar(productoId: number): Observable<CarritoItem[]> {
-    if (this.esCliente()) return this.http.delete<void>(`/api/carrito/productos/${productoId}`)
-      .pipe(switchMap(() => this.cargar()));
+    if (this.esCliente()) return this.enOrden(() => this.http.delete<void>(`/api/carrito/productos/${productoId}`)
+      .pipe(switchMap(() => this.cargar())));
     const nuevos = leerInvitado().filter(item => item.productoId !== productoId);
     this.guardarInvitado(nuevos);
     return of(nuevos);
