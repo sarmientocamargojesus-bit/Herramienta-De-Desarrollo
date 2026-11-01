@@ -8,6 +8,8 @@ import { MensajeError } from '../mensaje-error/mensaje-error';
 @Component({ imports: [RouterLink, MensajeError], selector: 'app-detalle-pedido', templateUrl: './detalle-pedido.html', styleUrl: './detalle-pedido.scss' })
 export class DetallePedido implements OnInit {
   private readonly ruta = inject(ActivatedRoute); private readonly servicio = inject(PedidosService);
+  // El mismo detalle se abre desde /gestion/pedidos/:id y desde /mis-pedidos/:id; el regreso depende de ese origen.
+  readonly enGestion = this.ruta.snapshot.pathFromRoot.flatMap(r => r.url.map(s => s.path))[0] === 'gestion';
   readonly pedido = signal<Pedido|null>(null); readonly detalles = signal<Linea[]>([]); readonly error = signal(''); readonly cargando = signal(true);
   ngOnInit(): void { const id=Number(this.ruta.snapshot.paramMap.get('id')); forkJoin({pedido:this.servicio.obtener(id),detalles:this.servicio.detalles(id)}).subscribe({next:r=>{this.pedido.set(r.pedido);this.detalles.set(r.detalles);this.cargando.set(false)},error:e=>{this.error.set(mensajeError(e));this.cargando.set(false)}}); }
 }

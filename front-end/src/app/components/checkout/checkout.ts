@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CarritoService } from '../../core/carrito.service';
@@ -11,6 +12,15 @@ export class Checkout implements OnInit {
   private readonly fb = inject(FormBuilder); private readonly pedidos = inject(PedidosService); private readonly router = inject(Router);
   readonly carrito = inject(CarritoService); readonly error = signal(''); readonly enviando = signal(false); readonly cargando = signal(true);
   readonly formulario = this.fb.nonNullable.group({ tipoEntrega: ['RECOJO' as 'RECOJO'|'DOMICILIO', Validators.required], direccionEntrega: [''], observaciones: [''], metodoPago: ['YAPE' as 'YAPE'|'TARJETA', Validators.required] });
+  constructor() {
+    // La dirección solo es obligatoria para domicilio; al cambiar la entrega se recalcula la validez del formulario.
+    this.formulario.controls.tipoEntrega.valueChanges.pipe(takeUntilDestroyed()).subscribe(tipo => {
+      const direccion = this.formulario.controls.direccionEntrega;
+      direccion.setValidators(tipo === 'DOMICILIO' ? Validators.required : null);
+      direccion.updateValueAndValidity();
+      this.error.set('');
+    });
+  }
   ngOnInit(): void { this.carrito.cargar().subscribe({ next: () => this.cargando.set(false), error: e => { this.error.set(mensajeError(e)); this.cargando.set(false); } }); }
   enviar(): void {
     const datos = this.formulario.getRawValue();

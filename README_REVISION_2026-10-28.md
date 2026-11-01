@@ -199,15 +199,15 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 1 | Sobrescritura de cuentas desde el registro público | Resuelto y verificado el 28 de octubre de 2026. |
 | 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado el 28 de octubre de 2026. |
 | 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
-| 4 | Bloqueo al cambiar de domicilio a recojo | Pendiente. |
+| 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 5 | Desincronización al renombrar categorías | Pendiente. |
 | 6 | Inventarios pendientes para los productos existentes | Pendiente de definir los mínimos individuales y registrarlos. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Pendiente. |
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
 | 9 | Accesos de cuenta ocultos en móvil | Pendiente. |
-| 10 | Regreso incorrecto del detalle administrativo de pedidos | Pendiente. |
+| 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
 | 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
-| 12 | Mensaje de sesión vencida al fallar el login | Pendiente. |
+| 12 | Mensaje de sesión vencida al fallar el login | Resuelto y verificado el 1 de noviembre de 2026. |
 | 13 | Respuesta 500 cuando falta el archivo de imagen | Pendiente. |
 | 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 | 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
@@ -443,4 +443,33 @@ Suite completa del backend: **90 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 - [InventarioService.java](src/main/java/com/fastfood/fast_food_backend/services/InventarioService.java).
 - [RegistroCatalogoIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/RegistroCatalogoIntegrationTest.java).
 
-El siguiente punto pendiente es el **4: bloqueo al cambiar de domicilio a recojo en el checkout**. Se trabajará cuando el usuario lo indique.
+### Puntos 4, 10 y 12. Checkout, regreso del detalle y mensaje del login
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resueltos y verificados con pruebas de Angular.
+
+#### Qué se hizo para corregirlos
+
+1. **Punto 4.** El campo de dirección tenía el atributo `required` en el HTML. Al elegir domicilio, Angular agregaba ese validador al formulario, y al volver a recojo el campo desaparecía sin que se recalculara la validez, por lo que el formulario seguía inválido. Se quitó el atributo, que se reemplazó por `aria-required="true"`. Ahora `checkout.ts` escucha el cambio del tipo de entrega: con domicilio la dirección es obligatoria, con recojo deja de serlo, se recalcula la validez y se borra el aviso anterior. Se conserva la comprobación de que la dirección no esté formada solo por espacios.
+2. **Punto 10.** `detalle-pedido` identifica si se abrió desde `/gestion/pedidos/:id` o desde `/mis-pedidos/:id`. Desde gestión, el enlace muestra «← Pedidos» y lleva a `/gestion/pedidos`; desde la cuenta del cliente conserva «← Mis pedidos».
+3. **Punto 12.** En la pantalla de inicio de sesión, una respuesta 401 muestra «El correo o la contraseña son incorrectos.». En las demás pantallas, el 401 sigue mostrando el aviso de sesión inválida o vencida.
+4. No cambian el backend, Supabase, las rutas, los permisos ni el cuerpo enviado a `/api/checkout`.
+
+#### Pruebas realizadas
+
+| Caso | Resultado |
+| --- | --- |
+| Elegir domicilio, intentar confirmar sin dirección y volver a recojo | El aviso se borra y la confirmación envía `/api/checkout` con `RECOJO`. |
+| Abrir el detalle desde `/gestion/pedidos/5` | El enlace lleva a `/gestion/pedidos`. |
+| Abrir el detalle desde `/mis-pedidos/5` | El enlace lleva a `/mis-pedidos`. |
+| Login con respuesta 401 | Se muestra el aviso de correo o contraseña incorrectos. |
+
+Antes de corregir el código fallaron los casos de checkout, detalle desde gestión y login. Después del cambio pasaron. Frontend: **43 pruebas correctas en 36 archivos** y compilación de producción correcta. No se repitió el recorrido manual en el navegador.
+
+#### Archivos involucrados
+
+- [checkout.ts](front-end/src/app/components/checkout/checkout.ts), [checkout.html](front-end/src/app/components/checkout/checkout.html) y [checkout.spec.ts](front-end/src/app/components/checkout/checkout.spec.ts).
+- [detalle-pedido.ts](front-end/src/app/components/detalle-pedido/detalle-pedido.ts), [detalle-pedido.html](front-end/src/app/components/detalle-pedido/detalle-pedido.html) y [detalle-pedido.spec.ts](front-end/src/app/components/detalle-pedido/detalle-pedido.spec.ts).
+- [inicio-sesion.ts](front-end/src/app/components/inicio-sesion/inicio-sesion.ts) e [inicio-sesion.spec.ts](front-end/src/app/components/inicio-sesion/inicio-sesion.spec.ts).
+
+El siguiente punto pendiente se elegirá cuando el usuario lo indique.

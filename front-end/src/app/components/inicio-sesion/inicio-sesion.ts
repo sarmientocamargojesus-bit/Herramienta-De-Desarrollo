@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -30,7 +31,12 @@ export class InicioSesion {
           error: error => { this.enviando.set(false); this.error.set('Iniciaste sesión, pero no se pudo importar el carrito. Tus productos siguen guardados en este navegador. ' + mensajeError(error)); }
         });
       },
-      error: error => { this.enviando.set(false); this.error.set(mensajeError(error)); }
+      // En el login, un 401 significa credenciales incorrectas, no una sesión vencida.
+      error: error => {
+        this.enviando.set(false);
+        this.error.set(error instanceof HttpErrorResponse && error.status === 401
+          ? 'El correo o la contraseña son incorrectos.' : mensajeError(error));
+      }
     });
   }
 
