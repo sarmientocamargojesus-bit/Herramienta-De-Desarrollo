@@ -210,6 +210,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 12 | Mensaje de sesión vencida al fallar el login | Pendiente. |
 | 13 | Respuesta 500 cuando falta el archivo de imagen | Pendiente. |
 | 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
 
 ### Punto 1. Registro público de usuarios
 
@@ -406,5 +407,40 @@ Suite completa del backend: **87 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 - [PagoService.java](src/main/java/com/fastfood/fast_food_backend/services/PagoService.java).
 - [PagoIntegridadIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/PagoIntegridadIntegrationTest.java).
 - [Solicitudes de API](requests.http).
+
+### Punto 15. Creación de productos, categorías e inventarios con el ID de otro registro
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+**Problema:** `POST /api/productos`, `POST /api/categorias` y `POST /api/inventarios` guardaban la entidad recibida con el `id` que traía el JSON. Si ese `id` ya existía, la API no creaba un registro nuevo sino que reemplazaba el existente. Por ejemplo, un producto «Inca Kola» con ID 3 pasaba a llamarse «Hamburguesa doble», y los pedidos antiguos mostraban el producto cambiado. Los dos primeros endpoints son del administrador y el de inventarios también lo puede usar el empleado. Angular no envía `id` al crear, así que el fallo aparecía al usar Postman, `requests.http` o una petición manual.
+
+#### Qué se hizo para corregirlo
+
+1. `ProductoService.registrar` y `CategoriaService.registrar` descartan el `id` recibido antes de guardar. La base de datos genera siempre un identificador nuevo.
+2. `InventarioService.registrar` descarta el `id` y las fechas de stock bajo y agotado recibidas. El servidor calcula esas fechas con el stock actual del producto, como ya lo hacía.
+3. La edición mediante `PUT` no cambia: sigue usando el `id` de la URL y conserva el identificador del registro.
+4. No cambian el JSON, los permisos, las validaciones, el frontend ni Supabase.
+
+#### Pruebas realizadas
+
+Se agregó `RegistroCatalogoIntegrationTest`, con 3 casos ejecutados mediante MockMvc.
+
+| Caso | Resultado |
+| --- | --- |
+| Crear un producto con el ID de otro producto | 201 con un ID nuevo; el producto original conserva nombre, precio y stock. |
+| Crear una categoría con el ID de otra categoría | 201 con un ID nuevo; la categoría original conserva nombre, descripción y estado. |
+| El empleado crea un inventario con el ID de otra configuración y fechas de alerta inventadas | 201 con un ID nuevo; la configuración original conserva su producto y no se guardan las fechas enviadas. |
+
+Antes de corregir el código fallaron los 3 casos: la API devolvió el mismo ID y sobrescribió el registro. Después del cambio pasaron.
+
+Suite completa del backend: **90 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+#### Archivos involucrados
+
+- [ProductoService.java](src/main/java/com/fastfood/fast_food_backend/services/ProductoService.java).
+- [CategoriaService.java](src/main/java/com/fastfood/fast_food_backend/services/CategoriaService.java).
+- [InventarioService.java](src/main/java/com/fastfood/fast_food_backend/services/InventarioService.java).
+- [RegistroCatalogoIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/RegistroCatalogoIntegrationTest.java).
 
 El siguiente punto pendiente es el **4: bloqueo al cambiar de domicilio a recojo en el checkout**. Se trabajará cuando el usuario lo indique.

@@ -41,6 +41,8 @@ public class ProductoService {
 
     @Transactional
     public Producto registrar(Producto producto) {
+        // Registrar siempre crea un producto nuevo: un id enviado en el JSON no puede reemplazar a otro.
+        producto.setId(null);
         validar(producto);
         asignarCategoria(producto);
         Producto guardado = productoRepository.save(producto);

@@ -48,6 +48,10 @@ public class InventarioService {
         if (inventarioRepository.existsByProductoId(productoId)) {
             throw new ReglaNegocioException("El producto ya tiene una configuración de inventario");
         }
+        // Registrar siempre crea una configuración nueva; el id y las fechas de alerta los define el servidor.
+        inventario.setId(null);
+        inventario.setFechaStockBajo(null);
+        inventario.setFechaAgotado(null);
         inventario.setProducto(buscarProducto(productoId));
         LocalDateTime ahora = LocalDateTime.now();
         inventario.setFechaActualizacion(ahora);

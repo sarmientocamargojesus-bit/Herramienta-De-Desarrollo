@@ -36,6 +36,8 @@ public class CategoriaService {
 
     public Categoria registrar(Categoria categoria) {
         validar(categoria);
+        // Registrar siempre crea una categoría nueva: un id enviado en el JSON no puede reemplazar a otra.
+        categoria.setId(null);
         validarNombreDisponible(categoria.getNombre(), null);
         if (categoria.getActivo() == null) {
             categoria.setActivo(true);
