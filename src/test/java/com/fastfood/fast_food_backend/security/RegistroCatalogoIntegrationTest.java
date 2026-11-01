@@ -3,7 +3,10 @@ package com.fastfood.fast_food_backend.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -120,6 +123,32 @@ class RegistroCatalogoIntegrationTest {
         // El stock 30 está sobre el mínimo 5: las fechas de alerta enviadas no se guardan.
         assertNull(nuevo.getFechaStockBajo());
         assertNull(nuevo.getFechaAgotado());
+    }
+
+    @Test
+    void renombrarCategoriaActualizaElNombreEnSusProductos() throws Exception {
+        Categoria piqueos = new Categoria();
+        piqueos.setNombre("PRUEBA_REGISTRO_PIQUEOS");
+        piqueos.setActivo(true);
+        piqueos = categorias.save(piqueos);
+        Producto papas = producto("Papas fritas", "6.00", 10);
+        papas.setCategoria(piqueos.getNombre());
+        papas = productoService.registrar(papas);
+        Producto hamburguesa = productoService.registrar(producto("Hamburguesa", "12.00", 10));
+
+        mockMvc.perform(put("/api/categorias/{id}", piqueos.getId()).header("Authorization", bearer(tokenAdmin))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"nombre":"prueba_registro_acompanamientos","descripcion":"Renombrada","activo":true}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/productos/{id}", papas.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.categoria").value("PRUEBA_REGISTRO_ACOMPANAMIENTOS"))
+                .andExpect(jsonPath("$.categoriaId").value(piqueos.getId().intValue()))
+                .andExpect(jsonPath("$.nombre").value("Papas fritas"))
+                .andExpect(jsonPath("$.stock").value(10));
+        assertEquals("HAMBURGUESAS", productos.findById(hamburguesa.getId()).orElseThrow().getCategoria());
     }
 
     private Producto producto(String nombre, String precio, int stock) {

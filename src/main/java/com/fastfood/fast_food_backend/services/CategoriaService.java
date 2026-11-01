@@ -3,6 +3,7 @@ package com.fastfood.fast_food_backend.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
@@ -46,6 +47,7 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
 
+    @Transactional
     public Categoria actualizar(Long id, Categoria datos) {
         Categoria categoria = buscarPorId(id);
         validar(datos);
@@ -55,7 +57,10 @@ public class CategoriaService {
         if (datos.getActivo() != null) {
             categoria.setActivo(datos.getActivo());
         }
-        return categoriaRepository.save(categoria);
+        Categoria guardada = categoriaRepository.save(categoria);
+        // Los productos guardan una copia del nombre que el catálogo usa para filtrar; se actualiza en la misma transacción.
+        productoRepository.actualizarNombreCategoria(guardada.getId(), guardada.getNombre());
+        return guardada;
     }
 
     public void eliminar(Long id) {

@@ -200,7 +200,7 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 | 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado el 28 de octubre de 2026. |
 | 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
 | 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
-| 5 | Desincronización al renombrar categorías | Pendiente. |
+| 5 | Desincronización al renombrar categorías | Resuelto y verificado el 1 de noviembre de 2026. |
 | 6 | Inventarios pendientes para los productos existentes | Resuelto en el código el 1 de noviembre de 2026; se aplica a Supabase al iniciar el backend. |
 | 7 | Pérdida de unidades por clics rápidos en el carrito | Pendiente. |
 | 8 | Tokens anteriores conservan permisos retirados | Pendiente. |
@@ -538,5 +538,37 @@ Suite completa del backend: **98 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 - [InicializadorDatos.java](src/main/java/com/fastfood/fast_food_backend/config/InicializadorDatos.java).
 - [InventarioFaltanteIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/services/InventarioFaltanteIntegrationTest.java) e [InicializadorDatosTest.java](src/test/java/com/fastfood/fast_food_backend/config/InicializadorDatosTest.java).
 - [README general](README.md).
+
+### Punto 5. Renombrar una categoría
+
+**Fecha de corrección:** 1 de noviembre de 2026.
+**Estado:** resuelto y verificado.
+
+#### Qué se hizo para corregirlo
+
+1. Cada producto conserva la referencia `categoria_id` y una copia del nombre en `categoria`, que Angular utiliza para filtrar el menú. Se mantuvo ese diseño para no cambiar el JSON ni el frontend.
+2. Se agregó `ProductoRepository.actualizarNombreCategoria`, que actualiza el nombre copiado en todos los productos que tienen el `categoria_id` indicado.
+3. `CategoriaService.actualizar` ahora es transaccional: guarda la categoría y actualiza sus productos en la misma operación. Si algo falla, no queda un cambio a medias.
+4. No cambian el nombre, el precio, el stock ni el `categoria_id` de los productos. Los productos de otras categorías no se modifican. No se requiere un script para Supabase, porque la revisión inicial no encontró nombres desincronizados en los datos actuales.
+
+#### Pruebas realizadas
+
+Se agregó un caso a `RegistroCatalogoIntegrationTest`: el administrador renombra una categoría mediante `PUT /api/categorias/{id}` y luego se consulta el producto con `GET /api/productos/{id}`.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Categoría del producto después de renombrar | Muestra el nombre nuevo y conserva el mismo `categoriaId`. |
+| Nombre y stock del producto | Sin cambios. |
+| Producto de otra categoría | Conserva su categoría. |
+
+Antes de corregir el código, el producto seguía mostrando el nombre anterior. Después del cambio la prueba pasó.
+
+Suite completa del backend: **99 pruebas, 0 fallos, 0 errores y 0 omitidas**, con H2 y la importación de `.env` deshabilitada.
+
+#### Archivos involucrados
+
+- [CategoriaService.java](src/main/java/com/fastfood/fast_food_backend/services/CategoriaService.java).
+- [ProductoRepository.java](src/main/java/com/fastfood/fast_food_backend/repositories/ProductoRepository.java).
+- [RegistroCatalogoIntegrationTest.java](src/test/java/com/fastfood/fast_food_backend/security/RegistroCatalogoIntegrationTest.java).
 
 El siguiente punto pendiente se elegirá cuando el usuario lo indique.

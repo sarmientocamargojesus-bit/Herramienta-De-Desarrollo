@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
@@ -16,6 +17,10 @@ import com.fastfood.fast_food_backend.entities.Producto;
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     boolean existsByCategoriaReferenciaId(Long categoriaId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Producto p SET p.categoria = :nombre WHERE p.categoriaReferencia.id = :categoriaId")
+    int actualizarNombreCategoria(@Param("categoriaId") Long categoriaId, @Param("nombre") String nombre);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Producto p WHERE p.id = :id")
