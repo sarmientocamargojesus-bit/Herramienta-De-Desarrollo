@@ -196,30 +196,29 @@ Los problemas descritos arriba se conservan como registro de la revisión inicia
 
 | Punto | Problema | Estado actual |
 | --- | --- | --- |
-| 1 | Sobrescritura de cuentas desde el registro público | Resuelto y verificado el 28 de octubre de 2026. |
-| 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado el 28 de octubre de 2026. |
-| 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado el 1 de noviembre de 2026. |
-| 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado el 1 de noviembre de 2026. |
-| 5 | Desincronización al renombrar categorías | Resuelto y verificado el 1 de noviembre de 2026. |
-| 6 | Inventarios pendientes para los productos existentes | Se registrará manualmente en Supabase con stock mínimo 5; se retiró el completado automático del código. |
-| 7 | Pérdida de unidades por clics rápidos en el carrito | Resuelto y verificado el 1 de noviembre de 2026. |
-| 8 | Tokens anteriores conservan permisos retirados | Resuelto y verificado el 1 de noviembre de 2026. |
-| 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado el 1 de noviembre de 2026. |
-| 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado el 1 de noviembre de 2026. |
-| 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado el 1 de noviembre de 2026. |
-| 12 | Mensaje de sesión vencida al fallar el login | Resuelto y verificado el 1 de noviembre de 2026. |
-| 13 | Respuesta 500 cuando falta el archivo de imagen | Resuelto y verificado el 1 de noviembre de 2026. |
-| 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
-| 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
-| 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
-| 17 | Fotos descargadas en cada visita y errores 404 por productos sin foto (hallazgo del 1 de noviembre) | Resuelto y verificado con pruebas el 1 de noviembre de 2026. |
-| 18 | La página seguía mostrando la sesión iniciada después de vencer o rechazarse el token (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
-| 19 | Edición de stock y descuento manual sin bloqueo frente a ventas simultáneas (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
-| 20 | Eliminar un pago dejaba el pedido confirmado y no devolvía el stock (hallazgo del 1 de noviembre) | Resuelto y verificado el 1 de noviembre de 2026. |
+| 1 | Sobrescritura de cuentas desde el registro público | Resuelto y verificado. |
+| 2 | Confirmación de pedidos sin productos ni pago | Resuelto y verificado. |
+| 3 | Venta simultánea de la última unidad por el pago antiguo | Resuelto y verificado. |
+| 4 | Bloqueo al cambiar de domicilio a recojo | Resuelto y verificado. |
+| 5 | Desincronización al renombrar categorías | Resuelto y verificado. |
+| 6 | Inventarios pendientes para los productos existentes | Resuelto mediante registro manual en Supabase con stock mínimo 5; se retiró el completado automático del código. |
+| 7 | Pérdida de unidades por clics rápidos en el carrito | Resuelto y verificado. |
+| 8 | Tokens anteriores conservan permisos retirados | Resuelto y verificado. |
+| 9 | Accesos de cuenta ocultos en móvil | Resuelto y verificado. |
+| 10 | Regreso incorrecto del detalle administrativo de pedidos | Resuelto y verificado. |
+| 11 | Métodos de pago inexistentes aceptados | Resuelto y verificado. |
+| 12 | Mensaje de sesión vencida al fallar el login | Resuelto y verificado. |
+| 13 | Respuesta 500 cuando falta el archivo de imagen | Resuelto y verificado. |
+| 14 | Registro de pago con el ID de otro pago (hallazgo del 1 de noviembre) | Resuelto y verificado. |
+| 15 | Creación de productos, categorías e inventarios con el ID de otro registro (hallazgo del 1 de noviembre) | Resuelto y verificado. |
+| 16 | Respuesta 500 por parámetros faltantes, método no permitido o tipo de contenido incorrecto (hallazgo del 1 de noviembre) | Resuelto y verificado. |
+| 17 | Fotos descargadas en cada visita y errores 404 por productos sin foto (hallazgo del 1 de noviembre) | Resuelto y verificado con pruebas. |
+| 18 | La página seguía mostrando la sesión iniciada después de vencer o rechazarse el token (hallazgo del 1 de noviembre) | Resuelto y verificado. |
+| 19 | Edición de stock y descuento manual sin bloqueo frente a ventas simultáneas (hallazgo del 1 de noviembre) | Resuelto y verificado. |
+| 20 | Eliminar un pago dejaba el pedido confirmado y no devolvía el stock (hallazgo del 1 de noviembre) | Resuelto y verificado. |
 
 ### Punto 1. Registro público de usuarios
 
-**Fecha de corrección:** 28 de octubre de 2026.  
 **Estado:** resuelto y verificado.
 
 #### Qué se hizo para corregirlo
@@ -270,7 +269,6 @@ Al cerrar el punto 1, el siguiente punto pendiente era el **2: controlar la conf
 
 ### Punto 2. Control de creación y edición de pedidos
 
-**Fecha de corrección:** 28 de octubre de 2026.
 **Estado:** resuelto y verificado.
 
 #### Qué se hizo para corregirlo
@@ -340,7 +338,6 @@ Comando utilizado desde la raíz del proyecto, con las dependencias ya descargad
 
 ### Punto 3 y punto 14. Pagos simultáneos y pago con ID de otro pago
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resueltos y verificados.
 
 El punto 14 se encontró en una revisión posterior del código. Se corrigió junto con el punto 3 porque ambos están en `PagoService.registrar`.
@@ -380,7 +377,6 @@ Suite completa del backend: **82 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Punto 11. Métodos y estados de pago inexistentes
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 #### Qué se hizo para corregirlo
@@ -415,7 +411,6 @@ Suite completa del backend: **87 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Punto 15. Creación de productos, categorías e inventarios con el ID de otro registro
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 **Problema:** `POST /api/productos`, `POST /api/categorias` y `POST /api/inventarios` guardaban la entidad recibida con el `id` que traía el JSON. Si ese `id` ya existía, la API no creaba un registro nuevo sino que reemplazaba el existente. Por ejemplo, un producto «Inca Kola» con ID 3 pasaba a llamarse «Hamburguesa doble», y los pedidos antiguos mostraban el producto cambiado. Los dos primeros endpoints son del administrador y el de inventarios también lo puede usar el empleado. Angular no envía `id` al crear, así que el fallo aparecía al usar Postman, `requests.http` o una petición manual.
@@ -450,7 +445,6 @@ Suite completa del backend: **90 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Puntos 4, 10 y 12. Checkout, regreso del detalle y mensaje del login
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resueltos y verificados con pruebas de Angular.
 
 #### Qué se hizo para corregirlos
@@ -479,7 +473,6 @@ Antes de corregir el código fallaron los casos de checkout, detalle desde gesti
 
 ### Puntos 13 y 16. Errores de solicitud respondidos como 500
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resueltos y verificados.
 
 **Problema:** `ManejadorGlobalExcepciones` no tenía reglas para varios errores que corresponden a quien envía la solicitud. Esos errores llegaban al manejador general, que respondía 500 «Ha ocurrido un error interno en el servidor» y registraba un error grave en el log. Ocurría al subir una imagen sin el campo `archivo` (punto 13), al omitir parámetros obligatorios como `nombre` en `/api/productos/buscar` o `maximo` en `/api/productos/rango-precios`, al usar un método HTTP que la ruta no admite y al enviar un tipo de contenido incompatible (punto 16).
@@ -512,8 +505,7 @@ Suite completa del backend: **95 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Punto 6. Inventarios de los productos existentes
 
-**Fecha de corrección:** 1 de noviembre de 2026.
-**Estado actual:** pendiente de registro manual en Supabase. El completado automático descrito abajo **se retiró del código** el mismo día por decisión del usuario, que prefiere insertar las filas directamente en la base de datos.
+**Estado actual:** resuelto. El usuario ejecutó en el SQL Editor de Supabase la inserción indicada abajo, sin errores. El completado automático descrito más adelante **se retiró del código** por decisión del usuario, que prefirió insertar las filas directamente en la base de datos.
 
 **Decisión del usuario:** los productos que no tienen configuración de inventario reciben un stock mínimo de **5**. Los productos creados desde la aplicación conservan su regla actual de mínimo 0, ajustable desde el panel.
 
@@ -560,7 +552,6 @@ Suite completa del backend: **98 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Punto 5. Renombrar una categoría
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 #### Qué se hizo para corregirlo
@@ -592,7 +583,6 @@ Suite completa del backend: **99 pruebas, 0 fallos, 0 errores y 0 omitidas**, co
 
 ### Punto 9. Accesos de cuenta en pantallas pequeñas
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado en el navegador.
 
 #### Qué se hizo para corregirlo
@@ -619,7 +609,6 @@ Frontend: **43 pruebas correctas en 36 archivos** y compilación de producción 
 
 ### Punto 7. Clics rápidos en Agregar
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado con pruebas de Angular.
 
 #### Qué se hizo para corregirlo
@@ -647,7 +636,6 @@ Antes de corregir el código, la primera prueba falló: las dos operaciones cons
 
 ### Punto 8. Tokens con permisos retirados
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 **Decisión:** retirar permisos debe surtir efecto de inmediato, sin esperar a que venza el token de 60 minutos.
@@ -684,7 +672,6 @@ Suite completa del backend: **104 pruebas, 0 fallos, 0 errores y 0 omitidas**, c
 
 ### Mantenimiento M1 a M4
 
-**Fecha:** 1 de noviembre de 2026.
 **Estado:** aplicado y verificado. Estos cambios no corrigen fallos ni modifican la lógica del proyecto.
 
 | Tarea | Qué se hizo |
@@ -704,7 +691,6 @@ No se aplicaron M5 (pruebas de comportamiento en Angular), M6 (`strict` en TypeS
 
 ### Punto 17. Carga de fotos de productos
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado con pruebas automáticas.
 
 **Problema:** cada tarjeta del menú pedía `GET /api/productos/{id}/imagen`. Los productos sin foto respondían 404 y llenaban la consola del navegador con errores antes de mostrar la ilustración de la categoría. Además, la foto se enviaba con `Cache-Control: no-store`, por lo que se descargaba completa en cada visita.
@@ -737,7 +723,6 @@ Antes de corregir el código fallaron las pruebas del backend y la del component
 
 ### Punto 18. Sesión vencida o rechazada en Angular
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 **Problema:** cuando el token vencía, el encabezado seguía mostrando Mis pedidos, Gestión y Salir hasta que se hacía una petición. Si el backend rechazaba el token con 401, por ejemplo por cambio de rol o cuenta desactivada (punto 8), Angular mostraba el aviso, pero conservaba la sesión.
@@ -763,7 +748,6 @@ En el navegador se simuló una sesión de cliente que vencía en 15 segundos. An
 
 ### Punto 19. Edición de stock frente a ventas simultáneas
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 **Problema:** el checkout y los pagos bloquean el producto, pero la edición del producto y `PUT /api/productos/{id}/descontar-stock` no lo hacían. Dos descuentos simultáneos podían vender la misma unidad. Además, el formulario de edición envía el stock que mostraba al abrirse: si se vendían unidades mientras el administrador editaba, al guardar se restauraba el stock anterior y se perdían las ventas en el inventario.
@@ -798,7 +782,6 @@ Antes de corregir el código fallaron la edición con stock desactualizado y las
 
 ### Punto 20. Eliminar un pago
 
-**Fecha de corrección:** 1 de noviembre de 2026.
 **Estado:** resuelto y verificado.
 
 **Problema:** `DELETE /api/pagos/{id}`, disponible solo para el administrador, borraba el pago, pero el pedido seguía CONFIRMADO y el stock descontado no se devolvía. El inventario quedaba con unidades vendidas sin pago asociado.
