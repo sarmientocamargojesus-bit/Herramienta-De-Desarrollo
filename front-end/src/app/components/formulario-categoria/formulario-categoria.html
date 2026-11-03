@@ -3,13 +3,14 @@
   <h1>{{ id ? 'Editar categoría' : 'Nueva categoría' }}</h1>
   <app-mensaje-error [texto]="error()" />
   <form class="formulario panel" [formGroup]="form" (ngSubmit)="guardar()">
-    <label class="campo">Nombre<input formControlName="nombre" required /></label
+    <label class="campo"
+      >Nombre<input formControlName="nombre" required />
+      @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+        <span class="ayuda">Escribe un nombre para la categoría.</span>
+      }</label
     ><label class="campo"
       >Descripción<textarea formControlName="descripcion" rows="3"></textarea></label
     ><label><input type="checkbox" formControlName="activo" /> Activa</label>
-    @if (form.invalid && form.touched) {
-      <p class="ayuda">Escribe un nombre para la categoría.</p>
-    }
     <div class="acciones">
       <button class="boton primario" [disabled]="enviando()">Guardar categoría</button
       ><a class="boton secundario" routerLink="/gestion/categorias">Cancelar</a>

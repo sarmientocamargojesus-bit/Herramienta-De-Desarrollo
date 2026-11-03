@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CatalogoService } from '../../core/catalogo.service';
 import { mensajeError } from '../../core/errores';
+import { noSoloEspacios } from '../../core/validadores';
 import { Categoria, Producto } from '../../models/product';
 import { ImagenProducto } from '../imagen-producto/imagen-producto';
 import { MensajeError } from '../mensaje-error/mensaje-error';
@@ -23,7 +24,7 @@ export class FormularioProducto implements OnInit {
   readonly error = signal('');
   readonly aviso = signal('');
   readonly enviando = signal(false);
-  readonly form = this.fb.nonNullable.group({ nombre: ['', Validators.required], descripcion: [''], precio: [0, [Validators.required, Validators.min(0.01)]], stock: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]], categoria: ['', Validators.required] });
+  readonly form = this.fb.nonNullable.group({ nombre: ['', [Validators.required, noSoloEspacios]], descripcion: [''], precio: [0, [Validators.required, Validators.min(0.01)]], stock: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]], categoria: ['', Validators.required] });
 
   ngOnInit(): void {
     const id = this.id();

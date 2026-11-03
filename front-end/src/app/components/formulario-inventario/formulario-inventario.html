@@ -10,11 +10,19 @@
       <p>Las fechas de stock bajo y agotado las calcula el backend.</p>
       <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()">
         <label class="campo"
-          >Stock mínimo<input type="number" min="0" step="1" formControlName="stockMinimo" required
-        /></label>
-        @if (form.invalid && form.touched) {
-          <p class="ayuda">Usa un número entero no negativo.</p>
-        }
+          >Stock mínimo<input
+            type="number"
+            min="0"
+            step="1"
+            formControlName="stockMinimo"
+            required
+          />
+          @if (form.controls.stockMinimo.touched && form.controls.stockMinimo.errors; as e) {
+            <span class="ayuda">{{
+              e['required'] ? 'Ingresa el stock mínimo.' : 'Usa un número entero de 0 o más.'
+            }}</span>
+          }
+        </label>
         <button class="boton primario" [disabled]="enviando()">Guardar mínimo</button>
       </form>
     </div>

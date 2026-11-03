@@ -3,7 +3,7 @@
 El avance actual contiene la API REST en Spring Boot (catálogo, usuarios,
 pedidos, carrito, checkout con pago simulado e inventario) y el frontend
 Angular de la carpeta `front-end`, que la consume. Aplica los conceptos
-estudiados durante las semanas 2, 3, 6, 7, 8 y 12.
+estudiados durante las semanas 2, 3, 6, 7, 8, 12 y 13.
 
 ## Semana 2
 
@@ -68,6 +68,20 @@ estudiados durante las semanas 2, 3, 6, 7, 8 y 12.
   actualiza los productos que recibe `CatalogoProductos`.
 - Servicios compartidos `CarritoService` y `SesionService` para el carrito y la sesión.
 - Guard de roles que orienta la navegación; el backend mantiene la autorización final.
+
+## Semana 13
+
+- Formularios reactivos (`ReactiveFormsModule`, `FormBuilder`, `FormGroup` y `FormControl`) en registro,
+  inicio de sesión, checkout y los formularios de gestión de productos, categorías e inventario.
+- Validadores incorporados: `required`, `email`, `minLength`, `maxLength`, `min` y `pattern`.
+- Validador personalizado `noSoloEspacios` en `front-end/src/app/core/validadores.ts`, que rechaza nombres,
+  teléfonos y direcciones formados solo por espacios, igual que el backend.
+- Validación cruzada `camposIguales` a nivel de `FormGroup`: el registro pide confirmar la contraseña y no
+  se envía si no coincide. La confirmación no se envía al backend.
+- Validación dinámica en el checkout: la dirección es obligatoria solo para entrega a domicilio.
+- Mensajes específicos debajo de cada campo cuando el control está `invalid` y `touched`.
+- Envío solo con datos válidos, botón bloqueado durante el envío y errores del servidor sin perder los
+  datos escritos. Si el correo ya está registrado (409), el aviso aparece junto al campo Correo.
 
 ## Modelo de datos del sistema
 

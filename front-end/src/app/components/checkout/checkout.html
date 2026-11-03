@@ -25,7 +25,14 @@
               formControlName="direccionEntrega"
               autocomplete="street-address"
               aria-required="true"
-          /></label>
+            />
+            @if (
+              formulario.controls.direccionEntrega.touched &&
+              formulario.controls.direccionEntrega.invalid
+            ) {
+              <span class="ayuda">Escribe la dirección donde entregaremos el pedido.</span>
+            }
+          </label>
         }
         <label class="campo"
           >Observaciones<textarea formControlName="observaciones" rows="3"></textarea></label

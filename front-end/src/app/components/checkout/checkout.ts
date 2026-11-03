@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CarritoService } from '../../core/carrito.service';
 import { mensajeError } from '../../core/errores';
 import { PedidosService } from '../../core/pedidos.service';
+import { noSoloEspacios } from '../../core/validadores';
 import { CheckoutRequest } from '../../models/product';
 import { MensajeError } from '../mensaje-error/mensaje-error';
 @Component({ imports: [ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-checkout', templateUrl: './checkout.html', styleUrl: './checkout.scss' })
@@ -16,7 +17,7 @@ export class Checkout implements OnInit {
     // La dirección solo es obligatoria para domicilio; al cambiar la entrega se recalcula la validez del formulario.
     this.formulario.controls.tipoEntrega.valueChanges.pipe(takeUntilDestroyed()).subscribe(tipo => {
       const direccion = this.formulario.controls.direccionEntrega;
-      direccion.setValidators(tipo === 'DOMICILIO' ? Validators.required : null);
+      direccion.setValidators(tipo === 'DOMICILIO' ? [Validators.required, noSoloEspacios] : null);
       direccion.updateValueAndValidity();
       this.error.set('');
     });
