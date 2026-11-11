@@ -1,7 +1,7 @@
 <section class="pagina">
   <h1>Mis pedidos</h1>
   <p class="subtitulo">Consulta lo que ya confirmaste.</p>
-  <app-mensaje-error [texto]="error()" />
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando()) {
     <p>Cargando…</p>
   } @else if (!pedidos().length) {

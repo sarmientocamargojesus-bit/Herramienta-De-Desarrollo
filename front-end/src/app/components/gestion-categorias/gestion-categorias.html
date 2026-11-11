@@ -2,7 +2,7 @@
   <h1>Categorías</h1>
   <p class="subtitulo">Organiza el menú. Una categoría con productos no se puede eliminar.</p>
   <a class="boton primario" routerLink="/gestion/categorias/nueva">Nueva categoría</a
-  ><app-mensaje-error [texto]="error()" />
+  ><app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !categorias().length) {
     <app-indicador-carga />
   } @else if (!categorias().length && !error()) {

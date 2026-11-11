@@ -1,5 +1,5 @@
 <section class="pagina">
-  <a routerLink="/">← Volver al menú</a><app-mensaje-error [texto]="error()" />
+  <a routerLink="/">← Volver al menú</a><app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando()) {
     <app-indicador-carga />
   }

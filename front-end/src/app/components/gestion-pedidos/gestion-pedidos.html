@@ -1,7 +1,7 @@
 <section class="pagina">
   <h1>Pedidos</h1>
   <p class="subtitulo">Pedidos registrados por el backend después del checkout.</p>
-  <app-mensaje-error [texto]="error()" />
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !pedidos().length) {
     <app-indicador-carga />
   } @else if (!pedidos().length && !error()) {

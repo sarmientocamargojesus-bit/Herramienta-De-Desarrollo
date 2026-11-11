@@ -3,7 +3,7 @@
   <p class="subtitulo">
     El stock actual pertenece al producto. Aquí se consulta el mínimo y las fechas de alerta.
   </p>
-  <app-mensaje-error [texto]="error()" />
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !inventarios().length) {
     <app-indicador-carga />
   } @else if (!inventarios().length && !error()) {

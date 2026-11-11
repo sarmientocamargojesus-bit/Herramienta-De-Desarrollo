@@ -4,7 +4,7 @@
     Administra precio, categoría, descripción y stock. El inventario se actualiza desde el backend.
   </p>
   <a class="boton primario" routerLink="/gestion/productos/nuevo">Nuevo producto</a
-  ><app-mensaje-error [texto]="error()" />
+  ><app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !productos().length) {
     <app-indicador-carga />
   } @else if (!productos().length && !error()) {

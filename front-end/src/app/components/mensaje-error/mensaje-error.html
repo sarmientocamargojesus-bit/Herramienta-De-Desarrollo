@@ -1,3 +1,8 @@
 @if (texto()) {
-  <p class="error" role="alert">{{ texto() }}</p>
+  <div class="error" role="alert">
+    <p>{{ texto() }}</p>
+    @if (reintentable()) {
+      <button type="button" class="reintentar" (click)="reintentar.emit()">Reintentar</button>
+    }
+  </div>
 }

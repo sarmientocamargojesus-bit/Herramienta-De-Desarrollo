@@ -1,7 +1,7 @@
 <section class="pagina">
   <h1>Usuarios</h1>
   <p class="subtitulo">El cambio de rol conserva el nombre, teléfono y demás datos del usuario.</p>
-  <app-mensaje-error [texto]="error()" />
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !usuarios().length) {
     <app-indicador-carga />
   } @else if (!usuarios().length && !error()) {

@@ -3,7 +3,7 @@
   <p class="subtitulo">
     Se crean con el checkout; esta pantalla solo los consulta. No contiene datos reales de pago.
   </p>
-  <app-mensaje-error [texto]="error()" />
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !pagos().length) {
     <app-indicador-carga />
   } @else if (!pagos().length && !error()) {

@@ -38,7 +38,11 @@ describe.each(pantallas)('Gestión de %s', (_nombre, componente, url, mensajeVac
     fixture.detectChanges();
     const texto = () => { fixture.detectChanges(); return (fixture.nativeElement as HTMLElement).textContent ?? ''; };
     const tabla = () => { fixture.detectChanges(); return (fixture.nativeElement as HTMLElement).querySelector('table'); };
-    return { http: TestBed.inject(HttpTestingController), texto, tabla };
+    const boton = (nombre: string) => {
+      fixture.detectChanges();
+      return [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(b => b.textContent?.trim() === nombre);
+    };
+    return { http: TestBed.inject(HttpTestingController), texto, tabla, boton };
   }
 
   it('muestra el indicador mientras carga', () => {
@@ -61,6 +65,23 @@ describe.each(pantallas)('Gestión de %s', (_nombre, componente, url, mensajeVac
     http.expectOne(url).flush([registro]);
     expect(tabla()).not.toBeNull();
     expect(texto()).not.toContain(mensajeVacio);
+  });
+
+  it('ofrece Reintentar si el backend no responde y vuelve a cargar la lista', () => {
+    const { http, texto, tabla, boton } = abrir();
+    http.expectOne(url).flush(null, { status: 0, statusText: 'Unknown Error' });
+    expect(texto()).toContain('No se pudo conectar con el backend');
+
+    boton('Reintentar')!.click();
+    expect(texto()).not.toContain('No se pudo conectar');
+    http.expectOne(url).flush([registro]);
+    expect(tabla()).not.toBeNull();
+  });
+
+  it('no ofrece Reintentar ante un error que no se resuelve repitiendo la petición', () => {
+    const { http, boton } = abrir();
+    http.expectOne(url).flush({ mensaje: 'Sin permiso' }, { status: 403, statusText: 'Forbidden' });
+    expect(boton('Reintentar')).toBeUndefined();
   });
 
   it('muestra solo el error si la petición falla', () => {

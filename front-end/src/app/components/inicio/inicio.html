@@ -9,7 +9,7 @@
       </div>
       <span class="spark" aria-hidden="true">✳</span>
     </div>
-    <app-mensaje-error [texto]="error()" />
+    <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
     @if (aviso()) {
       <p class="aviso" role="status">{{ aviso() }}</p>
     }

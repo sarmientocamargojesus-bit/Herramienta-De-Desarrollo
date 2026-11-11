@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   imports: [],
@@ -6,4 +6,9 @@ import { Component, input } from '@angular/core';
   styleUrl: "./mensaje-error.scss",
   templateUrl: "./mensaje-error.html",
 })
-export class MensajeError { texto = input(''); }
+export class MensajeError {
+  texto = input('');
+  // Si el error permite repetir la petición, el padre recibe el evento reintentar y vuelve a cargar.
+  reintentable = input(false);
+  reintentar = output<void>();
+}

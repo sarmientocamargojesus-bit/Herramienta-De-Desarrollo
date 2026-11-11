@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { catchError, debounceTime, distinctUntilChanged, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoService } from '../../core/carrito.service';
 import { CatalogoService } from '../../core/catalogo.service';
-import { mensajeError } from '../../core/errores';
+import { esReintentable, mensajeError } from '../../core/errores';
 import { Producto } from '../../models/product';
 import { CatalogoProductos } from '../catalogo-productos/catalogo-productos';
 import { FiltroCategorias } from '../filtro-categorias/filtro-categorias';
@@ -34,6 +34,8 @@ export class Inicio implements OnInit {
     .filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
   readonly cargando = signal(true);
   readonly error = signal('');
+  // Solo la carga del menú ofrece Reintentar; los errores al agregar o buscar no.
+  readonly reintentable = signal(false);
   readonly aviso = signal('');
 
   constructor() {
@@ -48,18 +50,24 @@ export class Inicio implements OnInit {
     ).subscribe(resultados => { this.resultados.set(resultados); this.buscando.set(false); });
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void { this.cargar(); }
+
+  cargar(): void {
+    this.error.set('');
+    this.reintentable.set(false);
+    this.cargando.set(true);
     forkJoin({ productos: this.catalogo.productos(), categorias: this.catalogo.categorias() }).subscribe({
       next: ({ productos, categorias }) => {
         this.productos.set(productos);
         this.categorias.set([{ label: 'Todos', value: 'TODAS' }, ...categorias.map(c => ({ label: c.nombre, value: c.nombre }))]);
         this.cargando.set(false);
       },
-      error: error => { this.error.set(mensajeError(error)); this.cargando.set(false); }
+      error: error => { this.error.set(mensajeError(error)); this.reintentable.set(esReintentable(error)); this.cargando.set(false); }
     });
   }
 
   agregar(producto: Producto): void {
+    this.reintentable.set(false);
     try {
       this.carrito.agregar(producto).subscribe({
         next: () => { this.aviso.set(`${producto.nombre} se agregó al carrito.`); this.error.set(''); },
@@ -72,7 +80,7 @@ export class Inicio implements OnInit {
   private buscar(texto: string): Observable<Producto[] | null> {
     return this.catalogo.buscar(texto).pipe(
       tap(() => this.error.set('')),
-      catchError(error => { this.error.set(mensajeError(error)); return of(null); })
+      catchError(error => { this.error.set(mensajeError(error)); this.reintentable.set(false); return of(null); })
     );
   }
 }
