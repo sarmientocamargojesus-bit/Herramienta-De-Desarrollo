@@ -3,7 +3,7 @@
 El avance actual contiene la API REST en Spring Boot (catálogo, usuarios,
 pedidos, carrito, checkout con pago simulado e inventario) y el frontend
 Angular de la carpeta `front-end`, que la consume. Aplica los conceptos
-estudiados durante las semanas 2, 3, 6, 7, 8, 12 y 13.
+estudiados durante las semanas 2, 3, 6, 7, 8, 12, 13 y 14.
 
 ## Semana 2
 
@@ -82,6 +82,25 @@ estudiados durante las semanas 2, 3, 6, 7, 8, 12 y 13.
 - Mensajes específicos debajo de cada campo cuando el control está `invalid` y `touched`.
 - Envío solo con datos válidos, botón bloqueado durante el envío y errores del servidor sin perder los
   datos escritos. Si el correo ya está registrado (409), el aviso aparece junto al campo Correo.
+
+## Semana 14
+
+- Consumo de la API REST con `HttpClient` y Observables tipados (`Producto`, `Pedido`, `Pago`, etc.).
+- Servicios reutilizables en `front-end/src/app/core` (`CatalogoService`, `PedidosService`,
+  `GestionService`, `CarritoService` y `SesionService`); los componentes no llaman a HTTP directamente.
+- URL base centralizada en `API_URL` (`core/api.config.ts`), usada por los servicios, el interceptor y las
+  imágenes.
+- Operaciones CRUD: `GET` (menú, pedidos, inventario, pagos, usuarios), `POST` (login, registro, checkout,
+  productos, categorías), `PUT` (productos, categorías, rol, stock mínimo, carrito) y `DELETE` (productos,
+  categorías, carrito y fotos) con confirmación antes de eliminar.
+- RxJS: el buscador del menú usa `debounceTime` y `switchMap` para cancelar la búsqueda anterior y consulta
+  `GET /api/productos/buscar`.
+- Estados de carga, lista vacía y error en las pantallas de gestión.
+- Manejo de errores HTTP: mensajes propios para conexión, 401, 403 y 404, y botón Reintentar cuando no hay
+  conexión o falla el servidor.
+- Avisos de éxito (`AvisosService`) que aparecen solo cuando la API confirma la operación.
+- Autenticación y autorización: el interceptor agrega `Authorization: Bearer` a las peticiones de la API y
+  cierra la sesión ante un 401; las rutas se protegen por rol con `rolGuard`.
 
 ## Modelo de datos del sistema
 

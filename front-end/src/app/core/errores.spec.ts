@@ -13,6 +13,13 @@ describe('Manejo de errores HTTP', () => {
     expect(mensajeError(respuesta(409, { mensaje: 'Stock insuficiente' }))).toBe('Stock insuficiente');
   });
 
+  it('explica que el servidor no está disponible ante 502, 503 y 504', () => {
+    for (const status of [502, 503, 504]) {
+      expect(mensajeError(respuesta(status))).toBe(
+        'El servidor no está disponible en este momento. Intenta de nuevo en unos segundos.');
+    }
+  });
+
   it('solo permite reintentar sin conexión o ante fallas del servidor', () => {
     expect(esReintentable(respuesta(0))).toBe(true);
     expect(esReintentable(respuesta(500))).toBe(true);

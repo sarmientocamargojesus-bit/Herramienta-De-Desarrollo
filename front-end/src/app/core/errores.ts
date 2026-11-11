@@ -5,6 +5,10 @@ export function mensajeError(error: unknown): string {
     if (error.status === 0) return 'No se pudo conectar con el backend. Verifica que Spring Boot esté iniciado.';
     if (error.status === 401) return 'La sesión no es válida o ha vencido. Inicia sesión nuevamente.';
     if (error.status === 403) return 'No tienes permiso para realizar esta acción.';
+    // 502, 503 y 504 los devuelve el proxy o un servidor intermedio cuando el backend no responde.
+    if ([502, 503, 504].includes(error.status)) {
+      return 'El servidor no está disponible en este momento. Intenta de nuevo en unos segundos.';
+    }
     const cuerpo = error.error as { mensaje?: string; message?: string } | null;
     const mensaje = cuerpo?.mensaje || cuerpo?.message;
     if (error.status === 404) return mensaje || 'El recurso solicitado no existe o fue eliminado.';

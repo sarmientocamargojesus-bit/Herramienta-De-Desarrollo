@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { AvisosService } from '../../core/avisos.service';
 import { CatalogoService } from '../../core/catalogo.service';
 import { mensajeError } from '../../core/errores';
 import { noSoloEspacios } from '../../core/validadores';
@@ -15,6 +16,7 @@ export class FormularioProducto implements OnInit {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly servicio = inject(CatalogoService);
+  private readonly avisos = inject(AvisosService);
   readonly id = signal<number | null>(Number(this.ruta.snapshot.paramMap.get('id')) || null);
   readonly categorias = signal<Categoria[]>([]);
   readonly producto = signal<Producto | null>(null);
@@ -64,7 +66,7 @@ export class FormularioProducto implements OnInit {
         this.producto.set(producto);
         const archivo = this.archivo();
         if (archivo) this.subirImagen(producto.id, archivo);
-        else { this.enviando.set(false); void this.router.navigateByUrl('/gestion/productos'); }
+        else { this.enviando.set(false); this.avisos.exito('Producto guardado.'); void this.router.navigateByUrl('/gestion/productos'); }
       },
       error: error => { this.error.set(mensajeError(error)); this.enviando.set(false); }
     });
@@ -82,7 +84,7 @@ export class FormularioProducto implements OnInit {
 
   private subirImagen(id: number, archivo: File): void {
     this.servicio.subirImagen(id, archivo).subscribe({
-      next: () => { this.archivo.set(null); this.imagenVersion.update(version => version + 1); this.enviando.set(false); void this.router.navigateByUrl('/gestion/productos'); },
+      next: () => { this.archivo.set(null); this.imagenVersion.update(version => version + 1); this.enviando.set(false); this.avisos.exito('Producto y foto guardados.'); void this.router.navigateByUrl('/gestion/productos'); },
       error: error => { this.error.set('El producto se guardó, pero no se pudo subir la imagen. Puedes volver a intentarlo sin crear otro producto. ' + mensajeError(error)); this.enviando.set(false); }
     });
   }

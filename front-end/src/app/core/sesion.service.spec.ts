@@ -46,12 +46,36 @@ describe('SesionService', () => {
     let estado = 0;
     TestBed.inject(HttpClient).get('/api/pedidos/mios').subscribe({ error: error => estado = error.status });
 
-    const peticion = TestBed.inject(HttpTestingController).expectOne('/api/pedidos/mios');
+    const http = TestBed.inject(HttpTestingController);
+    const peticion = http.expectOne('/api/pedidos/mios');
     expect(peticion.request.headers.get('Authorization')).toBe('Bearer token-prueba');
     peticion.flush({ mensaje: 'La sesión ya no es válida' }, { status: 401, statusText: 'Unauthorized' });
 
+    // La ruta protegida se repite sin token y vuelve a responder 401.
+    const repetida = http.expectOne('/api/pedidos/mios');
+    expect(repetida.request.headers.has('Authorization')).toBe(false);
+    repetida.flush({ mensaje: 'Debe iniciar sesión' }, { status: 401, statusText: 'Unauthorized' });
+
     expect(estado).toBe(401);
     expect(sesion.autenticado()).toBe(false);
+  });
+
+  it('una ruta pública con un token rechazado se carga sin token', () => {
+    guardarSesion(Date.now() + 60_000);
+    const sesion = TestBed.inject(SesionService);
+    let productos: unknown;
+    TestBed.inject(HttpClient).get('/api/productos').subscribe(respuesta => productos = respuesta);
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/productos')
+      .flush({ mensaje: 'El token JWT es inválido o está vencido' }, { status: 401, statusText: 'Unauthorized' });
+    const repetida = http.expectOne('/api/productos');
+    expect(repetida.request.headers.has('Authorization')).toBe(false);
+    repetida.flush([{ id: 1, nombre: 'Burger Brava' }]);
+
+    expect(productos).toEqual([{ id: 1, nombre: 'Burger Brava' }]);
+    expect(sesion.autenticado()).toBe(false);
+    http.verify();
   });
 
   it('un 403 no cierra la sesión', () => {
