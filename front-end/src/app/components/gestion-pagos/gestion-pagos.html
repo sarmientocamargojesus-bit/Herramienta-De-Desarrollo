@@ -4,30 +4,36 @@
     Se crean con el checkout; esta pantalla solo los consulta. No contiene datos reales de pago.
   </p>
   <app-mensaje-error [texto]="error()" />
-  <div class="panel tabla-contenedor">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Pedido</th>
-          <th>Método</th>
-          <th>Estado</th>
-          <th>Monto</th>
-          <th>Fecha</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of pagos(); track p.id) {
+  @if (cargando() && !pagos().length) {
+    <app-indicador-carga />
+  } @else if (!pagos().length && !error()) {
+    <p class="vacio">Todavía no hay pagos registrados.</p>
+  } @else if (pagos().length) {
+    <div class="panel tabla-contenedor">
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>#{{ p.id }}</td>
-            <td>#{{ p.pedido.id }}</td>
-            <td>{{ p.metodo }}</td>
-            <td>{{ p.estado }}</td>
-            <td>S/ {{ p.monto.toFixed(2) }}</td>
-            <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <th>ID</th>
+            <th>Pedido</th>
+            <th>Método</th>
+            <th>Estado</th>
+            <th>Monto</th>
+            <th>Fecha</th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (p of pagos(); track p.id) {
+            <tr>
+              <td>#{{ p.id }}</td>
+              <td>#{{ p.pedido.id }}</td>
+              <td>{{ p.metodo }}</td>
+              <td>{{ p.estado }}</td>
+              <td>S/ {{ p.monto.toFixed(2) }}</td>
+              <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </section>

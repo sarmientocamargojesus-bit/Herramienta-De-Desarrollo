@@ -5,33 +5,39 @@
   </p>
   <a class="boton primario" routerLink="/gestion/productos/nuevo">Nuevo producto</a
   ><app-mensaje-error [texto]="error()" />
-  <div class="panel tabla-contenedor">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Categoría</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of productos(); track p.id) {
+  @if (cargando() && !productos().length) {
+    <app-indicador-carga />
+  } @else if (!productos().length && !error()) {
+    <p class="vacio">Todavía no hay productos. Crea el primero con «Nuevo producto».</p>
+  } @else if (productos().length) {
+    <div class="panel tabla-contenedor">
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>{{ p.nombre }}</td>
-            <td>{{ p.categoria }}</td>
-            <td>S/ {{ p.precio.toFixed(2) }}</td>
-            <td>{{ p.stock }}</td>
-            <td>
-              <a [routerLink]="['/gestion/productos', p.id, 'editar']">Editar</a> ·
-              <button (click)="elegido.set(p)">Eliminar</button>
-            </td>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acciones</th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (p of productos(); track p.id) {
+            <tr>
+              <td>{{ p.nombre }}</td>
+              <td>{{ p.categoria }}</td>
+              <td>S/ {{ p.precio.toFixed(2) }}</td>
+              <td>{{ p.stock }}</td>
+              <td>
+                <a [routerLink]="['/gestion/productos', p.id, 'editar']">Editar</a> ·
+                <button (click)="elegido.set(p)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
   <app-dialogo-confirmacion
     [abierto]="!!elegido()"
     titulo="Eliminar producto"

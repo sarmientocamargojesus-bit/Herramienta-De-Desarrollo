@@ -3,31 +3,37 @@
   <p class="subtitulo">Organiza el menú. Una categoría con productos no se puede eliminar.</p>
   <a class="boton primario" routerLink="/gestion/categorias/nueva">Nueva categoría</a
   ><app-mensaje-error [texto]="error()" />
-  <div class="panel tabla-contenedor">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Activa</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of categorias(); track c.id) {
+  @if (cargando() && !categorias().length) {
+    <app-indicador-carga />
+  } @else if (!categorias().length && !error()) {
+    <p class="vacio">Todavía no hay categorías.</p>
+  } @else if (categorias().length) {
+    <div class="panel tabla-contenedor">
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>{{ c.nombre }}</td>
-            <td>{{ c.descripcion }}</td>
-            <td>{{ c.activo ? 'Sí' : 'No' }}</td>
-            <td>
-              <a [routerLink]="['/gestion/categorias', c.id, 'editar']">Editar</a> ·
-              <button (click)="elegida.set(c)">Eliminar</button>
-            </td>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Activa</th>
+            <th>Acciones</th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (c of categorias(); track c.id) {
+            <tr>
+              <td>{{ c.nombre }}</td>
+              <td>{{ c.descripcion }}</td>
+              <td>{{ c.activo ? 'Sí' : 'No' }}</td>
+              <td>
+                <a [routerLink]="['/gestion/categorias', c.id, 'editar']">Editar</a> ·
+                <button (click)="elegida.set(c)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
   <app-dialogo-confirmacion
     [abierto]="!!elegida()"
     titulo="Eliminar categoría"

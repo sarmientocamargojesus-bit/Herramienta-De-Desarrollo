@@ -2,30 +2,36 @@
   <h1>Pedidos</h1>
   <p class="subtitulo">Pedidos registrados por el backend después del checkout.</p>
   <app-mensaje-error [texto]="error()" />
-  <div class="panel tabla-contenedor">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Fecha</th>
-          <th>Estado</th>
-          <th>Total</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of pedidos(); track p.id) {
+  @if (cargando() && !pedidos().length) {
+    <app-indicador-carga />
+  } @else if (!pedidos().length && !error()) {
+    <p class="vacio">Todavía no hay pedidos registrados.</p>
+  } @else if (pedidos().length) {
+    <div class="panel tabla-contenedor">
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>#{{ p.id }}</td>
-            <td>{{ p.usuario.nombre }}</td>
-            <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ p.estado }}</td>
-            <td>S/ {{ p.total.toFixed(2) }}</td>
-            <td><a [routerLink]="['/gestion/pedidos', p.id]">Ver detalle</a></td>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th></th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (p of pedidos(); track p.id) {
+            <tr>
+              <td>#{{ p.id }}</td>
+              <td>{{ p.usuario.nombre }}</td>
+              <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ p.estado }}</td>
+              <td>S/ {{ p.total.toFixed(2) }}</td>
+              <td><a [routerLink]="['/gestion/pedidos', p.id]">Ver detalle</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </section>

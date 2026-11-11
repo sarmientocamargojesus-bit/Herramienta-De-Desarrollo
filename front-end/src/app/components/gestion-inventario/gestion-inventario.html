@@ -4,30 +4,36 @@
     El stock actual pertenece al producto. Aquí se consulta el mínimo y las fechas de alerta.
   </p>
   <app-mensaje-error [texto]="error()" />
-  <div class="panel tabla-contenedor">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Actual</th>
-          <th>Mínimo</th>
-          <th>Stock bajo desde</th>
-          <th>Agotado desde</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (i of inventarios(); track i.id) {
+  @if (cargando() && !inventarios().length) {
+    <app-indicador-carga />
+  } @else if (!inventarios().length && !error()) {
+    <p class="vacio">No hay productos con configuración de inventario.</p>
+  } @else if (inventarios().length) {
+    <div class="panel tabla-contenedor">
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>{{ i.producto.nombre }}</td>
-            <td>{{ i.producto.stock }}</td>
-            <td>{{ i.stockMinimo }}</td>
-            <td>{{ (i.fechaStockBajo | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
-            <td>{{ (i.fechaAgotado | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
-            <td><a [routerLink]="['/gestion/inventario', i.id, 'editar']">Ajustar mínimo</a></td>
+            <th>Producto</th>
+            <th>Actual</th>
+            <th>Mínimo</th>
+            <th>Stock bajo desde</th>
+            <th>Agotado desde</th>
+            <th></th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (i of inventarios(); track i.id) {
+            <tr>
+              <td>{{ i.producto.nombre }}</td>
+              <td>{{ i.producto.stock }}</td>
+              <td>{{ i.stockMinimo }}</td>
+              <td>{{ (i.fechaStockBajo | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
+              <td>{{ (i.fechaAgotado | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
+              <td><a [routerLink]="['/gestion/inventario', i.id, 'editar']">Ajustar mínimo</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </section>
