@@ -17,6 +17,14 @@ export class InicioSesion {
   readonly formulario = this.fb.nonNullable.group({ correo: ['', [Validators.required, Validators.email]], contrasena: ['', Validators.required] });
   readonly enviando = signal(false);
   readonly error = signal('');
+  readonly verContrasena = signal(false);
+  // Al venir del registro, el correo llega en el estado de la navegación (no en la URL) y se precarga.
+  readonly recienRegistrado = signal(false);
+
+  constructor() {
+    const estado = this.router.currentNavigation()?.extras.state as { correo?: string } | undefined;
+    if (estado?.correo) { this.formulario.controls.correo.setValue(estado.correo); this.recienRegistrado.set(true); }
+  }
 
   enviar(): void {
     if (this.formulario.invalid) { this.formulario.markAllAsTouched(); return; }

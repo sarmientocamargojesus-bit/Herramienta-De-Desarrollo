@@ -8,67 +8,69 @@
     @if (error()) {
       <app-mensaje-error [texto]="error()" />
     }
-    @if (listo()) {
-      <p class="exito">
-        Cuenta creada. Ahora puedes <a routerLink="/iniciar-sesion">iniciar sesión</a>.
-      </p>
-    } @else {
-      <form class="formulario" [formGroup]="formulario" (ngSubmit)="enviar()">
-        <label class="campo"
-          >Nombre<input formControlName="nombre" autocomplete="name" />
-          @if (formulario.controls.nombre.touched && formulario.controls.nombre.errors; as e) {
-            <span class="ayuda">{{
-              e['maxlength'] ? 'Usa como máximo 100 caracteres.' : 'Ingresa tu nombre.'
-            }}</span>
-          }</label
-        ><label class="campo"
-          >Correo<input type="email" formControlName="correo" autocomplete="email" />
-          @if (formulario.controls.correo.touched && formulario.controls.correo.errors; as e) {
-            <span class="ayuda">{{
-              e['registrado']
-                ? 'Este correo ya está registrado. Inicia sesión o usa otro correo.'
-                : 'Ingresa un correo válido.'
-            }}</span>
-          }</label
-        ><label class="campo"
-          >Teléfono<input type="tel" formControlName="telefono" autocomplete="tel" />
-          @if (formulario.controls.telefono.touched && formulario.controls.telefono.invalid) {
-            <span class="ayuda">Ingresa tu teléfono.</span>
-          }</label
-        ><label class="campo"
-          >Dirección (opcional)<input
-            formControlName="direccion"
-            autocomplete="street-address" /></label
-        ><label class="campo"
-          >Contraseña<input
-            type="password"
-            formControlName="contrasena"
-            autocomplete="new-password"
-          />
-          @if (formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid) {
-            <span class="ayuda">Usa al menos 6 caracteres.</span>
+    <form class="formulario" [formGroup]="formulario" (ngSubmit)="enviar()">
+      <label class="campo"
+        >Nombre<input formControlName="nombre" autocomplete="name" />
+        @if (formulario.controls.nombre.touched && formulario.controls.nombre.errors; as e) {
+          <span class="ayuda">{{
+            e['maxlength'] ? 'Usa como máximo 100 caracteres.' : 'Ingresa tu nombre.'
+          }}</span>
+        }</label
+      ><label class="campo"
+        >Correo<input type="email" formControlName="correo" autocomplete="email" />
+        @if (formulario.controls.correo.touched && formulario.controls.correo.errors; as e) {
+          <span class="ayuda">{{
+            e['registrado']
+              ? 'Este correo ya está registrado. Inicia sesión o usa otro correo.'
+              : 'Ingresa un correo válido.'
+          }}</span>
+        }</label
+      ><label class="campo"
+        >Teléfono<input type="tel" formControlName="telefono" autocomplete="tel" />
+        @if (formulario.controls.telefono.touched && formulario.controls.telefono.invalid) {
+          <span class="ayuda">Ingresa tu teléfono.</span>
+        }</label
+      ><label class="campo"
+        >Dirección (opcional)<input
+          formControlName="direccion"
+          autocomplete="street-address" /></label
+      ><label class="campo"
+        >Contraseña<input
+          [type]="verContrasena() ? 'text' : 'password'"
+          formControlName="contrasena"
+          autocomplete="new-password"
+        />
+        @if (formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid) {
+          <span class="ayuda">Usa al menos 6 caracteres.</span>
+        }
+      </label>
+      <label class="campo"
+        >Confirmar contraseña<input
+          [type]="verContrasena() ? 'text' : 'password'"
+          formControlName="confirmarContrasena"
+          autocomplete="new-password"
+        />
+        @if (formulario.controls.confirmarContrasena.touched) {
+          @if (formulario.controls.confirmarContrasena.invalid) {
+            <span class="ayuda">Repite tu contraseña.</span>
+          } @else if (formulario.errors?.['noCoinciden']) {
+            <span class="ayuda">Las contraseñas no coinciden.</span>
           }
-        </label>
-        <label class="campo"
-          >Confirmar contraseña<input
-            type="password"
-            formControlName="confirmarContrasena"
-            autocomplete="new-password"
-          />
-          @if (formulario.controls.confirmarContrasena.touched) {
-            @if (formulario.controls.confirmarContrasena.invalid) {
-              <span class="ayuda">Repite tu contraseña.</span>
-            } @else if (formulario.errors?.['noCoinciden']) {
-              <span class="ayuda">Las contraseñas no coinciden.</span>
-            }
-          }
-        </label>
-        <div class="acciones">
-          <button class="boton primario" [disabled]="enviando()">
-            {{ enviando() ? 'Creando…' : 'Crear cuenta' }}</button
-          ><a routerLink="/iniciar-sesion">Ya tengo cuenta</a>
-        </div>
-      </form>
-    }
+        }
+      </label>
+      <label class="mostrar"
+        ><input
+          type="checkbox"
+          [checked]="verContrasena()"
+          (change)="verContrasena.set($any($event.target).checked)"
+        />
+        Mostrar contraseñas</label
+      >
+      <div class="acciones">
+        <button class="boton primario" [disabled]="enviando()">
+          {{ enviando() ? 'Creando…' : 'Crear cuenta' }}</button
+        ><a routerLink="/iniciar-sesion">Ya tengo cuenta</a>
+      </div>
+    </form>
   </div>
 </section>

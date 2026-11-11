@@ -3,6 +3,9 @@
     <p class="eyebrow">TU CUENTA</p>
     <h1>Iniciar sesión</h1>
     <p class="subtitulo">Entra para conservar tu carrito y confirmar tu pedido.</p>
+    @if (recienRegistrado()) {
+      <p class="exito" role="status">Cuenta creada. Escribe tu contraseña para ingresar.</p>
+    }
     @if (error()) {
       <app-mensaje-error [texto]="error()" />
     }
@@ -15,7 +18,7 @@
       </label>
       <label class="campo"
         >Contraseña<input
-          type="password"
+          [type]="verContrasena() ? 'text' : 'password'"
           formControlName="contrasena"
           autocomplete="current-password"
         />
@@ -23,10 +26,18 @@
           <span class="ayuda">La contraseña es obligatoria.</span>
         }
       </label>
+      <label class="mostrar"
+        ><input
+          type="checkbox"
+          [checked]="verContrasena()"
+          (change)="verContrasena.set($any($event.target).checked)"
+        />
+        Mostrar contraseña</label
+      >
       <div class="acciones">
         <button class="boton primario" type="submit" [disabled]="enviando()">
           {{ enviando() ? 'Ingresando…' : 'Ingresar' }}</button
-        ><a routerLink="/registro">Crear cuenta</a>
+        ><a routerLink="/registro">¿No tienes cuenta? Crear cuenta</a>
       </div>
     </form>
   </div>

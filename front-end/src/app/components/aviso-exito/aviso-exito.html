@@ -1,6 +1,9 @@
 @if (avisos.mensaje(); as mensaje) {
   <div class="aviso-exito" role="status">
     <span>{{ mensaje }}</span>
+    @if (avisos.enlace(); as enlace) {
+      <a [routerLink]="enlace.ruta" (click)="avisos.cerrar()">{{ enlace.texto }}</a>
+    }
     <button type="button" aria-label="Cerrar aviso" (click)="avisos.cerrar()">×</button>
   </div>
 }

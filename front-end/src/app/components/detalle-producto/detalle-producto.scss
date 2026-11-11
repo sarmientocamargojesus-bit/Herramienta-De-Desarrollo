@@ -19,3 +19,14 @@
     grid-template-columns: 1fr;
   }
 }
+.cantidad {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+.cantidad span {
+  font-size: 13px;
+  font-weight: 800;
+  color: #6d665e;
+}

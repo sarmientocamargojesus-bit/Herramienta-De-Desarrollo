@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { mensajeError } from '../../core/errores';
 import { SesionService } from '../../core/sesion.service';
 import { camposIguales, noSoloEspacios } from '../../core/validadores';
@@ -11,6 +11,7 @@ import { MensajeError } from '../mensaje-error/mensaje-error';
 export class Registro {
   private readonly fb = inject(FormBuilder);
   private readonly sesion = inject(SesionService);
+  private readonly router = inject(Router);
   readonly formulario = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(100), noSoloEspacios]],
     correo: ['', [Validators.required, Validators.email]],
@@ -21,14 +22,15 @@ export class Registro {
   }, { validators: camposIguales('contrasena', 'confirmarContrasena') });
   readonly enviando = signal(false);
   readonly error = signal('');
-  readonly listo = signal(false);
+  readonly verContrasena = signal(false);
   enviar(): void {
     if (this.formulario.invalid) { this.formulario.markAllAsTouched(); return; }
     this.enviando.set(true); this.error.set('');
     // La confirmación solo se valida en el navegador; al backend llegan los mismos datos de siempre.
     const { confirmarContrasena, ...datos } = this.formulario.getRawValue();
     this.sesion.registrar(datos).subscribe({
-      next: () => { this.listo.set(true); this.enviando.set(false); },
+      // Al crear la cuenta se pasa al login con el correo ya escrito (en el estado, no en la URL).
+      next: () => { this.enviando.set(false); void this.router.navigateByUrl('/iniciar-sesion', { state: { correo: datos.correo.trim().toLowerCase() } }); },
       error: error => {
         this.enviando.set(false);
         // 409 en el registro significa que el correo ya existe: el aviso se muestra junto a ese campo.

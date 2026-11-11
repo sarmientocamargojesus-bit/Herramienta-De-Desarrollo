@@ -1,17 +1,17 @@
 <section class="pagina">
   <h1>Tu carrito</h1>
-  <p class="subtitulo">
-    Revisa tus productos antes de confirmar el pedido. Los precios y el stock final los verifica el
-    servidor.
-  </p>
+  <p class="subtitulo">Revisa tus productos y cantidades antes de confirmar el pedido.</p>
   <app-mensaje-error [texto]="error()" />
   @if (cargando()) {
     <p>Cargando carrito…</p>
   } @else if (!servicio.items().length) {
-    <p class="vacio">Tu carrito está vacío. <a routerLink="/">Explorar menú</a></p>
+    <div class="vacio panel">
+      <p>Tu carrito está vacío.</p>
+      <a class="boton primario" routerLink="/" fragment="menu">Ver el menú</a>
+    </div>
   } @else {
     <div class="panel tabla-contenedor">
-      <table class="tabla">
+      <table class="tabla responsiva">
         <thead>
           <tr>
             <th>Producto</th>
@@ -24,38 +24,44 @@
         <tbody>
           @for (item of servicio.items(); track item.productoId) {
             <tr>
-              <td>
-                {{ item.nombre
-                }}<small>Agregado: {{ item.fechaAgregado | date: 'dd/MM/yyyy HH:mm' }}</small>
+              <td data-label="Producto">
+                <span>
+                  <a class="nombre" [routerLink]="['/productos', item.productoId]">{{
+                    item.nombre
+                  }}</a>
+                  <small>Agregado: {{ item.fechaAgregado | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </span>
               </td>
-              <td>S/ {{ item.precio.toFixed(2) }}</td>
-              <td>
-                <input
-                  class="cantidad"
-                  type="number"
-                  min="1"
-                  [max]="item.stock"
-                  [value]="item.cantidad"
-                  (change)="cambiar(item, $any($event.target).value)"
-                  [attr.aria-label]="'Cantidad de ' + item.nombre"
+              <td data-label="Precio">S/ {{ item.precio | number: '1.2-2' }}</td>
+              <td data-label="Cantidad">
+                <app-selector-cantidad
+                  [valor]="item.cantidad"
+                  [maximo]="maximo(item)"
+                  [etiqueta]="'Cantidad de ' + item.nombre"
+                  (valorCambio)="cambiar(item, $event)"
                 />
               </td>
-              <td>S/ {{ (item.precio * item.cantidad).toFixed(2) }}</td>
-              <td><button class="quitar" (click)="quitar(item.productoId)">Quitar</button></td>
+              <td data-label="Subtotal">S/ {{ item.precio * item.cantidad | number: '1.2-2' }}</td>
+              <td data-label="">
+                <button type="button" class="quitar" (click)="quitar(item.productoId)">
+                  Quitar
+                </button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
     <div class="resumen panel">
-      <strong>Subtotal estimado: S/ {{ total().toFixed(2) }}</strong>
-      <p>La entrega a domicilio puede añadir un costo al confirmar.</p>
+      <p class="unidades">{{ unidades() }} {{ unidades() === 1 ? 'producto' : 'productos' }}</p>
+      <strong>Subtotal: S/ {{ total() | number: '1.2-2' }}</strong>
+      <p>El total final se confirma al finalizar tu pedido.</p>
       @if (sesion.rol() === 'CLIENTE') {
         <a class="boton primario" routerLink="/checkout">Continuar al pago</a>
       } @else {
         <p>
-          Tu carrito queda guardado en este navegador. Inicia sesión como cliente para importarlo y
-          pagar.
+          Tu carrito queda guardado en este navegador. Inicia sesión o crea una cuenta para
+          confirmar el pedido.
         </p>
         <a
           class="boton primario"
@@ -64,6 +70,7 @@
           >Iniciar sesión</a
         >
       }
+      <a class="seguir" routerLink="/" fragment="menu">← Seguir comprando</a>
     </div>
   }
 </section>

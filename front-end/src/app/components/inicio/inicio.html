@@ -5,14 +5,11 @@
       <div>
         <p class="eyebrow">EL MENÚ</p>
         <h2 id="menu-title">ELIGE TU <em>ANTOJO.</em></h2>
-        <p>Productos consultados al backend de Fast Food.</p>
+        <p>Hamburguesas, combos, piqueos y bebidas preparados al momento.</p>
       </div>
       <span class="spark" aria-hidden="true">✳</span>
     </div>
     <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
-    @if (aviso()) {
-      <p class="aviso" role="status">{{ aviso() }}</p>
-    }
     @if (cargando()) {
       <app-indicador-carga />
     } @else {

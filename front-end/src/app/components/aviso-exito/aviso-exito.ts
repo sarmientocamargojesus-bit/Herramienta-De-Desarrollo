@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AvisosService } from '../../core/avisos.service';
 
 @Component({
-  imports: [],
+  imports: [RouterLink],
   selector: 'app-aviso-exito',
   templateUrl: './aviso-exito.html',
   styleUrl: './aviso-exito.scss',

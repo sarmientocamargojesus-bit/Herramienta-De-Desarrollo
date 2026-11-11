@@ -42,22 +42,29 @@
             <option value="TARJETA">Tarjeta (simulada)</option>
           </select></label
         >
-        <p class="subtitulo">
-          El servidor aprobará la referencia de prueba. No se realizará ningún cobro real.
-        </p>
+        <p class="subtitulo">Es un pago de prueba: no se realizará ningún cobro real.</p>
         <button class="boton primario" [disabled]="enviando()">
           {{ enviando() ? 'Confirmando…' : 'Confirmar pedido' }}
         </button>
       </form>
-      <aside class="panel">
+      <aside class="panel resumen">
         <h2>Resumen</h2>
-        @for (item of carrito.items(); track item.productoId) {
-          <p>
-            {{ item.cantidad }} × {{ item.nombre }} — S/
-            {{ (item.precio * item.cantidad).toFixed(2) }}
-          </p>
-        }
-        <p>El total definitivo, incluido cualquier costo de entrega, se calcula en el backend.</p>
+        <ul>
+          @for (item of carrito.items(); track item.productoId) {
+            <li>
+              <span>{{ item.cantidad }} × {{ item.nombre }}</span>
+              <span>S/ {{ item.precio * item.cantidad | number: '1.2-2' }}</span>
+            </li>
+          }
+        </ul>
+        <p class="total">
+          <span>Total a pagar</span><strong>S/ {{ total() | number: '1.2-2' }}</strong>
+        </p>
+        <p class="nota">
+          Los precios y el stock se confirman al registrar el pedido. Si un producto se agotó, el
+          pedido no se registra y tu carrito se conserva.
+        </p>
+        <a routerLink="/carrito">← Editar carrito</a>
       </aside>
     </div>
   }

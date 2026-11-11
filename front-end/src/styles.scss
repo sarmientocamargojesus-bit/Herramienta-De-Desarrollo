@@ -312,3 +312,23 @@ p {
     box-shadow: none;
   }
 }
+
+// Los enlaces a secciones (#menu, #nosotros) dejan espacio para el encabezado fijo de la tienda.
+html {
+  scroll-padding-top: 96px;
+}
+@media (max-width: 760px) {
+  html {
+    scroll-padding-top: 140px;
+  }
+}
+
+// Casilla "Mostrar contraseña" de los formularios de acceso.
+.mostrar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4d473f;
+  cursor: pointer;
+}

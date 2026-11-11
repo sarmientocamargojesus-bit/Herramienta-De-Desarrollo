@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,10 +9,12 @@ import { PedidosService } from '../../core/pedidos.service';
 import { noSoloEspacios } from '../../core/validadores';
 import { CheckoutRequest } from '../../models/product';
 import { MensajeError } from '../mensaje-error/mensaje-error';
-@Component({ imports: [ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-checkout', templateUrl: './checkout.html', styleUrl: './checkout.scss' })
+@Component({ imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-checkout', templateUrl: './checkout.html', styleUrl: './checkout.scss' })
 export class Checkout implements OnInit {
   private readonly fb = inject(FormBuilder); private readonly pedidos = inject(PedidosService); private readonly router = inject(Router);
-  readonly carrito = inject(CarritoService); readonly error = signal(''); readonly enviando = signal(false); readonly cargando = signal(true);
+  readonly carrito = inject(CarritoService);
+  // Total con los precios del carrito; el backend vuelve a calcularlo al confirmar.
+  readonly total = computed(() => this.carrito.items().reduce((s, i) => s + i.precio * i.cantidad, 0)); readonly error = signal(''); readonly enviando = signal(false); readonly cargando = signal(true);
   readonly formulario = this.fb.nonNullable.group({ tipoEntrega: ['RECOJO' as 'RECOJO'|'DOMICILIO', Validators.required], direccionEntrega: [''], observaciones: [''], metodoPago: ['YAPE' as 'YAPE'|'TARJETA', Validators.required] });
   constructor() {
     // La dirección solo es obligatoria para domicilio; al cambiar la entrega se recalcula la validez del formulario.

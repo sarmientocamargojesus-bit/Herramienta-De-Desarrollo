@@ -1,16 +1,25 @@
 <section class="pagina">
   <app-mensaje-error [texto]="error()" />
   @if (pedido(); as p) {
-    <div class="panel">
+    <div class="panel confirmacion">
       <p class="exito">Pedido confirmado</p>
       <h1>¡Gracias por tu pedido!</h1>
-      <p>Pedido #{{ p.id }} · {{ p.estado }}</p>
-      <p>Fecha: {{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
-      <p>Total: S/ {{ p.total.toFixed(2) }}</p>
-      <p>El pago fue simulado para este proyecto.</p>
+      <dl>
+        <dt>Pedido</dt>
+        <dd>#{{ p.id }} <app-etiqueta-estado [valor]="p.estado" /></dd>
+        <dt>Fecha</dt>
+        <dd>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        <dt>Entrega</dt>
+        <dd>{{ p.tipoEntrega === 'DOMICILIO' ? 'A domicilio' : 'Recojo en tienda' }}</dd>
+        <dt>Total</dt>
+        <dd>
+          <strong>S/ {{ p.total | number: '1.2-2' }}</strong>
+        </dd>
+      </dl>
+      <p class="nota">El pago fue simulado para este proyecto: no se realizó ningún cobro real.</p>
       <div class="acciones">
         <a class="boton primario" [routerLink]="['/mis-pedidos', p.id]">Ver detalle</a
-        ><a class="boton secundario" routerLink="/">Volver al menú</a>
+        ><a class="boton secundario" routerLink="/" fragment="menu">Seguir comprando</a>
       </div>
     </div>
   }

@@ -1,8 +1,7 @@
-.cantidad {
-  width: 75px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.nombre {
+  color: inherit;
+  font-weight: 800;
+  text-decoration: none;
 }
 small {
   display: block;
@@ -20,7 +19,32 @@ small {
   margin-top: 20px;
   max-width: 420px;
   margin-left: auto;
+  display: grid;
+  gap: 10px;
 }
 .resumen p {
+  margin: 0;
   color: #746c63;
+}
+.unidades {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.resumen strong {
+  font-size: 22px;
+}
+.seguir {
+  justify-self: center;
+  color: #bb2e1f;
+  font-weight: 750;
+}
+.vacio.panel {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.vacio p {
+  margin: 0;
 }
