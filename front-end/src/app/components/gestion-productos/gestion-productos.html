@@ -10,33 +10,75 @@
   } @else if (!productos().length && !error()) {
     <p class="vacio">Todavía no hay productos. Crea el primero con «Nuevo producto».</p>
   } @else if (productos().length) {
-    <div class="panel tabla-contenedor">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (p of productos(); track p.id) {
-            <tr>
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.categoria }}</td>
-              <td>S/ {{ p.precio.toFixed(2) }}</td>
-              <td>{{ p.stock }}</td>
-              <td>
-                <a [routerLink]="['/gestion/productos', p.id, 'editar']">Editar</a> ·
-                <button (click)="elegido.set(p)">Eliminar</button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="barra-filtros">
+      <input
+        type="search"
+        placeholder="Buscar por nombre o descripción"
+        aria-label="Buscar productos"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+      <select
+        aria-label="Filtrar por categoría"
+        [value]="categoria()"
+        (change)="categoria.set($any($event.target).value)"
+      >
+        <option value="TODAS">Todas las categorías</option>
+        @for (c of categoriasDisponibles(); track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+      <span class="contador">{{ visibles().length }} de {{ productos().length }} productos</span>
     </div>
+    @if (!visibles().length) {
+      <p class="vacio">Ningún producto coincide con la búsqueda.</p>
+    } @else {
+      <div class="panel tabla-contenedor">
+        <table class="tabla responsiva">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of visibles(); track p.id) {
+              <tr>
+                <td data-label="Producto">
+                  <div class="producto">
+                    <app-imagen-producto class="miniatura" [producto]="p" />
+                    <span>{{ p.nombre }}</span>
+                  </div>
+                </td>
+                <td data-label="Categoría">{{ p.categoria }}</td>
+                <td data-label="Precio">S/ {{ p.precio | number: '1.2-2' }}</td>
+                <td data-label="Stock">
+                  {{ p.stock }}
+                  @if (p.stock === 0) {
+                    <app-etiqueta-estado valor="AGOTADO" />
+                  }
+                </td>
+                <td data-label="Acciones">
+                  <div class="acciones-fila">
+                    <a
+                      class="boton secundario pequeno"
+                      [routerLink]="['/gestion/productos', p.id, 'editar']"
+                      >Editar</a
+                    >
+                    <button type="button" class="boton peligro pequeno" (click)="elegido.set(p)">
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
   <app-dialogo-confirmacion
     [abierto]="!!elegido()"

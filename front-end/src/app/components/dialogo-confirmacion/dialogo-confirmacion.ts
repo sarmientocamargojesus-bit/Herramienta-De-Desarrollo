@@ -10,6 +10,7 @@ export class DialogoConfirmacion {
   abierto = input(false);
   titulo = input('Confirmar acción');
   mensaje = input('¿Confirmas esta acción?');
+  textoConfirmar = input('Confirmar');
   confirmar = output<void>();
   cancelar = output<void>();
 }

@@ -8,10 +8,40 @@
   @if (pedido(); as p) {
     <h1>Pedido #{{ p.id }}</h1>
     <p class="subtitulo">
-      {{ p.fecha | date: 'dd/MM/yyyy HH:mm' }} · {{ p.estado }} · {{ p.tipoEntrega }}
+      {{ p.fecha | date: 'dd/MM/yyyy HH:mm' }} · <app-etiqueta-estado [valor]="p.estado" />
     </p>
+
+    <div class="datos">
+      @if (enGestion) {
+        <section class="panel">
+          <h2>Cliente</h2>
+          <dl>
+            <dt>Nombre</dt>
+            <dd>{{ p.usuario.nombre }}</dd>
+            <dt>Correo</dt>
+            <dd>{{ p.usuario.correo }}</dd>
+            <dt>Teléfono</dt>
+            <dd>{{ p.telefono || p.usuario.telefono || '—' }}</dd>
+          </dl>
+        </section>
+      }
+      <section class="panel">
+        <h2>Entrega</h2>
+        <dl>
+          <dt>Tipo</dt>
+          <dd>{{ p.tipoEntrega === 'DOMICILIO' ? 'A domicilio' : 'Recojo en tienda' }}</dd>
+          @if (p.tipoEntrega === 'DOMICILIO') {
+            <dt>Dirección</dt>
+            <dd>{{ p.direccionEntrega || '—' }}</dd>
+          }
+          <dt>Observaciones</dt>
+          <dd>{{ p.observaciones || 'Sin observaciones' }}</dd>
+        </dl>
+      </section>
+    </div>
+
     <div class="panel tabla-contenedor">
-      <table class="tabla">
+      <table class="tabla responsiva">
         <thead>
           <tr>
             <th>Producto</th>
@@ -23,16 +53,19 @@
         <tbody>
           @for (d of detalles(); track d.id) {
             <tr>
-              <td>{{ d.producto.nombre }}</td>
-              <td>{{ d.cantidad }}</td>
-              <td>S/ {{ d.precioUnitario.toFixed(2) }}</td>
-              <td>S/ {{ d.subtotal.toFixed(2) }}</td>
+              <td data-label="Producto">{{ d.producto.nombre }}</td>
+              <td data-label="Cantidad">{{ d.cantidad }}</td>
+              <td data-label="Precio">S/ {{ d.precioUnitario | number: '1.2-2' }}</td>
+              <td data-label="Subtotal">S/ {{ d.subtotal | number: '1.2-2' }}</td>
             </tr>
           }
         </tbody>
       </table>
-      <p>Subtotal: S/ {{ p.subtotal.toFixed(2) }} · Entrega: S/ {{ p.costoEntrega.toFixed(2) }}</p>
-      <strong>Total: S/ {{ p.total.toFixed(2) }}</strong>
+      <div class="totales">
+        <p>Subtotal: S/ {{ p.subtotal | number: '1.2-2' }}</p>
+        <p>Entrega: S/ {{ p.costoEntrega | number: '1.2-2' }}</p>
+        <strong>Total: S/ {{ p.total | number: '1.2-2' }}</strong>
+      </div>
     </div>
   }
 </section>

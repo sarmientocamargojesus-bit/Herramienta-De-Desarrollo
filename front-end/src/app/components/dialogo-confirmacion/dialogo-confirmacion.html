@@ -5,7 +5,9 @@
       <p id="pregunta">{{ mensaje() }}</p>
       <div class="acciones">
         <button type="button" (click)="cancelar.emit()">Cancelar</button
-        ><button type="button" class="peligro" (click)="confirmar.emit()">Confirmar</button>
+        ><button type="button" class="peligro" (click)="confirmar.emit()">
+          {{ textoConfirmar() }}
+        </button>
       </div>
     </div>
   </div>

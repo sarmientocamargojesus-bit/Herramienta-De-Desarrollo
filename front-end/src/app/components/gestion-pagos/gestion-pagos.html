@@ -1,7 +1,8 @@
 <section class="pagina">
   <h1>Pagos simulados</h1>
   <p class="subtitulo">
-    Se crean con el checkout; esta pantalla solo los consulta. No contiene datos reales de pago.
+    Se crean con el checkout. Anular un pago devuelve el stock y cancela su pedido. No contiene
+    datos reales de pago.
   </p>
   <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !pagos().length) {
@@ -10,7 +11,7 @@
     <p class="vacio">Todavía no hay pagos registrados.</p>
   } @else if (pagos().length) {
     <div class="panel tabla-contenedor">
-      <table class="tabla">
+      <table class="tabla responsiva">
         <thead>
           <tr>
             <th>ID</th>
@@ -19,21 +20,37 @@
             <th>Estado</th>
             <th>Monto</th>
             <th>Fecha</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          @for (p of pagos(); track p.id) {
+          @for (p of ordenados(); track p.id) {
             <tr>
-              <td>#{{ p.id }}</td>
-              <td>#{{ p.pedido.id }}</td>
-              <td>{{ p.metodo }}</td>
-              <td>{{ p.estado }}</td>
-              <td>S/ {{ p.monto.toFixed(2) }}</td>
-              <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td data-label="ID">#{{ p.id }}</td>
+              <td data-label="Pedido">
+                <a [routerLink]="['/gestion/pedidos', p.pedido.id]">#{{ p.pedido.id }}</a>
+              </td>
+              <td data-label="Método">{{ p.metodo }}</td>
+              <td data-label="Estado"><app-etiqueta-estado [valor]="p.estado" /></td>
+              <td data-label="Monto">S/ {{ p.monto | number: '1.2-2' }}</td>
+              <td data-label="Fecha">{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td data-label="">
+                <button type="button" class="boton peligro pequeno" (click)="elegido.set(p)">
+                  Anular
+                </button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
   }
+  <app-dialogo-confirmacion
+    [abierto]="!!elegido()"
+    titulo="Anular pago"
+    [mensaje]="mensajeAnulacion()"
+    textoConfirmar="Anular pago"
+    (confirmar)="anular()"
+    (cancelar)="elegido.set(null)"
+  />
 </section>

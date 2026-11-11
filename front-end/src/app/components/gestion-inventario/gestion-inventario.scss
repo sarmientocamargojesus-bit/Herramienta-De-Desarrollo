@@ -1,0 +1,41 @@
+.contadores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.contador-stock {
+  border: 1px solid #ebe3d8;
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: #fff;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #4d473f;
+}
+.contador-stock strong {
+  font-size: 18px;
+  margin-right: 4px;
+}
+.contador-stock.peligro {
+  border-left-color: #c33620;
+}
+.contador-stock.alerta {
+  border-left-color: #d99a00;
+}
+.contador-stock.exito {
+  border-left-color: #1f8a4c;
+}
+.solo-reponer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.fila-agotado td {
+  background: #fdf0ed;
+}
+.fila-bajo td {
+  background: #fff8e6;
+}

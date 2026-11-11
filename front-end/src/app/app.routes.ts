@@ -7,7 +7,8 @@ export const routes: Routes = [
     loadComponent: () => import('./components/panel-gestion/panel-gestion').then(m => m.PanelGestion),
     canActivate: [rolGuard], data: { roles: ['ADMINISTRADOR', 'EMPLEADO'] },
     children: [
-      { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
+      { path: '', redirectTo: 'resumen', pathMatch: 'full' },
+      { path: 'resumen', loadComponent: () => import('./components/resumen-gestion/resumen-gestion').then(m => m.ResumenGestion) },
       { path: 'productos', loadComponent: () => import('./components/gestion-productos/gestion-productos').then(m => m.GestionProductos), canActivate: [rolGuard], data: { roles: ['ADMINISTRADOR'] } },
       { path: 'productos/nuevo', loadComponent: () => import('./components/formulario-producto/formulario-producto').then(m => m.FormularioProducto), canActivate: [rolGuard], data: { roles: ['ADMINISTRADOR'] } },
       { path: 'productos/:id/editar', loadComponent: () => import('./components/formulario-producto/formulario-producto').then(m => m.FormularioProducto), canActivate: [rolGuard], data: { roles: ['ADMINISTRADOR'] } },

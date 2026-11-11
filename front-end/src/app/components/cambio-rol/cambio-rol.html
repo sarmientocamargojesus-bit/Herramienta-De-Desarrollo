@@ -5,12 +5,19 @@
   @if (usuario(); as u) {
     <form class="formulario panel" [formGroup]="form" (ngSubmit)="guardar()">
       <p>
-        <strong>{{ u.nombre }}</strong
-        ><br />{{ u.correo }} · {{ u.telefono }}
+        <strong>{{ u.nombre }}</strong> <app-etiqueta-estado [valor]="u.rol" /><br />{{
+          u.correo
+        }}
+        · {{ u.telefono }}
       </p>
       <p class="subtitulo">
         Solo se enviará el nuevo rol. El nombre, teléfono y demás datos permanecen intactos.
       </p>
+      @if (esPropio()) {
+        <p class="advertencia" role="note">
+          Es tu propia cuenta. Si dejas de ser administrador perderás el acceso a Gestión.
+        </p>
+      }
       <label class="campo"
         >Rol<select formControlName="rol">
           <option value="CLIENTE">Cliente</option>
@@ -20,4 +27,12 @@
       ><button class="boton primario" [disabled]="enviando()">Guardar rol</button>
     </form>
   }
+  <app-dialogo-confirmacion
+    [abierto]="confirmando()"
+    titulo="Confirmar cambio de rol"
+    [mensaje]="mensajeConfirmacion()"
+    textoConfirmar="Cambiar rol"
+    (confirmar)="confirmar()"
+    (cancelar)="confirmando.set(false)"
+  />
 </section>

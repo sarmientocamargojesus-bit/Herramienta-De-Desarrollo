@@ -6,8 +6,9 @@ import { esReintentable, mensajeError } from '../../core/errores';
 import { Categoria } from '../../models/product';
 import { DialogoConfirmacion } from '../dialogo-confirmacion/dialogo-confirmacion';
 import { IndicadorCarga } from '../indicador-carga/indicador-carga';
+import { EtiquetaEstado } from '../etiqueta-estado/etiqueta-estado';
 import { MensajeError } from '../mensaje-error/mensaje-error';
-@Component({ imports:[IndicadorCarga, RouterLink,DialogoConfirmacion,MensajeError],selector:'app-gestion-categorias',templateUrl:'./gestion-categorias.html',styleUrl:'./gestion-categorias.scss' })
+@Component({ imports:[EtiquetaEstado, IndicadorCarga, RouterLink,DialogoConfirmacion,MensajeError],selector:'app-gestion-categorias',templateUrl:'./gestion-categorias.html',styleUrl:'./gestion-categorias.scss' })
 export class GestionCategorias implements OnInit {
   private readonly servicio=inject(CatalogoService); private readonly avisos=inject(AvisosService); readonly categorias=signal<Categoria[]>([]); readonly error=signal(''); readonly cargando=signal(true); readonly reintentable=signal(false); readonly elegida=signal<Categoria|null>(null);
   ngOnInit():void{this.cargar()}

@@ -7,31 +7,59 @@
   } @else if (!pedidos().length && !error()) {
     <p class="vacio">Todavía no hay pedidos registrados.</p>
   } @else if (pedidos().length) {
-    <div class="panel tabla-contenedor">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Estado</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (p of pedidos(); track p.id) {
-            <tr>
-              <td>#{{ p.id }}</td>
-              <td>{{ p.usuario.nombre }}</td>
-              <td>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ p.estado }}</td>
-              <td>S/ {{ p.total.toFixed(2) }}</td>
-              <td><a [routerLink]="['/gestion/pedidos', p.id]">Ver detalle</a></td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="barra-filtros">
+      <input
+        type="search"
+        placeholder="Buscar por cliente o número de pedido"
+        aria-label="Buscar pedidos"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+      <select
+        aria-label="Filtrar por estado"
+        [value]="estado()"
+        (change)="estado.set($any($event.target).value)"
+      >
+        <option value="TODOS">Todos los estados</option>
+        @for (e of estados; track e) {
+          <option [value]="e">{{ e.charAt(0) + e.slice(1).toLowerCase() }}</option>
+        }
+      </select>
+      <span class="contador">{{ visibles().length }} de {{ pedidos().length }} pedidos</span>
     </div>
+    @if (!visibles().length) {
+      <p class="vacio">Ningún pedido coincide con los filtros.</p>
+    } @else {
+      <div class="panel tabla-contenedor">
+        <table class="tabla responsiva">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of visibles(); track p.id) {
+              <tr>
+                <td data-label="ID">#{{ p.id }}</td>
+                <td data-label="Cliente">{{ p.usuario.nombre }}</td>
+                <td data-label="Fecha">{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td data-label="Estado"><app-etiqueta-estado [valor]="p.estado" /></td>
+                <td data-label="Total">S/ {{ p.total | number: '1.2-2' }}</td>
+                <td data-label="">
+                  <a class="boton secundario pequeno" [routerLink]="['/gestion/pedidos', p.id]"
+                    >Ver detalle</a
+                  >
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
 </section>

@@ -9,31 +9,85 @@
   } @else if (!inventarios().length && !error()) {
     <p class="vacio">No hay productos con configuración de inventario.</p>
   } @else if (inventarios().length) {
-    <div class="panel tabla-contenedor">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Actual</th>
-            <th>Mínimo</th>
-            <th>Stock bajo desde</th>
-            <th>Agotado desde</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (i of inventarios(); track i.id) {
-            <tr>
-              <td>{{ i.producto.nombre }}</td>
-              <td>{{ i.producto.stock }}</td>
-              <td>{{ i.stockMinimo }}</td>
-              <td>{{ (i.fechaStockBajo | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
-              <td>{{ (i.fechaAgotado | date: 'dd/MM/yyyy HH:mm') || '—' }}</td>
-              <td><a [routerLink]="['/gestion/inventario', i.id, 'editar']">Ajustar mínimo</a></td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="contadores" role="status">
+      <p class="contador-stock peligro">
+        <strong>{{ agotados() }}</strong> agotados
+      </p>
+      <p class="contador-stock alerta">
+        <strong>{{ stockBajo() }}</strong> con stock bajo
+      </p>
+      <p class="contador-stock exito">
+        <strong>{{ disponibles() }}</strong> disponibles
+      </p>
     </div>
+    <div class="barra-filtros">
+      <input
+        type="search"
+        placeholder="Buscar producto"
+        aria-label="Buscar en el inventario"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+      <label class="solo-reponer">
+        <input
+          type="checkbox"
+          [checked]="soloPorReponer()"
+          (change)="soloPorReponer.set($any($event.target).checked)"
+        />
+        Solo por reponer
+      </label>
+      <span class="contador">{{ visibles().length }} de {{ inventarios().length }} productos</span>
+    </div>
+    @if (!visibles().length) {
+      <p class="vacio">
+        {{
+          soloPorReponer() && !busqueda()
+            ? 'Ningún producto necesita reposición.'
+            : 'Ningún producto coincide con la búsqueda.'
+        }}
+      </p>
+    } @else {
+      <div class="panel tabla-contenedor">
+        <table class="tabla responsiva">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Actual</th>
+              <th>Mínimo</th>
+              <th>Estado</th>
+              <th>Stock bajo desde</th>
+              <th>Agotado desde</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of visibles(); track i.id) {
+              <tr
+                [class.fila-agotado]="estadoStock(i) === 'AGOTADO'"
+                [class.fila-bajo]="estadoStock(i) === 'STOCK BAJO'"
+              >
+                <td data-label="Producto">{{ i.producto.nombre }}</td>
+                <td data-label="Actual">{{ i.producto.stock }}</td>
+                <td data-label="Mínimo">{{ i.stockMinimo }}</td>
+                <td data-label="Estado"><app-etiqueta-estado [valor]="estadoStock(i)" /></td>
+                <td data-label="Stock bajo desde">
+                  {{ (i.fechaStockBajo | date: 'dd/MM/yyyy HH:mm') || '—' }}
+                </td>
+                <td data-label="Agotado desde">
+                  {{ (i.fechaAgotado | date: 'dd/MM/yyyy HH:mm') || '—' }}
+                </td>
+                <td data-label="">
+                  <a
+                    class="boton secundario pequeno"
+                    [routerLink]="['/gestion/inventario', i.id, 'editar']"
+                    >Ajustar mínimo</a
+                  >
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
 </section>

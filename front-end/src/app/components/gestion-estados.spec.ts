@@ -25,6 +25,17 @@ const pantallas: [string, Type<unknown>, string, string, object][] = [
     { id: 1, nombre: 'Ana', correo: 'ana@correo.com', telefono: '999', rol: 'CLIENTE' }],
 ];
 
+describe('Estado de stock en Inventario', () => {
+  it('marca agotado, stock bajo y disponible con el mismo criterio que el backend', () => {
+    TestBed.configureTestingModule({ imports: [GestionInventario], providers: [provideHttpClient(), provideRouter([])] });
+    const inventario = TestBed.createComponent(GestionInventario).componentInstance;
+    const fila = (stock: number, stockMinimo: number) => ({ producto: { stock }, stockMinimo }) as never;
+    expect(inventario.estadoStock(fila(0, 5))).toBe('AGOTADO');
+    expect(inventario.estadoStock(fila(5, 5))).toBe('STOCK BAJO');
+    expect(inventario.estadoStock(fila(6, 5))).toBe('DISPONIBLE');
+  });
+});
+
 describe.each(pantallas)('Gestión de %s', (_nombre, componente, url, mensajeVacio, registro) => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -65,6 +76,9 @@ describe.each(pantallas)('Gestión de %s', (_nombre, componente, url, mensajeVac
     http.expectOne(url).flush([registro]);
     expect(tabla()).not.toBeNull();
     expect(texto()).not.toContain(mensajeVacio);
+    // En el celular cada celda muestra el título de su columna (tabla como tarjeta).
+    expect(tabla()!.classList).toContain('responsiva');
+    expect([...tabla()!.querySelectorAll('td')].every(td => td.hasAttribute('data-label'))).toBe(true);
   });
 
   it('ofrece Reintentar si el backend no responde y vuelve a cargar la lista', () => {

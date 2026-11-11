@@ -1,0 +1,79 @@
+<section class="pagina">
+  <h1>Resumen</h1>
+  <p class="subtitulo">Ventas confirmadas y productos que necesitan reposición.</p>
+  <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
+
+  @if (cargando()) {
+    <app-indicador-carga />
+  } @else if (!error()) {
+    <div class="indicadores">
+      <article class="indicador">
+        <p>Total vendido</p>
+        <strong>S/ {{ totalVendido() | number: '1.2-2' }}</strong>
+        <span>Pedidos confirmados</span>
+      </article>
+      <article class="indicador">
+        <p>Pedidos confirmados</p>
+        <strong>{{ confirmados() }}</strong>
+        <span>{{ cancelados() }} cancelados</span>
+      </article>
+      <article class="indicador" [class.alerta]="porReponer().length > 0">
+        <p>Por reponer</p>
+        <strong>{{ porReponer().length }}</strong>
+        <span>En o bajo el stock mínimo</span>
+      </article>
+      <article class="indicador" [class.peligro]="agotados() > 0">
+        <p>Agotados</p>
+        <strong>{{ agotados() }}</strong>
+        <span>Sin unidades disponibles</span>
+      </article>
+    </div>
+
+    <div class="listas">
+      <section class="panel">
+        <div class="encabezado">
+          <h2>Últimos pedidos</h2>
+          <a routerLink="/gestion/pedidos">Ver todos</a>
+        </div>
+        @if (!ultimos().length) {
+          <p class="vacio">Todavía no hay pedidos registrados.</p>
+        } @else {
+          <ul>
+            @for (p of ultimos(); track p.id) {
+              <li>
+                <a [routerLink]="['/gestion/pedidos', p.id]"
+                  >#{{ p.id }} · {{ p.usuario.nombre }}</a
+                >
+                <small>{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</small>
+                <app-etiqueta-estado [valor]="p.estado" />
+                <strong>S/ {{ p.total | number: '1.2-2' }}</strong>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="panel">
+        <div class="encabezado">
+          <h2>Productos por reponer</h2>
+          <a routerLink="/gestion/inventario">Ver inventario</a>
+        </div>
+        @if (!reponer().length) {
+          <p class="vacio">Ningún producto está en su stock mínimo.</p>
+        } @else {
+          <ul>
+            @for (i of reponer(); track i.id) {
+              <li>
+                <a [routerLink]="['/gestion/inventario', i.id, 'editar']">{{
+                  i.producto.nombre
+                }}</a>
+                <small>Stock {{ i.producto.stock }} · mínimo {{ i.stockMinimo }}</small>
+                <app-etiqueta-estado [valor]="estado(i)" />
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  }
+</section>

@@ -7,29 +7,84 @@
   } @else if (!usuarios().length && !error()) {
     <p class="vacio">No hay usuarios registrados.</p>
   } @else if (usuarios().length) {
-    <div class="panel tabla-contenedor">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th>Rol</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (u of usuarios(); track u.id) {
-            <tr>
-              <td>{{ u.nombre }}</td>
-              <td>{{ u.correo }}</td>
-              <td>{{ u.telefono }}</td>
-              <td>{{ u.rol }}</td>
-              <td><a [routerLink]="['/gestion/usuarios', u.id, 'rol']">Cambiar rol</a></td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="barra-filtros">
+      <input
+        type="search"
+        placeholder="Buscar por nombre, correo o teléfono"
+        aria-label="Buscar usuarios"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+      <select
+        aria-label="Filtrar por rol"
+        [value]="rol()"
+        (change)="rol.set($any($event.target).value)"
+      >
+        <option value="TODOS">Todos los roles</option>
+        <option value="CLIENTE">Clientes</option>
+        <option value="EMPLEADO">Empleados</option>
+        <option value="ADMINISTRADOR">Administradores</option>
+      </select>
+      <span class="contador">{{ visibles().length }} de {{ usuarios().length }} usuarios</span>
     </div>
+    @if (!visibles().length) {
+      <p class="vacio">Ningún usuario coincide con los filtros.</p>
+    } @else {
+      <div class="panel tabla-contenedor">
+        <table class="tabla responsiva">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th>Cuenta</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of visibles(); track u.id) {
+              <tr>
+                <td data-label="Nombre">{{ u.nombre }}</td>
+                <td data-label="Correo">{{ u.correo }}</td>
+                <td data-label="Teléfono">{{ u.telefono }}</td>
+                <td data-label="Rol"><app-etiqueta-estado [valor]="u.rol" /></td>
+                <td data-label="Cuenta">
+                  <app-etiqueta-estado [valor]="u.activo ? 'ACTIVO' : 'INACTIVO'" />
+                </td>
+                <td data-label="">
+                  <div class="acciones-fila">
+                    <a
+                      class="boton secundario pequeno"
+                      [routerLink]="['/gestion/usuarios', u.id, 'rol']"
+                      >Cambiar rol</a
+                    >
+                    <button
+                      type="button"
+                      class="boton pequeno"
+                      [class.peligro]="u.activo"
+                      [class.secundario]="!u.activo"
+                      [disabled]="esPropio(u)"
+                      [title]="esPropio(u) ? 'No puedes desactivar tu propia cuenta' : ''"
+                      (click)="elegido.set(u)"
+                    >
+                      {{ u.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
+  <app-dialogo-confirmacion
+    [abierto]="!!elegido()"
+    [titulo]="elegido()?.activo ? 'Desactivar cuenta' : 'Activar cuenta'"
+    [mensaje]="mensajeCambio()"
+    [textoConfirmar]="elegido()?.activo ? 'Desactivar' : 'Activar'"
+    (confirmar)="cambiarActivo()"
+    (cancelar)="elegido.set(null)"
+  />
 </section>

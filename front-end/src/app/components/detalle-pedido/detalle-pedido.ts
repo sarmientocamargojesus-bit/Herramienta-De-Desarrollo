@@ -1,12 +1,13 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { mensajeError } from '../../core/errores';
 import { PedidosService } from '../../core/pedidos.service';
 import { DetallePedido as Linea, Pedido } from '../../models/product';
+import { EtiquetaEstado } from '../etiqueta-estado/etiqueta-estado';
 import { MensajeError } from '../mensaje-error/mensaje-error';
-@Component({ imports: [DatePipe, RouterLink, MensajeError], selector: 'app-detalle-pedido', templateUrl: './detalle-pedido.html', styleUrl: './detalle-pedido.scss' })
+@Component({ imports: [EtiquetaEstado, DatePipe, DecimalPipe, RouterLink, MensajeError], selector: 'app-detalle-pedido', templateUrl: './detalle-pedido.html', styleUrl: './detalle-pedido.scss' })
 export class DetallePedido implements OnInit {
   private readonly ruta = inject(ActivatedRoute); private readonly servicio = inject(PedidosService);
   // El mismo detalle se abre desde /gestion/pedidos/:id y desde /mis-pedidos/:id; el regreso depende de ese origen.

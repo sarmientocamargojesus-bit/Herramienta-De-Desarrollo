@@ -1,0 +1,33 @@
+.etiqueta {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.exito {
+  background: #e4f3e9;
+  color: #176238;
+}
+.alerta {
+  background: #fff3d6;
+  color: #8a5a00;
+}
+.peligro {
+  background: #fde7e3;
+  color: #a12a17;
+}
+.info {
+  background: #e3eefc;
+  color: #1c4f8f;
+}
+.admin {
+  background: #efe6fb;
+  color: #5b2e91;
+}
+.neutro {
+  background: #eeebe6;
+  color: #4d473f;
+}

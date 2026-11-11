@@ -1,7 +1,12 @@
-.tabla button {
-  border: 0;
-  background: none;
-  color: #a52619;
-  cursor: pointer;
-  font-weight: 800;
+.producto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.miniatura {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 6px;
+  background: #f3ece2;
 }

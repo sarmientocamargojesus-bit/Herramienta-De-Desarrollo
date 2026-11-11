@@ -1,18 +1,40 @@
 <div class="gestion">
   <aside class="barra">
-    <a class="marca" routerLink="/">FAST FOOD <small>Gestión</small></a>
-    <p class="rol">{{ sesion.rol() }}</p>
+    <a class="marca" routerLink="/">FAST FOOD <small>Panel de gestión</small></a>
+
+    <div class="cuenta">
+      <span class="avatar" aria-hidden="true">{{ inicial() }}</span>
+      <div>
+        <p class="correo" [title]="correo()">{{ correo() }}</p>
+        <p class="rol">{{ rolTexto() }}</p>
+      </div>
+    </div>
+
     <nav aria-label="Navegación de gestión">
-      <a routerLink="/gestion/pedidos" routerLinkActive="activo">Pedidos</a
-      ><a routerLink="/gestion/inventario" routerLinkActive="activo">Inventario</a>
-      @if (sesion.rol() === 'ADMINISTRADOR') {
-        <a routerLink="/gestion/productos" routerLinkActive="activo">Productos</a
-        ><a routerLink="/gestion/categorias" routerLinkActive="activo">Categorías</a
-        ><a routerLink="/gestion/pagos" routerLinkActive="activo">Pagos</a
-        ><a routerLink="/gestion/usuarios" routerLinkActive="activo">Usuarios</a>
+      <p class="grupo">Operación</p>
+      @for (s of operacion; track s.ruta) {
+        <a [routerLink]="s.ruta" routerLinkActive="activo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="s.icono" /></svg>{{ s.texto }}
+        </a>
+      }
+      @if (esAdministrador()) {
+        <p class="grupo">Administración</p>
+        @for (s of administracion; track s.ruta) {
+          <a [routerLink]="s.ruta" routerLinkActive="activo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="s.icono" /></svg>{{ s.texto }}
+          </a>
+        }
       }
     </nav>
-    <a routerLink="/">Ver tienda</a><button type="button" (click)="salir()">Cerrar sesión</button>
+
+    <div class="pie">
+      <a routerLink="/">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="iconos.tienda" /></svg>Ver tienda
+      </a>
+      <button type="button" (click)="salir()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="iconos.salir" /></svg>Cerrar sesión
+      </button>
+    </div>
   </aside>
   <main class="contenido"><router-outlet /></main>
   <app-aviso-exito />

@@ -51,6 +51,40 @@ describe("DetallePedido", () => {
     expect(harness.routeNativeElement!.querySelector('.subtitulo')!.textContent).toContain('21/10/2026 10:05');
   });
 
+  it("en gestión muestra los datos del cliente y de la entrega", async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/gestion/pedidos/7', DetallePedido);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/pedidos/7').flush({
+      id: 7, fecha: '2026-11-01T12:00:00', estado: 'CONFIRMADO', tipoEntrega: 'DOMICILIO',
+      direccionEntrega: 'Av. Lima 123', observaciones: 'Sin cebolla', telefono: '999111222',
+      subtotal: 25, costoEntrega: 0, total: 25,
+      usuario: { nombre: 'Ana Pérez', correo: 'ana@correo.com', telefono: '988' }
+    });
+    http.expectOne('/api/pedidos/7/detalles').flush([]);
+    harness.detectChanges();
+    const texto = harness.routeNativeElement!.textContent ?? '';
+    for (const dato of ['Ana Pérez', 'ana@correo.com', '999111222', 'A domicilio', 'Av. Lima 123', 'Sin cebolla', 'S/ 25.00']) {
+      expect(texto).toContain(dato);
+    }
+  });
+
+  it("el cliente ve su entrega pero no el bloque de datos del cliente", async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/mis-pedidos/8', DetallePedido);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/pedidos/8').flush({
+      id: 8, fecha: '2026-11-01T12:00:00', estado: 'CONFIRMADO', tipoEntrega: 'RECOJO', observaciones: null,
+      subtotal: 10, costoEntrega: 0, total: 10, usuario: { nombre: 'Ana', correo: 'ana@correo.com' }
+    });
+    http.expectOne('/api/pedidos/8/detalles').flush([]);
+    harness.detectChanges();
+    const texto = harness.routeNativeElement!.textContent ?? '';
+    expect(texto).toContain('Recojo en tienda');
+    expect(texto).toContain('Sin observaciones');
+    expect(texto).not.toContain('Cliente');
+  });
+
   it("desde la cuenta del cliente regresa a mis pedidos", async () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/mis-pedidos/5', DetallePedido);
