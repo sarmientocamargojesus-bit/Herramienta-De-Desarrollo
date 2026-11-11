@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { from, lastValueFrom, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoItem, Producto } from '../models/product';
+import { API_URL } from './api.config';
 import { SesionService } from './sesion.service';
 
 const CLAVE = 'fast-food-carrito-invitado';
@@ -22,6 +23,7 @@ function leerInvitado(): CarritoItem[] {
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
   private readonly http = inject(HttpClient);
+  private readonly api = inject(API_URL);
   private readonly sesion = inject(SesionService);
   readonly items = signal<CarritoItem[]>(leerInvitado());
 
@@ -51,7 +53,7 @@ export class CarritoService {
       this.items.set(items);
       return of(items);
     }
-    return this.http.get<CarritoItem[]>('/api/carrito').pipe(tap(items => this.items.set(items)));
+    return this.http.get<CarritoItem[]>(`${this.api}/carrito`).pipe(tap(items => this.items.set(items)));
   }
 
   agregar(producto: Producto, cantidad = 1): Observable<CarritoItem[]> {
@@ -60,7 +62,7 @@ export class CarritoService {
       return this.enOrden(() => this.cargar().pipe(
         switchMap(items => {
           const actual = items.find(item => item.productoId === producto.id)?.cantidad ?? 0;
-          return this.http.put<CarritoItem>(`/api/carrito/productos/${producto.id}`, { productoId: producto.id, cantidad: actual + cantidad });
+          return this.http.put<CarritoItem>(`${this.api}/carrito/productos/${producto.id}`, { productoId: producto.id, cantidad: actual + cantidad });
         }),
         switchMap(() => this.cargar())
       ));
@@ -78,7 +80,7 @@ export class CarritoService {
 
   establecer(item: CarritoItem, cantidad: number): Observable<CarritoItem[]> {
     if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > Math.min(100, item.stock)) throw new Error('La cantidad supera el stock disponible.');
-    if (this.esCliente()) return this.enOrden(() => this.http.put<CarritoItem>(`/api/carrito/productos/${item.productoId}`, { productoId: item.productoId, cantidad })
+    if (this.esCliente()) return this.enOrden(() => this.http.put<CarritoItem>(`${this.api}/carrito/productos/${item.productoId}`, { productoId: item.productoId, cantidad })
       .pipe(switchMap(() => this.cargar())));
     const nuevos = leerInvitado().map(actual => actual.productoId === item.productoId ? { ...actual, cantidad } : actual);
     this.guardarInvitado(nuevos);
@@ -86,7 +88,7 @@ export class CarritoService {
   }
 
   quitar(productoId: number): Observable<CarritoItem[]> {
-    if (this.esCliente()) return this.enOrden(() => this.http.delete<void>(`/api/carrito/productos/${productoId}`)
+    if (this.esCliente()) return this.enOrden(() => this.http.delete<void>(`${this.api}/carrito/productos/${productoId}`)
       .pipe(switchMap(() => this.cargar())));
     const nuevos = leerInvitado().filter(item => item.productoId !== productoId);
     this.guardarInvitado(nuevos);
@@ -97,7 +99,7 @@ export class CarritoService {
     const invitado = leerInvitado();
     if (!invitado.length || !this.esCliente()) return of([]);
     const datos = invitado.map(({ productoId, cantidad, fechaAgregado }) => ({ productoId, cantidad, fechaAgregado }));
-    return this.http.post<CarritoItem[]>('/api/carrito/importar', datos).pipe(tap(items => {
+    return this.http.post<CarritoItem[]>(`${this.api}/carrito/importar`, datos).pipe(tap(items => {
       localStorage.removeItem(CLAVE);
       this.items.set(items);
     }));

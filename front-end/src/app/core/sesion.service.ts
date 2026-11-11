@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { tap } from 'rxjs';
 import { Rol, Usuario } from '../models/product';
+import { API_URL } from './api.config';
 
 interface RespuestaLogin { token: string; tipo: string; expiraEnSegundos: number; correo: string; rol: Rol; }
 interface SesionGuardada extends RespuestaLogin { venceEn: number; }
@@ -20,6 +21,7 @@ function leerSesion(): SesionGuardada | null {
 @Injectable({ providedIn: 'root' })
 export class SesionService {
   private readonly http = inject(HttpClient);
+  private readonly api = inject(API_URL);
   private readonly estado = signal<SesionGuardada | null>(leerSesion());
   readonly sesion = this.estado.asReadonly();
   readonly autenticado = computed(() => !!this.token());
@@ -35,7 +37,7 @@ export class SesionService {
   }
 
   iniciar(correo: string, contrasena: string) {
-    return this.http.post<RespuestaLogin>('/api/auth/login', { correo, contrasena }).pipe(tap(respuesta => {
+    return this.http.post<RespuestaLogin>(`${this.api}/auth/login`, { correo, contrasena }).pipe(tap(respuesta => {
       const sesion: SesionGuardada = { ...respuesta, venceEn: Date.now() + respuesta.expiraEnSegundos * 1000 };
       sessionStorage.setItem(CLAVE, JSON.stringify(sesion));
       this.estado.set(sesion);
@@ -44,7 +46,7 @@ export class SesionService {
   }
 
   registrar(datos: Pick<Usuario, 'nombre' | 'correo' | 'telefono'> & { contrasena: string; direccion: string }) {
-    return this.http.post<Usuario>('/api/usuarios', datos);
+    return this.http.post<Usuario>(`${this.api}/usuarios`, datos);
   }
 
   salir(): void {

@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { API_URL } from './api.config';
 import { CatalogoService } from './catalogo.service';
 import { GestionService } from './gestion.service';
 import { PedidosService } from './pedidos.service';
@@ -18,6 +19,21 @@ describe('Contratos HTTP del frontend', () => {
     const peticion = http.expectOne('/api/productos');
     expect(peticion.request.method).toBe('GET');
     peticion.flush([{ id: 1, nombre: 'Prueba', descripcion: '', precio: 10, stock: 2, categoria: 'COMBOS' }]);
+  });
+
+  it('todos los servicios usan la URL base configurada', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: API_URL, useValue: 'https://servidor.test/api' }]
+    });
+    const servidor = TestBed.inject(HttpTestingController);
+    TestBed.inject(CatalogoService).productos().subscribe();
+    TestBed.inject(PedidosService).todos().subscribe();
+    TestBed.inject(GestionService).usuarios().subscribe();
+    servidor.expectOne('https://servidor.test/api/productos').flush([]);
+    servidor.expectOne('https://servidor.test/api/pedidos').flush([]);
+    servidor.expectOne('https://servidor.test/api/usuarios').flush([]);
+    servidor.verify();
   });
 
   it('envía el stock que se veía al editar un producto', () => {

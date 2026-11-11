@@ -1,12 +1,15 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+import { API_URL } from './api.config';
 import { SesionService } from './sesion.service';
 
 export const autenticacionInterceptor: HttpInterceptorFn = (peticion, siguiente) => {
   const sesion = inject(SesionService);
+  const api = inject(API_URL);
   const token = sesion.token();
-  if (!token || !peticion.url.startsWith('/api/')) return siguiente(peticion);
+  // El token solo se envía a la API propia, nunca a otros sitios.
+  if (!token || !peticion.url.startsWith(`${api}/`)) return siguiente(peticion);
   return siguiente(peticion.clone({ setHeaders: { Authorization: `Bearer ${token}` } })).pipe(
     // Un 401 con token significa que el backend ya no lo acepta (vencido, cuenta desactivada o rol cambiado).
     catchError(error => {
