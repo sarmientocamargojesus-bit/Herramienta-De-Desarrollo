@@ -45,6 +45,27 @@
   padding: 12px 16px;
   border-radius: 4px;
 }
+.buscador {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #3a352e;
+}
+.buscador input {
+  padding: 12px 14px;
+  border: 1px solid #d9d0c2;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-weight: 500;
+}
+.estado-busqueda {
+  color: #69645c;
+  padding: 24px 0;
+}
 @media (max-width: 680px) {
   .menu-section {
     padding: 62px 20px 76px;

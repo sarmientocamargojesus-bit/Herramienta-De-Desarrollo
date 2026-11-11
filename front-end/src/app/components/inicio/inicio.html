@@ -16,12 +16,24 @@
     @if (cargando()) {
       <app-indicador-carga />
     } @else {
+      <label class="buscador"
+        ><span>Buscar en el menú</span
+        ><input type="search" [formControl]="busqueda" placeholder="Ej.: hamburguesa, papas…"
+      /></label>
       <app-filtro-categorias
         [categories]="categorias()"
         [selected]="seleccion()"
         (categorySelected)="seleccion.set($event)"
       />
-      <app-catalogo-productos [products]="visibles()" (agregar)="agregar($event)" />
+      @if (buscando()) {
+        <p class="estado-busqueda" role="status">Buscando…</p>
+      } @else if (termino() && !visibles().length) {
+        <p class="estado-busqueda" role="status">
+          No encontramos productos con «{{ termino() }}» en esta categoría.
+        </p>
+      } @else {
+        <app-catalogo-productos [products]="visibles()" (agregar)="agregar($event)" />
+      }
     }
   </div>
 </section>

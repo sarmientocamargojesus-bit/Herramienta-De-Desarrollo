@@ -1,5 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { catchError, debounceTime, distinctUntilChanged, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoService } from '../../core/carrito.service';
 import { CatalogoService } from '../../core/catalogo.service';
 import { mensajeError } from '../../core/errores';
@@ -12,7 +14,7 @@ import { Portada } from '../portada/portada';
 import { SobreNosotros } from '../sobre-nosotros/sobre-nosotros';
 
 @Component({
-  imports: [CatalogoProductos, FiltroCategorias, IndicadorCarga, MensajeError, Portada, SobreNosotros],
+  imports: [CatalogoProductos, FiltroCategorias, IndicadorCarga, MensajeError, Portada, ReactiveFormsModule, SobreNosotros],
   selector: "app-inicio",
   styleUrl: "./inicio.scss",
   templateUrl: "./inicio.html",
@@ -23,10 +25,28 @@ export class Inicio implements OnInit {
   readonly productos = signal<Producto[]>([]);
   readonly categorias = signal<{ label: string; value: string }[]>([{ label: 'Todos', value: 'TODAS' }]);
   readonly seleccion = signal('TODAS');
-  readonly visibles = computed(() => this.productos().filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
+  readonly busqueda = new FormControl('', { nonNullable: true });
+  readonly termino = signal('');
+  readonly buscando = signal(false);
+  // null: sin búsqueda activa, se muestra el menú completo.
+  readonly resultados = signal<Producto[] | null>(null);
+  readonly visibles = computed(() => (this.resultados() ?? this.productos())
+    .filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
   readonly cargando = signal(true);
   readonly error = signal('');
   readonly aviso = signal('');
+
+  constructor() {
+    // Espera a que se deje de escribir y switchMap cancela la búsqueda anterior si llega un texto nuevo.
+    this.busqueda.valueChanges.pipe(
+      debounceTime(300),
+      map(texto => texto.trim()),
+      distinctUntilChanged(),
+      tap(texto => { this.termino.set(texto); this.buscando.set(!!texto); }),
+      switchMap(texto => texto ? this.buscar(texto) : of(null)),
+      takeUntilDestroyed()
+    ).subscribe(resultados => { this.resultados.set(resultados); this.buscando.set(false); });
+  }
 
   ngOnInit(): void {
     forkJoin({ productos: this.catalogo.productos(), categorias: this.catalogo.categorias() }).subscribe({
@@ -46,5 +66,13 @@ export class Inicio implements OnInit {
         error: error => this.error.set(mensajeError(error))
       });
     } catch (error) { this.error.set(mensajeError(error)); }
+  }
+
+  // Un error se muestra sin cortar el flujo: la siguiente búsqueda sigue funcionando.
+  private buscar(texto: string): Observable<Producto[] | null> {
+    return this.catalogo.buscar(texto).pipe(
+      tap(() => this.error.set('')),
+      catchError(error => { this.error.set(mensajeError(error)); return of(null); })
+    );
   }
 }

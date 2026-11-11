@@ -9,6 +9,7 @@ export class CatalogoService {
   private readonly api = inject(API_URL);
   productos() { return this.http.get<Producto[]>(`${this.api}/productos`); }
   producto(id: number) { return this.http.get<Producto>(`${this.api}/productos/${id}`); }
+  buscar(nombre: string) { return this.http.get<Producto[]>(`${this.api}/productos/buscar`, { params: { nombre } }); }
   categorias() { return this.http.get<Categoria[]>(`${this.api}/categorias/activas`); }
   todasCategorias() { return this.http.get<Categoria[]>(`${this.api}/categorias`); }
   crearProducto(datos: Omit<Producto, 'id' | 'categoriaId'>) { return this.http.post<Producto>(`${this.api}/productos`, datos); }
