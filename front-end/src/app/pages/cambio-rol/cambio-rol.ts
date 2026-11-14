@@ -15,10 +15,12 @@ export class CambioRol implements OnInit {
  readonly id=Number(this.ruta.snapshot.paramMap.get('id')); readonly usuario=signal<Usuario|null>(null); readonly error=signal(''); readonly enviando=signal(false);
  readonly form=this.fb.nonNullable.group({rol:['CLIENTE' as Rol,Validators.required]});
  readonly confirmando=signal(false);
+ // El valor del formulario no es un signal: el rol elegido se guarda aquí al pulsar "Guardar" para que el mensaje se actualice.
+ readonly rolElegido=signal<Rol|null>(null);
  // Cambiar el propio rol quita el acceso al panel: el backend invalida la sesión al no coincidir el rol.
  readonly esPropio=computed(()=>this.usuario()?.correo.toLowerCase()===(this.sesion.sesion()?.correo??'').toLowerCase());
- readonly mensajeConfirmacion=computed(()=>{const u=this.usuario();if(!u)return '';const rol=this.form.controls.rol.value;const base=`${u.nombre} pasará de ${u.rol} a ${rol} y deberá volver a iniciar sesión.`;return this.esPropio()?`${base} Es tu propia cuenta: perderás el acceso a Gestión si dejas de ser administrador.`:base});
+ readonly mensajeConfirmacion=computed(()=>{const u=this.usuario();if(!u)return '';const rol=this.rolElegido()??u.rol;const base=`${u.nombre} pasará de ${u.rol} a ${rol} y deberá volver a iniciar sesión.`;return this.esPropio()?`${base} Es tu propia cuenta: perderás el acceso a Gestión si dejas de ser administrador.`:base});
  ngOnInit():void{this.servicio.usuarios().subscribe({next:us=>{const u=us.find(x=>x.id===this.id);if(u){this.usuario.set(u);this.form.patchValue({rol:u.rol})}else this.error.set('Usuario no encontrado.')},error:e=>this.error.set(mensajeError(e))})}
- guardar():void{const u=this.usuario();if(!u||this.form.invalid)return;if(this.form.getRawValue().rol===u.rol){this.error.set('El usuario ya tiene ese rol.');return}this.error.set('');this.confirmando.set(true)}
+ guardar():void{const u=this.usuario();if(!u||this.form.invalid)return;if(this.form.getRawValue().rol===u.rol){this.error.set('El usuario ya tiene ese rol.');return}this.error.set('');this.rolElegido.set(this.form.getRawValue().rol);this.confirmando.set(true)}
  confirmar():void{this.confirmando.set(false);this.enviando.set(true);this.servicio.cambiarRol(this.id,this.form.getRawValue().rol).subscribe({next:()=>{this.avisos.exito('Rol actualizado.');if(this.esPropio()){this.sesion.salir();void this.router.navigateByUrl('/iniciar-sesion')}else void this.router.navigateByUrl('/gestion/usuarios')},error:e=>{this.error.set(mensajeError(e));this.enviando.set(false)}})}
 }

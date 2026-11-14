@@ -83,6 +83,8 @@ describe('Acciones del administrador', () => {
     rol.guardar();
     expect(rol.error()).toBe('El usuario ya tiene ese rol.');
     expect(rol.confirmando()).toBe(false);
+    // La plantilla lee el mensaje antes de que se elija el rol: no debe quedarse con ese primer valor.
+    expect(rol.mensajeConfirmacion()).toContain('pasará de CLIENTE a CLIENTE');
 
     rol.form.setValue({ rol: 'EMPLEADO' });
     rol.guardar();
