@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CarritoService } from '../../core/carrito.service';
-import { SesionService } from '../../core/sesion.service';
+import { CarritoService } from '../../services/carrito.service';
+import { SesionService } from '../../services/sesion.service';
 
 @Component({
   selector: 'app-encabezado',

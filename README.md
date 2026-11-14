@@ -74,7 +74,7 @@ estudiados durante las semanas 2, 3, 6, 7, 8, 12, 13 y 14.
 - Formularios reactivos (`ReactiveFormsModule`, `FormBuilder`, `FormGroup` y `FormControl`) en registro,
   inicio de sesión, checkout y los formularios de gestión de productos, categorías e inventario.
 - Validadores incorporados: `required`, `email`, `minLength`, `maxLength`, `min` y `pattern`.
-- Validador personalizado `noSoloEspacios` en `front-end/src/app/core/validadores.ts`, que rechaza nombres,
+- Validador personalizado `noSoloEspacios` en `front-end/src/app/shared/validadores.ts`, que rechaza nombres,
   teléfonos y direcciones formados solo por espacios, igual que el backend.
 - Validación cruzada `camposIguales` a nivel de `FormGroup`: el registro pide confirmar la contraseña y no
   se envía si no coincide. La confirmación no se envía al backend.
@@ -86,9 +86,9 @@ estudiados durante las semanas 2, 3, 6, 7, 8, 12, 13 y 14.
 ## Semana 14
 
 - Consumo de la API REST con `HttpClient` y Observables tipados (`Producto`, `Pedido`, `Pago`, etc.).
-- Servicios reutilizables en `front-end/src/app/core` (`CatalogoService`, `PedidosService`,
+- Servicios reutilizables en `front-end/src/app/services` (`CatalogoService`, `PedidosService`,
   `GestionService`, `CarritoService` y `SesionService`); los componentes no llaman a HTTP directamente.
-- URL base centralizada en `API_URL` (`core/api.config.ts`), usada por los servicios, el interceptor y las
+- URL base centralizada en `API_URL` (`services/api.config.ts`), usada por los servicios, el interceptor y las
   imágenes.
 - Operaciones CRUD: `GET` (menú, pedidos, inventario, pagos, usuarios), `POST` (login, registro, checkout,
   productos, categorías), `PUT` (productos, categorías, rol, stock mínimo, carrito) y `DELETE` (productos,

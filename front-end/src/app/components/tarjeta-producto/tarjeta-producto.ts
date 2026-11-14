@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Producto } from '../../models/product';
-import { ImagenProducto } from '../imagen-producto/imagen-producto';
+import { ImagenProducto } from '../../shared/imagen-producto/imagen-producto';
 
 @Component({
   selector: 'app-tarjeta-producto',
