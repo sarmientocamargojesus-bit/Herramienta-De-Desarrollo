@@ -1,0 +1,56 @@
+// Estilos base de todo el documento: reinicio, tipografía, foco y movimiento reducido.
+@use 'variables' as v;
+@use 'mixins' as m;
+
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  // Los enlaces a secciones (#menu, #nosotros) dejan espacio para el encabezado fijo de la tienda.
+  scroll-padding-top: 96px;
+
+  @include m.hasta(encabezado) {
+    scroll-padding-top: 140px;
+  }
+}
+body {
+  margin: 0;
+  background: v.$crema;
+  color: v.$texto;
+  font-family: v.$fuente;
+}
+img,
+video {
+  max-width: 100%;
+}
+button,
+a,
+input,
+select,
+textarea {
+  font-family: inherit;
+
+  &:focus-visible {
+    outline: 3px solid v.$foco;
+    outline-offset: 3px;
+  }
+}
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: break-word;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *:before,
+  *:after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,5 +1,7 @@
+@use 'variables' as v;
+
 .carga {
-  color: #69645c;
+  color: v.$texto-gris;
   padding: 16px 0;
   font-size: 14px;
 }

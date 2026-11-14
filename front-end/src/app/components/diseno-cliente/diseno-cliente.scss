@@ -1,10 +1,12 @@
+@use 'variables' as v;
+
 // El encabezado queda visible al bajar: cuenta y "Mi pedido" siempre a mano.
 app-encabezado {
   position: sticky;
   top: 0;
   z-index: 15;
   display: block;
-  background: rgb(245 240 231 / 96%);
+  background: rgba(v.$crema, 0.96);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid #e6ddcf;
 }

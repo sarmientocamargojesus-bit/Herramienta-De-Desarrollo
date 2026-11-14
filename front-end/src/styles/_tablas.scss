@@ -1,0 +1,94 @@
+// Tablas de datos y su versión en tarjetas para el celular.
+@use 'variables' as v;
+@use 'mixins' as m;
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+  background: v.$blanco;
+
+  th,
+  td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid v.$linea;
+    vertical-align: top;
+  }
+  th {
+    font-size: 12px;
+    @include m.mayusculas;
+    color: v.$texto-tabla;
+  }
+  td {
+    font-size: 14px;
+  }
+  a {
+    @include m.enlace-acento(v.$rojo-enlace, 750);
+  }
+
+  @include m.hasta(movil) {
+    min-width: 540px;
+  }
+}
+.acciones-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// En el celular, las tablas marcadas como responsivas muestran cada fila como una tarjeta:
+// cada celda lleva delante el título de su columna (atributo data-label).
+@include m.hasta(tabla) {
+  .tabla.responsiva {
+    min-width: 0;
+    background: transparent;
+
+    thead {
+      display: none;
+    }
+    tr {
+      display: block;
+      margin-bottom: 12px;
+      padding: 6px 0;
+      border: 1px solid v.$linea;
+      border-radius: v.$radio-panel;
+      background: v.$blanco;
+    }
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 7px 14px;
+      border-bottom: 0;
+      text-align: right;
+
+      &::before {
+        content: attr(data-label);
+        flex: none;
+        font-size: 12px;
+        font-weight: 800;
+        @include m.mayusculas;
+        color: v.$texto-tabla;
+        text-align: left;
+      }
+      &[data-label='']::before {
+        content: none;
+      }
+      &[data-label=''] {
+        justify-content: flex-end;
+      }
+    }
+  }
+  .panel.tabla-contenedor:has(.tabla.responsiva) {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}

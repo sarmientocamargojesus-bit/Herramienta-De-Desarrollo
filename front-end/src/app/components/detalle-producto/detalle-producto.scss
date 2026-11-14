@@ -1,20 +1,24 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 .detalle {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
   margin-top: 25px;
   align-items: center;
-}
-.detalle app-imagen-producto {
-  aspect-ratio: 4/3;
-  border-radius: 7px;
+
+  app-imagen-producto {
+    aspect-ratio: 4/3;
+    border-radius: 7px;
+  }
 }
 .precio {
   font-size: 2rem;
   font-weight: 900;
   color: #c43621;
 }
-@media (max-width: 700px) {
+@include m.hasta(tabla) {
   .detalle {
     grid-template-columns: 1fr;
   }
@@ -24,9 +28,10 @@
   align-items: center;
   gap: 14px;
   margin-top: 8px;
-}
-.cantidad span {
-  font-size: 13px;
-  font-weight: 800;
-  color: #6d665e;
+
+  span {
+    font-size: 13px;
+    font-weight: 800;
+    color: v.$texto-suave;
+  }
 }

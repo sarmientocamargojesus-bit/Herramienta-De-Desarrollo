@@ -1,3 +1,8 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
+$texto-nota: #746c63;
+
 .nombre {
   color: inherit;
   font-weight: 800;
@@ -5,7 +10,7 @@
 }
 small {
   display: block;
-  color: #746c63;
+  color: $texto-nota;
   margin-top: 5px;
 }
 .quitar {
@@ -21,30 +26,31 @@ small {
   margin-left: auto;
   display: grid;
   gap: 10px;
-}
-.resumen p {
-  margin: 0;
-  color: #746c63;
+
+  p {
+    margin: 0;
+    color: $texto-nota;
+  }
 }
 .unidades {
   font-size: 13px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  @include m.mayusculas;
 }
 .resumen strong {
   font-size: 22px;
 }
 .seguir {
   justify-self: center;
-  color: #bb2e1f;
-  font-weight: 750;
+  @include m.enlace-acento(v.$rojo-enlace, 750);
 }
-.vacio.panel {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-}
-.vacio p {
-  margin: 0;
+.vacio {
+  &.panel {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+  }
+  p {
+    margin: 0;
+  }
 }

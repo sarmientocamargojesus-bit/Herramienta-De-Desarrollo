@@ -1,19 +1,22 @@
-.confirmacion dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 8px 18px;
-  margin: 18px 0;
-}
-.confirmacion dt {
-  color: #6d665e;
-}
-.confirmacion dd {
-  margin: 0;
-}
-.confirmacion strong {
-  font-size: 22px;
+@use 'variables' as v;
+@use 'mixins' as m;
+
+.confirmacion {
+  dl {
+    @include m.lista-datos(8px 18px);
+    margin: 18px 0;
+  }
+  dt {
+    color: v.$texto-suave;
+  }
+  dd {
+    margin: 0;
+  }
+  strong {
+    font-size: 22px;
+  }
 }
 .nota {
-  color: #6d665e;
+  color: v.$texto-suave;
   font-size: 13px;
 }

@@ -1,0 +1,70 @@
+// Formularios: campos, mensajes de validación, filtros de las tablas y casilla "Mostrar contraseña".
+@use 'variables' as v;
+
+.formulario {
+  display: grid;
+  gap: 18px;
+  max-width: 680px;
+}
+.campo {
+  display: grid;
+  gap: 7px;
+  font-weight: 750;
+  font-size: 14px;
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid v.$borde-campo;
+    border-radius: v.$radio;
+    background: v.$blanco;
+    padding: 11px 12px;
+    font-size: 15px;
+    color: v.$texto;
+  }
+  // Angular marca con .ng-invalid y .ng-touched los campos que no pasan la validación.
+  input,
+  select {
+    &.ng-invalid.ng-touched {
+      border-color: v.$rojo;
+    }
+  }
+}
+.ayuda {
+  font-size: 12px;
+  color: v.$texto-ayuda;
+}
+
+// Barra de búsqueda y filtros de las tablas de gestión.
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin: 18px 0 12px;
+
+  input,
+  select {
+    padding: 9px 12px;
+    border: 1px solid v.$borde-control;
+    border-radius: 6px;
+    background: v.$blanco;
+    font: inherit;
+    font-size: 14px;
+  }
+  input {
+    flex: 1 1 220px;
+    max-width: 340px;
+  }
+}
+
+// Casilla "Mostrar contraseña" de los formularios de acceso.
+.mostrar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: v.$texto-oscuro;
+  cursor: pointer;
+}

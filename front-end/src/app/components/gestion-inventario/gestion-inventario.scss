@@ -1,3 +1,12 @@
+@use 'variables' as v;
+
+// Color de la franja izquierda de cada contador según el estado del stock.
+$estados-stock: (
+  peligro: v.$rojo-oscuro,
+  alerta: v.$alerta,
+  exito: v.$exito,
+);
+
 .contadores {
   display: flex;
   flex-wrap: wrap;
@@ -5,27 +14,24 @@
   margin-top: 18px;
 }
 .contador-stock {
-  border: 1px solid #ebe3d8;
+  border: 1px solid v.$borde-suave;
   border-left-width: 4px;
   border-radius: 6px;
-  background: #fff;
+  background: v.$blanco;
   margin: 0;
   padding: 10px 14px;
   font-size: 14px;
-  color: #4d473f;
-}
-.contador-stock strong {
-  font-size: 18px;
-  margin-right: 4px;
-}
-.contador-stock.peligro {
-  border-left-color: #c33620;
-}
-.contador-stock.alerta {
-  border-left-color: #d99a00;
-}
-.contador-stock.exito {
-  border-left-color: #1f8a4c;
+  color: v.$texto-oscuro;
+
+  strong {
+    font-size: 18px;
+    margin-right: 4px;
+  }
+  @each $estado, $color in $estados-stock {
+    &.#{$estado} {
+      border-left-color: $color;
+    }
+  }
 }
 .solo-reponer {
   display: flex;
@@ -37,5 +43,5 @@
   background: #fdf0ed;
 }
 .fila-bajo td {
-  background: #fff8e6;
+  background: v.$alerta-fondo;
 }

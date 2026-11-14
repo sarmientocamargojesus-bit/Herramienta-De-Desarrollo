@@ -102,6 +102,29 @@ estudiados durante las semanas 2, 3, 6, 7, 8, 12, 13 y 14.
 - Autenticación y autorización: el interceptor agrega `Authorization: Bearer` a las peticiones de la API y
   cierra la sesión ante un 401; las rutas se protegen por rol con `rolGuard`.
 
+## Estilos con SASS
+
+Los estilos están escritos en SCSS y organizados en parciales dentro de `front-end/src/styles/`:
+
+| Archivo | Contenido |
+| --- | --- |
+| `_variables.scss` | Colores de marca, neutros y de estado, tipografía, medidas y el mapa `$puntos` de puntos de corte |
+| `_mixins.scss` | `hasta(punto)` (media queries), `mayusculas`, `enlace-acento`, `borde-lateral`, `lista-limpia`, `lista-datos`, `contenedor`, `pagina-estado` y `formulario-acceso` |
+| `_base.scss` | Reinicio, tipografía, foco visible y movimiento reducido |
+| `_layout.scss` | Páginas, paneles, rejillas y tarjetas de resumen |
+| `_formularios.scss` | Campos, validación (`.ng-invalid.ng-touched`), filtros y "Mostrar contraseña" |
+| `_botones.scss` | `.boton` y sus variantes generadas con un mapa y `@each` |
+| `_tablas.scss` | Tablas y su versión en tarjetas para el celular |
+| `_utilidades.scss` | Estados, mensajes y contadores |
+
+- `src/styles.scss` solo reúne los parciales con `@use`.
+- `_variables.scss` y `_mixins.scss` no generan CSS. Cada componente los importa con
+  `@use 'variables' as v;` y `@use 'mixins' as m;`: `angular.json` agrega `src/styles` en
+  `stylePreprocessorOptions.includePaths`.
+- Los componentes usan anidación y `&`, variables (`v.$rojo`), mixins con parámetros
+  (`@include m.hasta(movil) { … }`) y `@each` sobre mapas: tipos de `etiqueta-estado`, estados del
+  inventario e indicadores del resumen.
+
 ## Modelo de datos del sistema
 
 | Tabla | Propósito |

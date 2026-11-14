@@ -1,25 +1,29 @@
-.resumen ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.resumen li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0e9df;
-}
-.resumen .total {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 14px 0 8px;
-}
-.resumen .total strong {
-  font-size: 24px;
-}
-.resumen .nota {
-  color: #6d665e;
-  font-size: 13px;
+@use 'variables' as v;
+@use 'mixins' as m;
+
+.resumen {
+  ul {
+    @include m.lista-limpia;
+  }
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid v.$linea-suave;
+  }
+  .total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 14px 0 8px;
+
+    strong {
+      font-size: 24px;
+    }
+  }
+  .nota {
+    color: v.$texto-suave;
+    font-size: 13px;
+  }
 }

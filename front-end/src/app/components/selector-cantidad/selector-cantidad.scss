@@ -1,26 +1,31 @@
+@use 'variables' as v;
+
+$tamano-boton: 36px;
+
 .selector {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #d9d0c2;
+  border: 1px solid v.$borde-control;
   border-radius: 6px;
-  background: #fff;
+  background: v.$blanco;
   overflow: hidden;
 }
 button {
-  width: 36px;
-  height: 36px;
+  width: $tamano-boton;
+  height: $tamano-boton;
   border: 0;
-  background: #f5f0e7;
+  background: v.$crema;
   font-size: 18px;
   font-weight: 800;
   cursor: pointer;
-}
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 span {
-  min-width: 38px;
+  min-width: $tamano-boton + 2px;
   text-align: center;
   font-weight: 800;
 }

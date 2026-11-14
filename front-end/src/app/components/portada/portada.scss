@@ -1,25 +1,27 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
+// Degradado oscuro sobre la foto para que el texto se lea bien.
+$sombra-portada: rgba(15, 14, 13, 0.97) 0%, rgba(15, 14, 13, 0.86) 40%, rgba(15, 14, 13, 0.1) 100%;
+$sombra-portada-movil: rgba(15, 14, 13, 0.94), rgba(15, 14, 13, 0.7) 70%, rgba(15, 14, 13, 0.2);
+
 .hero {
   position: relative;
   min-height: 580px;
   background: #201e1b url('/assets/demo/hero-fast-food.png') center right/cover no-repeat;
-  color: #fff;
+  color: v.$blanco;
   overflow: hidden;
-}
-.hero:before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 14, 13, 0.97) 0%,
-    rgba(15, 14, 13, 0.86) 40%,
-    rgba(15, 14, 13, 0.1) 100%
-  );
+
+  &:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, $sombra-portada);
+  }
 }
 .hero-inner {
   position: relative;
-  max-width: 1240px;
-  margin: auto;
+  @include m.contenedor;
   padding: 76px 28px 88px;
 }
 .hero-content {
@@ -30,10 +32,11 @@
   letter-spacing: 0.19em;
   font-weight: 900;
   color: #ffd166;
-}
-.eyebrow span {
-  color: #ef4d2f;
-  margin-left: 12px;
+
+  span {
+    color: #ef4d2f;
+    margin-left: 12px;
+  }
 }
 h1 {
   max-width: 100%;
@@ -43,16 +46,17 @@ h1 {
   margin: 29px 0 26px;
   font-weight: 1000;
   overflow-wrap: anywhere;
-}
-h1 em {
-  font-style: normal;
-  color: #f2482e;
+
+  em {
+    font-style: normal;
+    color: #f2482e;
+  }
 }
 .lead {
   font-size: 17px;
   line-height: 1.55;
   max-width: 475px;
-  color: #eee5d8;
+  color: v.$fondo-estado;
   margin-bottom: 30px;
 }
 .hero-button {
@@ -60,19 +64,20 @@ h1 em {
   align-items: center;
   gap: 30px;
   text-decoration: none;
-  color: #fff;
-  background: #e53a23;
+  color: v.$blanco;
+  background: v.$rojo-vivo;
   border-radius: 4px;
   padding: 17px 22px;
   font-size: 13px;
   font-weight: 950;
   letter-spacing: 0.04em;
-}
-.hero-button:hover {
-  background: #bc2818;
-}
-.hero-button span {
-  font-size: 18px;
+
+  &:hover {
+    background: #bc2818;
+  }
+  span {
+    font-size: 18px;
+  }
 }
 .demo-label {
   font-size: 11px;
@@ -89,18 +94,14 @@ h1 em {
   font-weight: 900;
   color: #fce8bd;
 }
-@media (max-width: 750px) {
+@include m.hasta(portada) {
   .hero {
     min-height: clamp(520px, 80svh, 620px);
     background-position: 67% center;
-  }
-  .hero:before {
-    background: linear-gradient(
-      90deg,
-      rgba(15, 14, 13, 0.94),
-      rgba(15, 14, 13, 0.7) 70%,
-      rgba(15, 14, 13, 0.2)
-    );
+
+    &:before {
+      background: linear-gradient(90deg, $sombra-portada-movil);
+    }
   }
   .hero-inner {
     padding: 70px 20px 90px;
@@ -112,7 +113,7 @@ h1 em {
     display: none;
   }
 }
-@media (max-width: 480px) {
+@include m.hasta(chico) {
   .hero-inner {
     padding: 58px 20px 68px;
   }

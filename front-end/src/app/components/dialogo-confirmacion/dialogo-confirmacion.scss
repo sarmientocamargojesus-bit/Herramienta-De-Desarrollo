@@ -1,3 +1,5 @@
+@use 'variables' as v;
+
 .dialogo {
   position: fixed;
   inset: 0;
@@ -9,30 +11,32 @@
 }
 .contenido {
   width: min(100%, 420px);
-  background: #fff;
+  background: v.$blanco;
   border-radius: 9px;
   padding: 24px;
   box-shadow: 0 16px 45px #0004;
-}
-.contenido p {
-  margin: 0 0 24px;
-  font-weight: 700;
+
+  p {
+    margin: 0 0 24px;
+    font-weight: 700;
+  }
 }
 .acciones {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
-}
-.acciones button {
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 5px;
-  padding: 10px 16px;
-  cursor: pointer;
-}
-.acciones .peligro {
-  background: #d73520;
-  color: white;
-  border-color: #d73520;
+
+  button {
+    border: 1px solid #ccc;
+    background: v.$blanco;
+    border-radius: v.$radio;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  .peligro {
+    background: v.$rojo;
+    color: v.$blanco;
+    border-color: v.$rojo;
+  }
 }

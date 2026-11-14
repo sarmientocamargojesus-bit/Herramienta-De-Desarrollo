@@ -1,21 +1,23 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 .datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
-}
-.datos h2 {
-  margin: 0 0 10px;
-  font-size: 16px;
+
+  h2 {
+    margin: 0 0 10px;
+    font-size: 16px;
+  }
 }
 dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 6px 14px;
+  @include m.lista-datos(6px 14px);
   margin: 0;
 }
 dt {
-  color: #6d665e;
+  color: v.$texto-suave;
   font-size: 13px;
 }
 dd {
@@ -27,8 +29,9 @@ dd {
   justify-items: end;
   gap: 4px;
   margin-top: 12px;
-}
-.totales p {
-  margin: 0;
-  color: #6d665e;
+
+  p {
+    margin: 0;
+    color: v.$texto-suave;
+  }
 }

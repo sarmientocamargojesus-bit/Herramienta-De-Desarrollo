@@ -1,18 +1,9 @@
-.acceso {
-  display: grid;
-  place-items: center;
-}
-.panel {
-  width: min(100%, 600px);
-}
-.eyebrow {
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: #c43520;
-}
+@use 'variables' as v;
+@use 'mixins' as m;
+
+@include m.formulario-acceso(600px);
+
 .acciones a,
 .exito a {
-  color: #ad2a19;
-  font-weight: 700;
+  @include m.enlace-acento(v.$rojo-acceso, 700);
 }

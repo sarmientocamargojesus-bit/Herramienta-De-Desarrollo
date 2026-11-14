@@ -1,0 +1,90 @@
+// =====================================================================
+// Mixins reutilizables. Como _variables.scss, este archivo no genera CSS
+// por sí solo: cada componente lo incluye con `@use 'mixins' as m;`.
+// =====================================================================
+@use 'sass:map';
+@use 'variables' as v;
+
+// Media query de ancho máximo. Acepta un nombre del mapa v.$puntos
+// (por ejemplo `@include m.hasta(movil)`) o una medida directa.
+@mixin hasta($punto) {
+  $ancho: $punto;
+  @if map.has-key(v.$puntos, $punto) {
+    $ancho: map.get(v.$puntos, $punto);
+  }
+  @media (max-width: $ancho) {
+    @content;
+  }
+}
+
+// Texto corto en mayúsculas con espaciado (encabezados de tabla, etiquetas).
+@mixin mayusculas($espaciado: 0.05em) {
+  letter-spacing: $espaciado;
+  text-transform: uppercase;
+}
+
+// Enlace con color de acento y texto en negrita.
+@mixin enlace-acento($color: v.$rojo, $peso: 800) {
+  color: $color;
+  font-weight: $peso;
+}
+
+// Franja de color a la izquierda para avisos, errores y advertencias.
+@mixin borde-lateral($color) {
+  border-left: 4px solid $color;
+}
+
+// Lista sin viñetas ni márgenes.
+@mixin lista-limpia {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// Lista de definición en dos columnas: etiqueta a la izquierda y valor a la derecha.
+@mixin lista-datos($espacio) {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: $espacio;
+}
+
+// Contenedor centrado con el ancho de la tienda.
+@mixin contenedor($ancho: v.$ancho-tienda) {
+  max-width: $ancho;
+  margin: auto;
+}
+
+// Página de estado a pantalla completa ("acceso denegado", "página no encontrada").
+@mixin pagina-estado {
+  .estado {
+    max-width: 800px;
+    min-height: 50vh;
+    margin: auto;
+    padding: 90px 24px;
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      letter-spacing: -0.06em;
+    }
+    a {
+      @include enlace-acento;
+    }
+  }
+}
+
+// Tarjeta centrada de los formularios de acceso (inicio de sesión y registro).
+@mixin formulario-acceso($ancho) {
+  .acceso {
+    display: grid;
+    place-items: center;
+  }
+  .panel {
+    width: min(100%, $ancho);
+  }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    color: v.$rojo-acento;
+  }
+}

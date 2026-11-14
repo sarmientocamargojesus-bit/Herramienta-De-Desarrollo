@@ -1,42 +1,46 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 .menu-section {
-  background: #f5f0e7;
+  background: v.$crema;
   padding: 88px 28px 100px;
   scroll-margin-top: 15px;
 }
 .menu-inner {
-  max-width: 1240px;
-  margin: auto;
+  @include m.contenedor;
 }
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 32px;
+
+  h2 {
+    font-size: clamp(2.8rem, 5vw, 5rem);
+    letter-spacing: -0.075em;
+    line-height: 1;
+    margin: 15px 0;
+    font-weight: 1000;
+
+    em {
+      font-style: normal;
+      color: v.$rojo-titulo;
+    }
+  }
+  p:last-child {
+    color: v.$texto-gris;
+    font-size: 15px;
+  }
 }
 .eyebrow {
   font-size: 12px;
-  color: #d73520;
+  color: v.$rojo;
   letter-spacing: 0.18em;
   font-weight: 950;
 }
-.section-heading h2 {
-  font-size: clamp(2.8rem, 5vw, 5rem);
-  letter-spacing: -0.075em;
-  line-height: 1;
-  margin: 15px 0;
-  font-weight: 1000;
-}
-.section-heading h2 em {
-  font-style: normal;
-  color: #e43a24;
-}
-.section-heading p:last-child {
-  color: #69645c;
-  font-size: 15px;
-}
 .spark {
   font-size: 110px;
-  color: #e43a24;
+  color: v.$rojo-titulo;
   line-height: 1;
 }
 .buscador {
@@ -47,20 +51,21 @@
   font-size: 13px;
   font-weight: 800;
   color: #3a352e;
-}
-.buscador input {
-  padding: 12px 14px;
-  border: 1px solid #d9d0c2;
-  border-radius: 6px;
-  background: #fff;
-  font: inherit;
-  font-weight: 500;
+
+  input {
+    padding: 12px 14px;
+    border: 1px solid v.$borde-control;
+    border-radius: 6px;
+    background: v.$blanco;
+    font: inherit;
+    font-weight: 500;
+  }
 }
 .estado-busqueda {
-  color: #69645c;
+  color: v.$texto-gris;
   padding: 24px 0;
 }
-@media (max-width: 680px) {
+@include m.hasta(movil) {
   .menu-section {
     padding: 62px 20px 76px;
   }

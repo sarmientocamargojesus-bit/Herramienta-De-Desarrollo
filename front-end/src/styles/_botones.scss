@@ -1,0 +1,49 @@
+// Botones: el estilo base .boton y sus variantes se generan con un mapa y @each.
+@use 'sass:list';
+@use 'variables' as v;
+
+// Variantes de color: nombre => (fondo, borde, texto). `null` conserva el valor de .boton.
+$variantes: (
+  primario: (v.$rojo, v.$rojo, null),
+  secundario: (transparent, null, v.$oscuro),
+  peligro: (v.$rojo-peligro, v.$rojo-peligro, null),
+);
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 1px solid v.$oscuro;
+  border-radius: v.$radio;
+  background: v.$oscuro;
+  color: v.$blanco;
+  padding: 11px 17px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.88;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @each $nombre, $colores in $variantes {
+    $fondo: list.nth($colores, 1);
+    $borde: list.nth($colores, 2);
+    $texto: list.nth($colores, 3);
+    &.#{$nombre} {
+      background: $fondo;
+      border-color: $borde;
+      color: $texto;
+    }
+  }
+
+  &.pequeno {
+    padding: 6px 11px;
+    font-size: 13px;
+  }
+}

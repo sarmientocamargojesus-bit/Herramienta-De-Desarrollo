@@ -1,3 +1,16 @@
+@use 'sass:list';
+@use 'variables' as v;
+
+// Colores de cada tipo de etiqueta: tipo => (fondo, texto).
+$tipos: (
+  exito: (v.$exito-fondo, v.$exito-texto),
+  alerta: (#fff3d6, #8a5a00),
+  peligro: (#fde7e3, #a12a17),
+  info: (#e3eefc, #1c4f8f),
+  admin: (#efe6fb, #5b2e91),
+  neutro: (#eeebe6, v.$texto-oscuro),
+);
+
 .etiqueta {
   display: inline-block;
   padding: 3px 10px;
@@ -7,27 +20,9 @@
   line-height: 1.5;
   white-space: nowrap;
 }
-.exito {
-  background: #e4f3e9;
-  color: #176238;
-}
-.alerta {
-  background: #fff3d6;
-  color: #8a5a00;
-}
-.peligro {
-  background: #fde7e3;
-  color: #a12a17;
-}
-.info {
-  background: #e3eefc;
-  color: #1c4f8f;
-}
-.admin {
-  background: #efe6fb;
-  color: #5b2e91;
-}
-.neutro {
-  background: #eeebe6;
-  color: #4d473f;
+@each $tipo, $colores in $tipos {
+  .#{$tipo} {
+    background: list.nth($colores, 1);
+    color: list.nth($colores, 2);
+  }
 }

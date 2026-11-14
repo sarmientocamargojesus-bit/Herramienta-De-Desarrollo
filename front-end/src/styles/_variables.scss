@@ -1,11 +1,69 @@
-$rojo: #d73520;
-$oscuro: #1d1c1a;
-$crema: #f5f0e7;
-$borde: #ded6c9;
-$texto: #1e1c19;
+// =====================================================================
+// Variables de diseño de Fast Food.
+// Solo declaran valores: este archivo no genera CSS, por eso cualquier
+// componente puede usarlo con `@use 'variables' as v;` sin duplicar estilos.
+// =====================================================================
 
-@mixin movil {
-  @media (max-width: 680px) {
-    @content;
-  }
-}
+// ---------- Colores de marca ----------
+$rojo: #d73520; // acento principal (botones primarios, enlaces destacados)
+$rojo-vivo: #e53a23; // logotipo y botón de la portada
+$rojo-titulo: #e43a24; // palabras resaltadas en los títulos de la tienda
+$rojo-precio: #d83120; // precios y botón de las tarjetas de producto
+$rojo-oscuro: #c33620; // opción activa del panel y alertas de peligro
+$rojo-acento: #c43520; // textos pequeños en mayúsculas (eyebrow)
+$rojo-enlace: #bb2e1f; // enlaces dentro de tablas y resúmenes
+$rojo-acceso: #ad2a19; // enlaces de los formularios de acceso
+$rojo-peligro: #a5271a; // botón de acción destructiva
+$amarillo: #ffd365; // detalles del logotipo y avatar
+
+// ---------- Neutros ----------
+$blanco: #fff;
+$oscuro: #1d1c1a; // botones oscuros y bolsa de compra
+$crema: #f5f0e7; // fondo general de la tienda
+$texto: #1e1c19;
+$texto-suave: #6d665e; // textos secundarios y notas
+$texto-tenue: #6d665d; // mensajes de lista vacía y contadores
+$texto-gris: #69645c; // subtítulos
+$texto-tabla: #655e56; // encabezados de tabla
+$texto-oscuro: #4d473f;
+$texto-ayuda: #8b2b1d; // mensajes de validación
+
+// ---------- Bordes y líneas ----------
+$borde: #ded6c9; // paneles y tarjetas
+$borde-campo: #c9c2b7; // campos de formulario
+$borde-control: #d9d0c2; // buscadores, filtros y selector de cantidad
+$borde-suave: #ebe3d8; // indicadores del panel
+$linea: #eee7db; // separadores de tabla
+$linea-suave: #f0e9df; // separadores de listas
+
+// ---------- Estados ----------
+$exito: #1f8a4c;
+$exito-fondo: #e4f3e9;
+$exito-texto: #176238;
+$alerta: #d99a00;
+$alerta-fondo: #fff8e6;
+$fondo-estado: #eee5d8;
+$foco: #f9a742; // contorno de foco visible para teclado
+
+// ---------- Tipografía ----------
+$fuente: Arial, Helvetica, sans-serif;
+
+// ---------- Medidas ----------
+$ancho-pagina: 1160px; // contenido de las páginas internas
+$ancho-tienda: 1240px; // encabezado, portada, menú y pie de página
+$radio: 5px; // botones y campos
+$radio-panel: 8px;
+$sombra-panel: 0 8px 24px #20160c0b;
+
+// ---------- Puntos de corte (ancho máximo de pantalla) ----------
+// Se usan con el mixin `m.hasta(nombre)` de _mixins.scss.
+$puntos: (
+  mini: 400px,
+  chico: 480px,
+  compacto: 650px,
+  movil: 680px,
+  tabla: 700px,
+  portada: 750px,
+  encabezado: 760px,
+  mediano: 850px,
+);

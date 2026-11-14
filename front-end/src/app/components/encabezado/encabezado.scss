@@ -1,10 +1,13 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 .site-header {
   height: 88px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  max-width: 1240px;
+  max-width: v.$ancho-tienda;
   margin: auto;
   padding: 0 28px;
 }
@@ -24,27 +27,30 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  background: #e53a23;
-  color: white;
+  background: v.$rojo-vivo;
+  color: v.$blanco;
   transform: rotate(-12deg);
   font-size: 19px;
   letter-spacing: -0.14em;
-}
-.brand-mark span {
-  color: #ffd365;
+
+  span {
+    color: v.$amarillo;
+  }
 }
 nav {
   display: flex;
   gap: 36px;
-}
-nav a {
-  color: #24211c;
-  text-decoration: none;
-  font-weight: 750;
-  font-size: 14px;
-}
-nav a:hover {
-  color: #cf2d1b;
+
+  a {
+    color: #24211c;
+    text-decoration: none;
+    font-weight: 750;
+    font-size: 14px;
+
+    &:hover {
+      color: #cf2d1b;
+    }
+  }
 }
 .header-actions {
   display: flex;
@@ -54,34 +60,33 @@ nav a:hover {
   font-weight: 800;
 }
 .future-action {
-  color: #6d665e;
+  color: v.$texto-suave;
   text-decoration: none;
+  white-space: nowrap;
 }
 .bag {
-  background: #1d1c1a;
-  color: #fff;
+  background: v.$oscuro;
+  color: v.$blanco;
   padding: 13px 17px;
   border-radius: 6px;
   white-space: nowrap;
   text-decoration: none;
-}
-.bag span {
-  color: #ffd365;
-  margin-left: 8px;
+
+  span {
+    color: v.$amarillo;
+    margin-left: 8px;
+  }
 }
 .logout {
   border: 0;
   background: transparent;
-  color: #6d665e;
+  color: v.$texto-suave;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
 }
-.future-action {
-  white-space: nowrap;
-}
 // En móvil los accesos de cuenta se mantienen visibles con un tamaño compacto.
-@media (max-width: 760px) {
+@include m.hasta(encabezado) {
   .site-header {
     height: auto;
     min-height: 78px;
@@ -105,7 +110,7 @@ nav a:hover {
     padding: 10px 12px;
   }
 }
-@media (max-width: 400px) {
+@include m.hasta(mini) {
   .site-header {
     padding: 12px 16px;
     gap: 10px;

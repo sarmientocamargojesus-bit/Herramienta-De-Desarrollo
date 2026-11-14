@@ -1,6 +1,9 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 .advertencia {
-  border-left: 4px solid #d99a00;
-  background: #fff8e6;
+  @include m.borde-lateral(v.$alerta);
+  background: v.$alerta-fondo;
   color: #6b4700;
   padding: 10px 14px;
   border-radius: 4px;

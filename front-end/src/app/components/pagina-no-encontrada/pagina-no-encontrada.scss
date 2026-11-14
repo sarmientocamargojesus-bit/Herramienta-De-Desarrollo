@@ -1,14 +1,4 @@
-.estado {
-  max-width: 800px;
-  min-height: 50vh;
-  margin: auto;
-  padding: 90px 24px;
-}
-.estado h1 {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  letter-spacing: -0.06em;
-}
-.estado a {
-  color: #d73520;
-  font-weight: 800;
-}
+@use 'mixins' as m;
+
+// Comparte el diseño de página de estado con "acceso denegado".
+@include m.pagina-estado;

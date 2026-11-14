@@ -1,54 +1,60 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
 footer {
   background: #1d1b19;
-  color: #fff;
+  color: v.$blanco;
   padding: 55px 28px 24px;
 }
 .inner {
-  max-width: 1240px;
-  margin: auto;
+  @include m.contenedor;
   display: flex;
   justify-content: space-between;
   gap: 30px;
+
+  p {
+    color: #bdb6aa;
+    font-size: 13px;
+  }
+  nav {
+    display: flex;
+    gap: 28px;
+    align-items: start;
+
+    a {
+      color: #eee8de;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 13px;
+    }
+  }
 }
 .logo {
-  color: white;
+  color: v.$blanco;
   text-decoration: none;
   font-weight: 1000;
   font-size: 29px;
   letter-spacing: -0.075em;
-}
-.logo span {
-  color: #f04a30;
-}
-.inner p {
-  color: #bdb6aa;
-  font-size: 13px;
-}
-.inner nav {
-  display: flex;
-  gap: 28px;
-  align-items: start;
-}
-.inner nav a {
-  color: #eee8de;
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 13px;
+
+  span {
+    color: #f04a30;
+  }
 }
 .bottom {
-  max-width: 1240px;
+  max-width: v.$ancho-tienda;
   margin: 55px auto 0;
   padding-top: 18px;
   border-top: 1px solid #4a453e;
   color: #97918a;
   font-size: 12px;
 }
-@media (max-width: 650px) {
+@include m.hasta(compacto) {
   .inner {
     display: block;
-  }
-  .inner nav {
-    margin-top: 30px;
+
+    nav {
+      margin-top: 30px;
+    }
   }
   .bottom {
     margin-top: 35px;
