@@ -38,3 +38,6 @@ build/
 
 ### Configuración local de Claude Code ###
 .claude/
+
+### Documentación técnica personal (no se publica) ###
+DOCUMENTACION_TECNICA.md

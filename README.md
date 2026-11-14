@@ -521,4 +521,4 @@ npm run build
 ```
 
 Los problemas encontrados en la revisión del proyecto y el estado de cada
-corrección se registran en [README_REVISION_2026-10-28.md](README_REVISION_2026-10-28.md).
+corrección se registran en [revisiones del proyecto.md](revisiones%20del%20proyecto.md).
