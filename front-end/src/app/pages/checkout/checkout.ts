@@ -8,8 +8,9 @@ import { mensajeError } from '../../shared/errores';
 import { PedidosService } from '../../services/pedidos.service';
 import { noSoloEspacios } from '../../shared/validadores';
 import { CheckoutRequest } from '../../models/product';
+import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
-@Component({ imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-checkout', templateUrl: './checkout.html', styleUrl: './checkout.scss' })
+@Component({ imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MensajeError, IndicadorCarga], selector: 'app-checkout', templateUrl: './checkout.html', styleUrl: './checkout.scss' })
 export class Checkout implements OnInit {
   private readonly fb = inject(FormBuilder); private readonly pedidos = inject(PedidosService); private readonly router = inject(Router);
   readonly carrito = inject(CarritoService);

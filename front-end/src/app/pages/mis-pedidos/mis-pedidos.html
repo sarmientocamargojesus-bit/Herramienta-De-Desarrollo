@@ -3,7 +3,7 @@
   <p class="subtitulo">Tus pedidos y su estado, del más reciente al más antiguo.</p>
   <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando()) {
-    <p>Cargando…</p>
+    <app-indicador-carga />
   } @else if (!pedidos().length) {
     <p class="vacio">
       Aún no tienes pedidos. <a routerLink="/" fragment="menu">Ver el menú</a>

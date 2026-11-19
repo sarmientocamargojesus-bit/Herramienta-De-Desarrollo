@@ -1,5 +1,5 @@
 <section class="pagina">
-  <a routerLink="/gestion/categorias">← Categorías</a>
+  <a class="volver" routerLink="/gestion/categorias">← Categorías</a>
   <h1>{{ id ? 'Editar categoría' : 'Nueva categoría' }}</h1>
   <app-mensaje-error [texto]="error()" />
   <form class="formulario panel" [formGroup]="form" (ngSubmit)="guardar()">
@@ -10,9 +10,9 @@
       }</label
     ><label class="campo"
       >Descripción<textarea formControlName="descripcion" rows="3"></textarea></label
-    ><label><input type="checkbox" formControlName="activo" /> Activa</label>
+    ><label class="casilla"><input type="checkbox" formControlName="activo" /> Categoría activa (visible en el menú)</label>
     <div class="acciones">
-      <button class="boton primario" [disabled]="enviando()">Guardar categoría</button
+      <button class="boton primario" [disabled]="enviando()">{{ enviando() ? 'Guardando…' : 'Guardar categoría' }}</button
       ><a class="boton secundario" routerLink="/gestion/categorias">Cancelar</a>
     </div>
   </form>

@@ -8,8 +8,9 @@ import { PedidosService } from '../../services/pedidos.service';
 import { DetallePedido as Linea, Pedido } from '../../models/product';
 import { nombreEstado, SIGUIENTE_ESTADO } from '../../shared/estados-pedido';
 import { EtiquetaEstado } from '../../shared/etiqueta-estado/etiqueta-estado';
+import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
-@Component({ imports: [EtiquetaEstado, DatePipe, DecimalPipe, RouterLink, MensajeError], selector: 'app-detalle-pedido', templateUrl: './detalle-pedido.html', styleUrl: './detalle-pedido.scss' })
+@Component({ imports: [EtiquetaEstado, DatePipe, DecimalPipe, RouterLink, MensajeError, IndicadorCarga], selector: 'app-detalle-pedido', templateUrl: './detalle-pedido.html', styleUrl: './detalle-pedido.scss' })
 export class DetallePedido implements OnInit {
   private readonly ruta = inject(ActivatedRoute); private readonly servicio = inject(PedidosService); private readonly avisos = inject(AvisosService);
   // El mismo detalle se abre desde /gestion/pedidos/:id y desde /mis-pedidos/:id; el regreso depende de ese origen.

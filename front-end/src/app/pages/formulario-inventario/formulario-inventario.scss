@@ -1,0 +1,48 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
+// Datos del producto a la izquierda y el formulario a la derecha; en pantallas angostas, uno debajo del otro.
+.ajuste {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 520px);
+  gap: 18px;
+  align-items: start;
+
+  @include m.hasta(tabla) {
+    grid-template-columns: 1fr;
+  }
+}
+.datos {
+  h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+  }
+  dl {
+    @include m.lista-datos(10px 16px);
+    margin: 0;
+  }
+  dt {
+    color: v.$texto-suave;
+    font-size: 13px;
+  }
+  dd {
+    margin: 0;
+    font-weight: 700;
+  }
+}
+.panel + .panel {
+  margin-top: 0;
+}
+.previo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+}
+.nota {
+  margin: 0;
+  font-size: 13px;
+  color: v.$texto-suave;
+}

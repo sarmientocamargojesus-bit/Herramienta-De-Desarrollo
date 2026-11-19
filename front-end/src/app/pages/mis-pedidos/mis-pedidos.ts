@@ -5,8 +5,9 @@ import { esReintentable, mensajeError } from '../../shared/errores';
 import { PedidosService } from '../../services/pedidos.service';
 import { Pedido } from '../../models/product';
 import { EtiquetaEstado } from '../../shared/etiqueta-estado/etiqueta-estado';
+import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
-@Component({ imports: [DatePipe, DecimalPipe, RouterLink, EtiquetaEstado, MensajeError], selector: 'app-mis-pedidos', templateUrl: './mis-pedidos.html', styleUrl: './mis-pedidos.scss' })
+@Component({ imports: [DatePipe, DecimalPipe, RouterLink, EtiquetaEstado, MensajeError, IndicadorCarga], selector: 'app-mis-pedidos', templateUrl: './mis-pedidos.html', styleUrl: './mis-pedidos.scss' })
 export class MisPedidos implements OnInit {
   private readonly servicio = inject(PedidosService); readonly pedidos = signal<Pedido[]>([]); readonly error = signal(''); readonly cargando = signal(true); readonly reintentable = signal(false);
   // El pedido más reciente aparece primero.

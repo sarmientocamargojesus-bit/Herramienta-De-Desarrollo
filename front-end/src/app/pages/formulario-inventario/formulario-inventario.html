@@ -1,16 +1,33 @@
 <section class="pagina">
-  <a routerLink="/gestion/inventario">← Inventario</a>
+  <a class="volver" routerLink="/gestion/inventario">← Inventario</a>
   <h1>Ajustar stock mínimo</h1>
+  <p class="subtitulo">
+    Cuando el stock llega a este mínimo, el producto aparece como «Stock bajo» en Inventario y en el
+    Resumen.
+  </p>
   <app-mensaje-error [texto]="error()" />
+  @if (cargando()) {
+    <app-indicador-carga />
+  }
   @if (inventario(); as i) {
-    <div class="panel">
-      <p>
-        <strong>{{ i.producto.nombre }}</strong> · Stock actual: {{ i.producto.stock }}
-      </p>
-      <p>Las fechas de stock bajo y agotado las calcula el backend.</p>
-      <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="ajuste">
+      <section class="panel datos">
+        <h2>{{ i.producto.nombre }}</h2>
+        <dl>
+          <dt>Categoría</dt>
+          <dd>{{ i.producto.categoria }}</dd>
+          <dt>Stock actual</dt>
+          <dd>{{ i.producto.stock }} unidades</dd>
+          <dt>Mínimo actual</dt>
+          <dd>{{ i.stockMinimo }}</dd>
+          <dt>Estado</dt>
+          <dd><app-etiqueta-estado [valor]="estado(i.producto.stock, i.stockMinimo)" /></dd>
+        </dl>
+      </section>
+
+      <form class="formulario panel" [formGroup]="form" (ngSubmit)="guardar()">
         <label class="campo"
-          >Stock mínimo<input
+          >Nuevo stock mínimo<input
             type="number"
             min="0"
             step="1"
@@ -23,7 +40,17 @@
             }}</span>
           }
         </label>
-        <button class="boton primario" [disabled]="enviando()">Guardar mínimo</button>
+        @if (vistaPrevia(); as previo) {
+          <p class="previo">
+            Con este mínimo el producto quedará como <app-etiqueta-estado [valor]="previo" />
+          </p>
+        }
+        <p class="nota">Las fechas de stock bajo y agotado las calcula el backend al guardar.</p>
+        <div class="acciones">
+          <button class="boton primario" [disabled]="enviando()">
+            {{ enviando() ? 'Guardando…' : 'Guardar mínimo' }}</button
+          ><a class="boton secundario" routerLink="/gestion/inventario">Cancelar</a>
+        </div>
       </form>
     </div>
   }

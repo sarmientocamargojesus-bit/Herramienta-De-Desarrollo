@@ -1,5 +1,5 @@
 <section class="pagina">
-  <a routerLink="/gestion/usuarios">← Usuarios</a>
+  <a class="volver" routerLink="/gestion/usuarios">← Usuarios</a>
   <h1>Cambiar rol</h1>
   <app-mensaje-error [texto]="error()" />
   @if (usuario(); as u) {
@@ -24,7 +24,11 @@
           <option value="EMPLEADO">Empleado</option>
           <option value="ADMINISTRADOR">Administrador</option>
         </select></label
-      ><button class="boton primario" [disabled]="enviando() || esPropio()">Guardar rol</button>
+      ><div class="acciones">
+        <button class="boton primario" [disabled]="enviando() || esPropio()">
+          {{ enviando() ? 'Guardando…' : 'Guardar rol' }}</button
+        ><a class="boton secundario" routerLink="/gestion/usuarios">Cancelar</a>
+      </div>
     </form>
   }
   <app-dialogo-confirmacion

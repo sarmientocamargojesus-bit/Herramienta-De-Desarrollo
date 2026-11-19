@@ -1,9 +1,9 @@
 <section class="pagina">
-  <a [routerLink]="enGestion ? '/gestion/pedidos' : '/mis-pedidos'"
+  <a class="volver" [routerLink]="enGestion ? '/gestion/pedidos' : '/mis-pedidos'"
     >← {{ enGestion ? 'Pedidos' : 'Mis pedidos' }}</a
   ><app-mensaje-error [texto]="error()" />
   @if (cargando()) {
-    <p>Cargando…</p>
+    <app-indicador-carga />
   }
   @if (pedido(); as p) {
     <h1>Pedido #{{ p.id }}</h1>

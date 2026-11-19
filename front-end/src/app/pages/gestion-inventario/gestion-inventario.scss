@@ -34,10 +34,7 @@ $estados-stock: (
   }
 }
 .solo-reponer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  white-space: nowrap;
 }
 .fila-agotado td {
   background: #fdf0ed;

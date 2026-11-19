@@ -139,6 +139,16 @@ $barra-texto: #f3e9e3;
 
   ::ng-deep .pagina {
     max-width: 1300px;
+    padding-top: 32px;
+  }
+  // En el panel los títulos son más compactos que en la tienda: deja más espacio para tablas y formularios.
+  ::ng-deep .pagina h1 {
+    font-size: clamp(1.75rem, 2.6vw, 2.4rem);
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  ::ng-deep .pagina .subtitulo {
+    margin-bottom: 22px;
   }
 }
 @include m.hasta(tabla) {
@@ -161,9 +171,16 @@ $barra-texto: #f3e9e3;
     display: flex;
     overflow-x: auto;
     gap: 4px;
+    // Se desliza con el dedo sin mostrar la barra gris; la sección activa conserva su color.
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
 
+    &::-webkit-scrollbar {
+      display: none;
+    }
     a {
       white-space: nowrap;
+      scroll-snap-align: start;
     }
   }
   .pie {

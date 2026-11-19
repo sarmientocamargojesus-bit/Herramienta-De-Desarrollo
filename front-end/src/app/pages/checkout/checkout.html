@@ -5,7 +5,7 @@
   </p>
   <app-mensaje-error [texto]="error()" />
   @if (cargando()) {
-    <p>Cargando…</p>
+    <app-indicador-carga />
   } @else if (!carrito.items().length) {
     <p class="vacio">
       No hay productos para confirmar. <a routerLink="/carrito">Volver al carrito</a>
@@ -65,7 +65,7 @@
           Los precios y el stock se confirman al registrar el pedido. Si un producto se agotó, el
           pedido no se registra y tu carrito se conserva.
         </p>
-        <a routerLink="/carrito">← Editar carrito</a>
+        <a class="volver" routerLink="/carrito">← Editar carrito</a>
       </aside>
     </div>
   }

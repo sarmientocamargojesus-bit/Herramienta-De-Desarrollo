@@ -15,6 +15,26 @@
     margin: 0 0 14px;
   }
 }
+// Enlace "← Volver" de las páginas de detalle y formularios.
+.volver {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  @include m.enlace-acento(v.$rojo-enlace, 800);
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 4px;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  &:visited {
+    color: v.$rojo-enlace;
+  }
+}
 .subtitulo {
   color: v.$texto-gris;
   line-height: 1.5;
