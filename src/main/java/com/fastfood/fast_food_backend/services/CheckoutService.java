@@ -30,6 +30,8 @@ import com.fastfood.fast_food_backend.repositories.UsuarioRepository;
 @Service
 public class CheckoutService {
 
+    private static final int MAX_TEXTO = 255;
+
     private final CarritoItemRepository carrito;
     private final UsuarioRepository usuarios;
     private final ProductoRepository productos;
@@ -71,6 +73,9 @@ public class CheckoutService {
         BigDecimal subtotal = BigDecimal.ZERO;
         for (CarritoItem item : seleccion) {
             Producto producto = bloqueados.get(item.getProducto().getId());
+            if (!producto.categoriaDisponible()) {
+                throw new ReglaNegocioException("El producto ya no está disponible: " + producto.getNombre());
+            }
             if (item.getCantidad() <= 0 || producto.getStock() < item.getCantidad()) {
                 throw new ReglaNegocioException("Stock insuficiente para " + producto.getNombre());
             }
@@ -137,6 +142,12 @@ public class CheckoutService {
         // Solo se recibe un marcador de prueba; nunca números de tarjeta, CVV ni claves de Yape.
         if (!"DEMO-APROBADO".equals(solicitud.referenciaPrueba())) {
             throw new IllegalArgumentException("Usa la referencia ficticia DEMO-APROBADO para la simulación");
+        }
+        if (solicitud.direccionEntrega() != null && solicitud.direccionEntrega().length() > MAX_TEXTO) {
+            throw new IllegalArgumentException("La dirección no puede tener más de " + MAX_TEXTO + " caracteres");
+        }
+        if (solicitud.observaciones() != null && solicitud.observaciones().length() > MAX_TEXTO) {
+            throw new IllegalArgumentException("Las observaciones no pueden tener más de " + MAX_TEXTO + " caracteres");
         }
     }
 

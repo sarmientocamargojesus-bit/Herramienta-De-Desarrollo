@@ -2,8 +2,10 @@ package com.fastfood.fast_food_backend.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,8 +103,43 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
+    // Solo se avanza hacia adelante: CONFIRMADO → EN_PREPARACION → LISTO → ENTREGADO.
+    private static final Map<String, String> SIGUIENTE_ESTADO = Map.of(
+            "CONFIRMADO", "EN_PREPARACION",
+            "EN_PREPARACION", "LISTO",
+            "LISTO", "ENTREGADO");
+
+    @Transactional
+    public Pedido cambiarEstado(Long id, String nuevoEstado) {
+        if (nuevoEstado == null || nuevoEstado.isBlank()) {
+            throw new IllegalArgumentException("El nuevo estado es obligatorio");
+        }
+        String estado = nuevoEstado.trim().toUpperCase(Locale.ROOT);
+        Pedido pedido = pedidoRepository.bloquearPorId(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + id));
+        String actual = pedido.getEstado() == null ? "" : pedido.getEstado().toUpperCase(Locale.ROOT);
+        String permitido = SIGUIENTE_ESTADO.get(actual);
+        if (permitido == null) {
+            throw new ReglaNegocioException("Un pedido " + actual + " ya no puede cambiar de estado");
+        }
+        if (!permitido.equals(estado)) {
+            throw new ReglaNegocioException("Un pedido " + actual + " solo puede pasar a " + permitido);
+        }
+        pedido.setEstado(estado);
+        pedido.setFechaActualizacion(LocalDateTime.now());
+        return pedidoRepository.save(pedido);
+    }
+
+    // Un pedido pagado tiene stock descontado y un pago: se anula desde Pagos, no se borra.
+    @Transactional
     public void eliminar(Long id) {
-        Pedido pedido = buscarPorId(id);
+        Pedido pedido = pedidoRepository.bloquearPorId(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + id));
+        String estado = pedido.getEstado() == null ? "" : pedido.getEstado().toUpperCase(Locale.ROOT);
+        if (!"PENDIENTE".equals(estado) && !"CANCELADO".equals(estado)) {
+            throw new ReglaNegocioException(
+                    "Solo se pueden eliminar pedidos PENDIENTE o CANCELADO; para un pedido pagado, anula su pago");
+        }
         pedidoRepository.delete(pedido);
     }
 
@@ -162,14 +199,23 @@ public class PedidoService {
         pedido.setObservaciones(solicitud.getObservaciones());
         pedido = pedidoRepository.save(pedido);
 
+        // Se suma la cantidad pedida por producto para comparar con el stock aunque llegue repetido.
+        Map<Long, Integer> cantidadesPorProducto = new HashMap<>();
+        for (DetallePedidoRequest datosDetalle : solicitud.getDetalles()) {
+            cantidadesPorProducto.merge(datosDetalle.getProductoId(), datosDetalle.getCantidad(), Integer::sum);
+        }
+
         BigDecimal total = BigDecimal.ZERO;
         for (DetallePedidoRequest datosDetalle : solicitud.getDetalles()) {
             Producto producto = productoRepository.findById(datosDetalle.getProductoId())
                     .orElseThrow(() -> new RecursoNoEncontradoException(
                             "Producto no encontrado: " + datosDetalle.getProductoId()));
 
-            if (producto.getStock() <= 0) {
-                throw new ReglaNegocioException("El producto está agotado: " + producto.getNombre());
+            if (!producto.categoriaDisponible()) {
+                throw new ReglaNegocioException("El producto no está disponible: " + producto.getNombre());
+            }
+            if (producto.getStock() < cantidadesPorProducto.get(producto.getId())) {
+                throw new ReglaNegocioException("Stock insuficiente para el producto " + producto.getNombre());
             }
 
             BigDecimal subtotal = producto.getPrecio()
@@ -196,6 +242,12 @@ public class PedidoService {
     private void validar(Pedido pedido) {
         if (pedido.getUsuario() == null || pedido.getUsuario().getId() == null) {
             throw new IllegalArgumentException("El usuario del pedido es obligatorio");
+        }
+        if (pedido.getDireccionEntrega() != null && pedido.getDireccionEntrega().length() > 255) {
+            throw new IllegalArgumentException("La dirección no puede tener más de 255 caracteres");
+        }
+        if (pedido.getObservaciones() != null && pedido.getObservaciones().length() > 255) {
+            throw new IllegalArgumentException("Las observaciones no pueden tener más de 255 caracteres");
         }
         if (pedido.getEstado() == null || pedido.getEstado().isBlank()) {
             throw new IllegalArgumentException("El estado del pedido es obligatorio");

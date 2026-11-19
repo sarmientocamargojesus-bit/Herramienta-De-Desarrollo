@@ -60,16 +60,24 @@ public class InicializadorDatos implements CommandLineRunner {
         }
 
         String correo = correoAdministrador.trim().toLowerCase(Locale.ROOT);
-        Usuario administrador = usuarioRepository.findByCorreoIgnoreCase(correo).orElse(null);
-        if (administrador == null) {
-            administrador = new Usuario();
+        Usuario existente = usuarioRepository.findByCorreoIgnoreCase(correo).orElse(null);
+        if (existente == null) {
+            Usuario administrador = new Usuario();
             administrador.setNombre("Administrador");
             administrador.setCorreo(correo);
             administrador.setTelefono("000000000");
             administrador.setActivo(true);
+            administrador.setContrasena(passwordEncoder.encode(contrasenaAdministrador));
+            administrador.setRol("ADMINISTRADOR");
+            usuarioRepository.save(administrador);
+            return;
         }
-        administrador.setContrasena(passwordEncoder.encode(contrasenaAdministrador));
-        administrador.setRol("ADMINISTRADOR");
-        usuarioRepository.save(administrador);
+        // La cuenta ya existe: su contraseña y sus datos no se tocan en cada arranque.
+        // Solo si no queda ningún administrador activo se recupera el acceso con esta cuenta.
+        if (usuarioRepository.countByRolIgnoreCaseAndActivoTrue("ADMINISTRADOR") == 0) {
+            existente.setRol("ADMINISTRADOR");
+            existente.setActivo(true);
+            usuarioRepository.save(existente);
+        }
     }
 }

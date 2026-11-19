@@ -76,6 +76,12 @@ public class CategoriaService {
         if (categoria == null || categoria.getNombre() == null || categoria.getNombre().isBlank()) {
             throw new IllegalArgumentException("El nombre de la categoría es obligatorio");
         }
+        if (categoria.getNombre().trim().length() > 50) {
+            throw new IllegalArgumentException("El nombre de la categoría no puede tener más de 50 caracteres");
+        }
+        if (categoria.getDescripcion() != null && categoria.getDescripcion().length() > 255) {
+            throw new IllegalArgumentException("La descripción no puede tener más de 255 caracteres");
+        }
     }
 
     private void validarNombreDisponible(String nombre, Long idActual) {

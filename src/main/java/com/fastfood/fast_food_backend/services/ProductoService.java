@@ -11,7 +11,9 @@ import com.fastfood.fast_food_backend.entities.Categoria;
 import com.fastfood.fast_food_backend.exceptions.RecursoNoEncontradoException;
 import com.fastfood.fast_food_backend.exceptions.ReglaNegocioException;
 import com.fastfood.fast_food_backend.repositories.ProductoRepository;
+import com.fastfood.fast_food_backend.repositories.CarritoItemRepository;
 import com.fastfood.fast_food_backend.repositories.CategoriaRepository;
+import com.fastfood.fast_food_backend.repositories.DetallePedidoRepository;
 import com.fastfood.fast_food_backend.repositories.ImagenProductoRepository;
 
 @Service
@@ -21,13 +23,21 @@ public class ProductoService {
     private final CategoriaRepository categoriaRepository;
     private final InventarioService inventarioService;
     private final ImagenProductoRepository imagenProductoRepository;
+    private final DetallePedidoRepository detallePedidoRepository;
+    private final CarritoItemRepository carritoItemRepository;
+
+    private static final int MAX_NOMBRE = 100;
+    private static final int MAX_DESCRIPCION = 255;
 
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
-            InventarioService inventarioService, ImagenProductoRepository imagenProductoRepository) {
+            InventarioService inventarioService, ImagenProductoRepository imagenProductoRepository,
+            DetallePedidoRepository detallePedidoRepository, CarritoItemRepository carritoItemRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.inventarioService = inventarioService;
         this.imagenProductoRepository = imagenProductoRepository;
+        this.detallePedidoRepository = detallePedidoRepository;
+        this.carritoItemRepository = carritoItemRepository;
     }
 
     public List<Producto> listar() {
@@ -67,7 +77,9 @@ public class ProductoService {
         producto.setNombre(datosProducto.getNombre());
         producto.setDescripcion(datosProducto.getDescripcion());
         producto.setPrecio(datosProducto.getPrecio());
-        producto.setStock(datosProducto.getStock());
+        if (datosProducto.stockFueEnviado()) {
+            producto.setStock(datosProducto.getStock());
+        }
         producto.setCategoria(datosProducto.getCategoria());
         validar(producto);
         asignarCategoria(producto);
@@ -79,6 +91,13 @@ public class ProductoService {
     @Transactional
     public void eliminar(Long id) {
         Producto producto = buscarPorId(id);
+        // Un producto vendido forma parte del historial de pedidos y no se puede borrar.
+        if (detallePedidoRepository.existsByProductoId(id)) {
+            throw new ReglaNegocioException(
+                    "No se puede eliminar un producto que ya tiene pedidos; deja su stock en 0 para retirarlo");
+        }
+        // Si solo está en carritos, se quita de ellos antes de borrarlo.
+        carritoItemRepository.deleteByProductoId(id);
         inventarioService.eliminarPorProducto(id);
         imagenProductoRepository.deleteById(id);
         productoRepository.delete(producto);
@@ -136,6 +155,12 @@ public class ProductoService {
     private void validar(Producto producto) {
         if (producto.getNombre() == null || producto.getNombre().isBlank()) {
             throw new IllegalArgumentException("El nombre del producto es obligatorio");
+        }
+        if (producto.getNombre().trim().length() > MAX_NOMBRE) {
+            throw new IllegalArgumentException("El nombre del producto no puede tener más de " + MAX_NOMBRE + " caracteres");
+        }
+        if (producto.getDescripcion() != null && producto.getDescripcion().length() > MAX_DESCRIPCION) {
+            throw new IllegalArgumentException("La descripción no puede tener más de " + MAX_DESCRIPCION + " caracteres");
         }
         if (producto.getPrecio() == null || producto.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El precio debe ser mayor que cero");

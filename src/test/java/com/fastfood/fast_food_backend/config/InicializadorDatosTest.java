@@ -1,9 +1,10 @@
 package com.fastfood.fast_food_backend.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,33 +31,38 @@ class InicializadorDatosTest {
     @Mock private PasswordEncoder passwordEncoder;
 
     @Test
-    void conservaDatosDelUsuarioExistenteAlPromoverlo() {
-        Usuario usuario = new Usuario();
-        usuario.setId(3L);
-        usuario.setNombre("Nombre original");
-        usuario.setCorreo("cliente@example.com");
-        usuario.setTelefono("987654321");
-        usuario.setDireccion("Ica, Perú");
-        usuario.setActivo(false);
-        usuario.setContrasena("hash-anterior");
-        usuario.setRol("CLIENTE");
-
+    void noCambiaContrasenaNiRolDeUnaCuentaExistenteSiYaHayAdministrador() {
+        Usuario usuario = usuarioExistente();
         when(categoriaRepository.findByNombreIgnoreCase(anyString())).thenReturn(Optional.of(new Categoria()));
         when(usuarioRepository.findByCorreoIgnoreCase("cliente@example.com")).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.encode("clave-elegida")).thenReturn("hash-nuevo");
+        when(usuarioRepository.countByRolIgnoreCaseAndActivoTrue("ADMINISTRADOR")).thenReturn(1L);
 
-        InicializadorDatos inicializador = nuevoInicializador("CLIENTE@example.com");
-        inicializador.run();
+        nuevoInicializador("CLIENTE@example.com").run();
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(passwordEncoder, never()).encode(anyString());
+        assertEquals("hash-anterior", usuario.getContrasena());
+        assertEquals("CLIENTE", usuario.getRol());
+    }
+
+    @Test
+    void recuperaElAccesoSinTocarLaContrasenaCuandoNoQuedaAdministradorActivo() {
+        Usuario usuario = usuarioExistente();
+        when(categoriaRepository.findByNombreIgnoreCase(anyString())).thenReturn(Optional.of(new Categoria()));
+        when(usuarioRepository.findByCorreoIgnoreCase("cliente@example.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.countByRolIgnoreCaseAndActivoTrue("ADMINISTRADOR")).thenReturn(0L);
+
+        nuevoInicializador("CLIENTE@example.com").run();
 
         verify(usuarioRepository).save(usuario);
+        verify(passwordEncoder, never()).encode(anyString());
         assertEquals(3L, usuario.getId());
         assertEquals("Nombre original", usuario.getNombre());
-        assertEquals("cliente@example.com", usuario.getCorreo());
         assertEquals("987654321", usuario.getTelefono());
         assertEquals("Ica, Perú", usuario.getDireccion());
-        assertFalse(usuario.getActivo());
+        assertEquals("hash-anterior", usuario.getContrasena());
         assertEquals("ADMINISTRADOR", usuario.getRol());
-        assertEquals("hash-nuevo", usuario.getContrasena());
+        assertTrue(usuario.getActivo());
     }
 
     @Test
@@ -77,6 +83,19 @@ class InicializadorDatosTest {
         assertEquals("ADMINISTRADOR", administrador.getRol());
         assertEquals("hash-nuevo", administrador.getContrasena());
         assertTrue(administrador.getActivo());
+    }
+
+    private Usuario usuarioExistente() {
+        Usuario usuario = new Usuario();
+        usuario.setId(3L);
+        usuario.setNombre("Nombre original");
+        usuario.setCorreo("cliente@example.com");
+        usuario.setTelefono("987654321");
+        usuario.setDireccion("Ica, Perú");
+        usuario.setActivo(false);
+        usuario.setContrasena("hash-anterior");
+        usuario.setRol("CLIENTE");
+        return usuario;
     }
 
     private InicializadorDatos nuevoInicializador(String correo) {

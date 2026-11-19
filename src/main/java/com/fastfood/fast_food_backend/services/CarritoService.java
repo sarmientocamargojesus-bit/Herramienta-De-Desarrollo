@@ -46,7 +46,10 @@ public class CarritoService {
         Usuario usuario = obtenerCliente(correo, true);
         for (CarritoItemRequest solicitud : seleccionInvitado) {
             validar(solicitud);
-            Producto producto = buscarProducto(solicitud.productoId());
+            // Un producto que ya no se vende se omite para no perder el resto del carrito del invitado.
+            Producto producto = productos.findById(solicitud.productoId())
+                    .filter(Producto::categoriaDisponible).orElse(null);
+            if (producto == null) continue;
             CarritoItem item = items.findByUsuarioIdAndProductoId(usuario.getId(), producto.getId())
                     .orElseGet(() -> nuevoItem(usuario, producto, fechaValida(solicitud.fechaAgregado())));
             // El máximo hace que reintentar la importación no duplique unidades.
@@ -93,8 +96,12 @@ public class CarritoService {
 
     private Producto buscarProducto(Long productoId) {
         if (productoId == null) throw new IllegalArgumentException("El producto es obligatorio");
-        return productos.findById(productoId)
+        Producto producto = productos.findById(productoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + productoId));
+        if (!producto.categoriaDisponible()) {
+            throw new ReglaNegocioException("El producto no está disponible: " + producto.getNombre());
+        }
+        return producto;
     }
 
     private void validar(CarritoItemRequest solicitud) {

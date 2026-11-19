@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,18 +57,22 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        return usuarioService.actualizar(id, usuario);
+    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario usuario, Authentication autenticacion) {
+        return usuarioService.actualizar(id, usuario, autenticacion.getName());
     }
 
     @PutMapping("/{id}/rol")
-    public Usuario cambiarRol(@PathVariable Long id, @RequestBody CambiarRolRequest solicitud) {
-        return usuarioService.cambiarRol(id, solicitud.getRol());
+    public Usuario cambiarRol(@PathVariable Long id, @RequestBody CambiarRolRequest solicitud,
+            Authentication autenticacion) {
+        if (solicitud == null) {
+            throw new IllegalArgumentException("El nuevo rol es obligatorio");
+        }
+        return usuarioService.cambiarRol(id, solicitud.getRol(), autenticacion.getName());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        usuarioService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, Authentication autenticacion) {
+        usuarioService.eliminar(id, autenticacion.getName());
         return ResponseEntity.noContent().build();
     }
 }

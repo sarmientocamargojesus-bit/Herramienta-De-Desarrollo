@@ -29,6 +29,7 @@ public class PagoService {
     private static final Set<String> METODOS_PERMITIDOS = Set.of("YAPE", "TARJETA");
     private static final String ESTADO_APROBADO = "APROBADO";
     private static final String ESTADO_CANCELADO = "CANCELADO";
+    private static final Set<String> ESTADOS_CON_STOCK_DESCONTADO = Set.of("CONFIRMADO", "EN_PREPARACION", "LISTO");
 
     private final PagoRepository pagoRepository;
     private final PedidoRepository pedidoRepository;
@@ -98,6 +99,9 @@ public class PagoService {
 
         for (Map.Entry<Long, Integer> entrada : cantidades.entrySet()) {
             Producto producto = productos.get(entrada.getKey());
+            if (!producto.categoriaDisponible()) {
+                throw new ReglaNegocioException("El producto ya no está disponible: " + producto.getNombre());
+            }
             if (producto.getStock() < entrada.getValue()) {
                 throw new ReglaNegocioException(
                         "Stock insuficiente para el producto " + producto.getNombre());
@@ -126,7 +130,14 @@ public class PagoService {
         return pagoRepository.save(nuevo);
     }
 
+    @Transactional
     public Pago actualizar(Long id, Pago datos) {
+        if (datos == null) {
+            throw new IllegalArgumentException("Los datos del pago son obligatorios");
+        }
+        if (datos.getFecha() != null && datos.getFecha().isAfter(LocalDateTime.now().plusMinutes(5))) {
+            throw new IllegalArgumentException("La fecha del pago no puede estar en el futuro");
+        }
         Pago pago = buscarPorId(id);
         if (datos.getMetodo() == null || datos.getMetodo().isBlank()
                 || datos.getEstado() == null || datos.getEstado().isBlank()) {
@@ -153,7 +164,12 @@ public class PagoService {
         Long pedidoId = pago.getPedido().getId();
         Pedido pedido = pedidoRepository.bloquearPorId(pedidoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado: " + pedidoId));
-        if ("CONFIRMADO".equalsIgnoreCase(pedido.getEstado())) {
+        String estado = pedido.getEstado() == null ? "" : pedido.getEstado().toUpperCase(Locale.ROOT);
+        if ("ENTREGADO".equals(estado)) {
+            throw new ReglaNegocioException("No se puede anular el pago de un pedido ya entregado");
+        }
+        // Mientras el pedido no se entregó, sus unidades vuelven al inventario.
+        if (ESTADOS_CON_STOCK_DESCONTADO.contains(estado)) {
             Map<Long, Producto> productos = new LinkedHashMap<>();
             for (Long productoId : detallePedidoRepository.buscarProductoIdsPorPedidoId(pedidoId)) {
                 productos.put(productoId, productoRepository.bloquearPorId(productoId)

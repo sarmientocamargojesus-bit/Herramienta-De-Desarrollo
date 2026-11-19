@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "productos")
@@ -45,6 +46,11 @@ public class Producto {
     // Se calcula al leer el producto; permite que Angular no pida una foto que no existe.
     @Formula("(case when exists (select 1 from imagenes_producto i where i.producto_id = id) then true else false end)")
     private boolean tieneImagen;
+
+    // Indica si el JSON recibido traía "stock"; si no lo trae, al editar se conserva el stock actual.
+    @Transient
+    @JsonIgnore
+    private boolean stockAsignado;
 
     public Long getId() {
         return id;
@@ -89,6 +95,11 @@ public class Producto {
 
     public void setStock(int stock) {
         this.stock = stock;
+        this.stockAsignado = true;
+    }
+
+    public boolean stockFueEnviado() {
+        return stockAsignado;
     }
 
     public String getCategoria() {
@@ -105,6 +116,11 @@ public class Producto {
 
     public void setCategoriaReferencia(Categoria categoriaReferencia) {
         this.categoriaReferencia = categoriaReferencia;
+    }
+
+    // Un producto de una categoría inactiva sigue visible en el panel, pero no se puede agregar al carrito ni comprar.
+    public boolean categoriaDisponible() {
+        return categoriaReferencia == null || Boolean.TRUE.equals(categoriaReferencia.getActivo());
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -21,4 +21,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> bloquearPorCorreo(@Param("correo") String correo);
 
     List<Usuario> findByRolIgnoreCase(String rol);
+
+    long countByRolIgnoreCaseAndActivoTrue(String rol);
 }

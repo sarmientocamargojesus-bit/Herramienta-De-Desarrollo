@@ -107,7 +107,13 @@ class RegistroCatalogoIntegrationTest {
         Inventario original = inventarios.findByProductoId(conInventario.getId()).orElseThrow();
         Producto sinInventario = productos.save(producto("Gaseosa", "3.00", 30));
 
-        MvcResult resultado = mockMvc.perform(post("/api/inventarios").header("Authorization", bearer(tokenEmpleado))
+        // Crear configuraciones de inventario es del administrador; el empleado recibe 403.
+        mockMvc.perform(post("/api/inventarios").header("Authorization", bearer(tokenEmpleado))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"producto\":{\"id\":%d},\"stockMinimo\":5}".formatted(sinInventario.getId())))
+                .andExpect(status().isForbidden());
+
+        MvcResult resultado = mockMvc.perform(post("/api/inventarios").header("Authorization", bearer(tokenAdmin))
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {"id":%d,"producto":{"id":%d},"stockMinimo":5,
                                  "fechaStockBajo":"2000-01-01T00:00:00","fechaAgotado":"2000-01-01T00:00:00"}

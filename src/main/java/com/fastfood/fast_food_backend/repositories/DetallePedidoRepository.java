@@ -15,4 +15,6 @@ public interface DetallePedidoRepository extends JpaRepository<DetallePedido, Lo
 
     @Query("SELECT DISTINCT d.producto.id FROM DetallePedido d WHERE d.pedido.id = :pedidoId ORDER BY d.producto.id")
     List<Long> buscarProductoIdsPorPedidoId(@Param("pedidoId") Long pedidoId);
+
+    boolean existsByProductoId(Long productoId);
 }

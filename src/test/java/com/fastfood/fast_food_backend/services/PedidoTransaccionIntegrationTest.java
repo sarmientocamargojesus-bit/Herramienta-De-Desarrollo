@@ -2,6 +2,7 @@ package com.fastfood.fast_food_backend.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -91,7 +92,8 @@ class PedidoTransaccionIntegrationTest {
     @Test
     void debePermitirCrearVariosPedidosAunqueElStockSeValideAlPagar() {
         Usuario usuario = usuarioRepository.save(usuario());
-        Producto producto = productoRepository.save(producto("Hamburguesa", "12.50", 1));
+        // Cada pedido cabe en el stock (3), pero juntos lo superan: el stock no se reserva hasta pagar.
+        Producto producto = productoRepository.save(producto("Hamburguesa", "12.50", 3));
 
         Pedido primero = pedidoService.procesarPedido(
                 solicitud(usuario.getId(), detalle(producto.getId(), 2)));
@@ -102,7 +104,20 @@ class PedidoTransaccionIntegrationTest {
         assertEquals("PENDIENTE", segundo.getEstado());
         assertEquals(2, pedidoRepository.count());
         assertEquals(2, detallePedidoRepository.count());
-        assertEquals(1, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+        assertEquals(3, productoRepository.findById(producto.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void debeRechazarUnPedidoQueSuperaElStockDisponible() {
+        Usuario usuario = usuarioRepository.save(usuario());
+        Producto producto = productoRepository.save(producto("Hamburguesa", "12.50", 2));
+
+        ReglaNegocioException error = assertThrows(ReglaNegocioException.class,
+                () -> pedidoService.procesarPedido(
+                        solicitud(usuario.getId(), detalle(producto.getId(), 1), detalle(producto.getId(), 2))));
+
+        assertTrue(error.getMessage().contains("Stock insuficiente"));
+        assertEquals(0, pedidoRepository.count());
     }
 
     private Usuario usuario() {

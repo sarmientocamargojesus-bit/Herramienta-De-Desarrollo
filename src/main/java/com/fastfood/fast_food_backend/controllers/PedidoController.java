@@ -21,6 +21,7 @@ import com.fastfood.fast_food_backend.entities.DetallePedido;
 import com.fastfood.fast_food_backend.dto.ProcesarPedidoRequest;
 import com.fastfood.fast_food_backend.dto.CrearPedidoRequest;
 import com.fastfood.fast_food_backend.dto.ActualizarPedidoRequest;
+import com.fastfood.fast_food_backend.dto.CambiarEstadoPedidoRequest;
 import com.fastfood.fast_food_backend.services.PedidoService;
 
 @RestController
@@ -57,6 +58,15 @@ public class PedidoController {
     @PreAuthorize("hasAnyRole('EMPLEADO','ADMINISTRADOR')")
     public Pedido actualizar(@PathVariable Long id, @RequestBody ActualizarPedidoRequest solicitud) {
         return pedidoService.actualizar(id, solicitud);
+    }
+
+    @PutMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('EMPLEADO','ADMINISTRADOR')")
+    public Pedido cambiarEstado(@PathVariable Long id, @RequestBody CambiarEstadoPedidoRequest solicitud) {
+        if (solicitud == null) {
+            throw new IllegalArgumentException("El nuevo estado es obligatorio");
+        }
+        return pedidoService.cambiarEstado(id, solicitud.estado());
     }
 
     @DeleteMapping("/{id}")

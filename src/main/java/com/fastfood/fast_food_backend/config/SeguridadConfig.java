@@ -60,9 +60,14 @@ public class SeguridadConfig {
                                 .hasRole("CLIENTE")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/productos/**", "/api/categorias/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/inventarios/**").hasAnyRole("EMPLEADO", "ADMINISTRADOR")
+                        // El empleado consulta el inventario y ajusta el mínimo; crear o borrar configuraciones es del administrador.
+                        .requestMatchers(HttpMethod.POST, "/api/inventarios", "/api/inventarios/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inventarios/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/inventarios", "/api/inventarios/**").hasAnyRole("EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/pedidos/**").hasAnyRole("CLIENTE", "EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/pagos/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        // Cualquier ruta de la API que no esté declarada arriba exige sesión; no queda pública por olvido.
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint(apiSecurityErrorHandler)
