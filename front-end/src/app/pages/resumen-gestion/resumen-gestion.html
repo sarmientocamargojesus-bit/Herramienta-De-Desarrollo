@@ -15,7 +15,7 @@
       <article class="indicador">
         <p>Pedidos pagados</p>
         <strong>{{ confirmados() }}</strong>
-        <span>{{ cancelados() }} cancelados</span>
+        <span>{{ cancelados() }} {{ cancelados() === 1 ? 'cancelado' : 'cancelados' }}</span>
       </article>
       <article class="indicador" [class.alerta]="porReponer().length > 0">
         <p>Por reponer</p>
@@ -33,7 +33,7 @@
       <section class="panel">
         <div class="encabezado">
           <h2>Últimos pedidos</h2>
-          <a routerLink="/gestion/pedidos">Ver todos</a>
+          <a routerLink="/gestion/pedidos">Ver todos →</a>
         </div>
         @if (!ultimos().length) {
           <p class="vacio">Todavía no hay pedidos registrados.</p>
@@ -56,7 +56,7 @@
       <section class="panel">
         <div class="encabezado">
           <h2>Productos por reponer</h2>
-          <a routerLink="/gestion/inventario">Ver inventario</a>
+          <a routerLink="/gestion/inventario">Ver inventario →</a>
         </div>
         @if (!reponer().length) {
           <p class="vacio">Ningún producto está en su stock mínimo.</p>
