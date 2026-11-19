@@ -51,7 +51,7 @@ public class PagoService {
     }
 
     public List<Pago> listar() {
-        return pagoRepository.findAll();
+        return pagoRepository.listarConPedido();
     }
 
     public Pago buscarPorId(Long id) {

@@ -24,7 +24,7 @@ public class InventarioService {
     }
 
     public List<Inventario> listar() {
-        return inventarioRepository.findAll();
+        return inventarioRepository.listarConProducto();
     }
 
     public List<Inventario> listarStockBajo() {

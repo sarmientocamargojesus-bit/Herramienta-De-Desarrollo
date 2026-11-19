@@ -23,6 +23,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     List<Pedido> findByEstadoIgnoreCase(String estado);
 
+    // Cada pedido con su cliente en una sola consulta.
+    @Query("SELECT p FROM Pedido p JOIN FETCH p.usuario")
+    List<Pedido> listarConUsuario();
+
     @Query("SELECT SUM(p.total) FROM Pedido p WHERE UPPER(p.estado) = UPPER(:estado)")
     BigDecimal sumarTotalPorEstado(@Param("estado") String estado);
 }

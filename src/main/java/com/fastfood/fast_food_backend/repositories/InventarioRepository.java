@@ -14,6 +14,11 @@ public interface InventarioRepository extends JpaRepository<Inventario, Long> {
 
     boolean existsByProductoId(Long productoId);
 
-    @Query("SELECT i FROM Inventario i WHERE i.producto.stock <= i.stockMinimo ORDER BY i.producto.nombre")
+    // Trae cada inventario con su producto y su categoría en una sola consulta (evita una consulta por producto).
+    @Query("SELECT i FROM Inventario i JOIN FETCH i.producto p LEFT JOIN FETCH p.categoriaReferencia")
+    List<Inventario> listarConProducto();
+
+    @Query("SELECT i FROM Inventario i JOIN FETCH i.producto p LEFT JOIN FETCH p.categoriaReferencia "
+            + "WHERE p.stock <= i.stockMinimo ORDER BY p.nombre")
     List<Inventario> buscarProductosConStockBajo();
 }
