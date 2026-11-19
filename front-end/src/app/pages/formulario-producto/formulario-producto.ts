@@ -26,7 +26,7 @@ export class FormularioProducto implements OnInit {
   readonly error = signal('');
   readonly aviso = signal('');
   readonly enviando = signal(false);
-  readonly form = this.fb.nonNullable.group({ nombre: ['', [Validators.required, noSoloEspacios]], descripcion: [''], precio: [0, [Validators.required, Validators.min(0.01)]], stock: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]], categoria: ['', Validators.required] });
+  readonly form = this.fb.nonNullable.group({ nombre: ['', [Validators.required, noSoloEspacios, Validators.maxLength(100)]], descripcion: ['', Validators.maxLength(255)], precio: [0, [Validators.required, Validators.min(0.01)]], stock: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]], categoria: ['', Validators.required] });
 
   ngOnInit(): void {
     const id = this.id();

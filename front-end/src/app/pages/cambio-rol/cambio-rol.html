@@ -15,7 +15,7 @@
       </p>
       @if (esPropio()) {
         <p class="advertencia" role="note">
-          Es tu propia cuenta. Si dejas de ser administrador perderás el acceso a Gestión.
+          Es tu propia cuenta: no puedes cambiar tu propio rol. Pide a otro administrador que lo haga.
         </p>
       }
       <label class="campo"
@@ -24,7 +24,7 @@
           <option value="EMPLEADO">Empleado</option>
           <option value="ADMINISTRADOR">Administrador</option>
         </select></label
-      ><button class="boton primario" [disabled]="enviando()">Guardar rol</button>
+      ><button class="boton primario" [disabled]="enviando() || esPropio()">Guardar rol</button>
     </form>
   }
   <app-dialogo-confirmacion

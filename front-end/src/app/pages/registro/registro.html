@@ -10,14 +10,14 @@
     }
     <form class="formulario" [formGroup]="formulario" (ngSubmit)="enviar()">
       <label class="campo"
-        >Nombre<input formControlName="nombre" autocomplete="name" />
+        >Nombre<input formControlName="nombre" autocomplete="name" maxlength="100" />
         @if (formulario.controls.nombre.touched && formulario.controls.nombre.errors; as e) {
           <span class="ayuda">{{
             e['maxlength'] ? 'Usa como máximo 100 caracteres.' : 'Ingresa tu nombre.'
           }}</span>
         }</label
       ><label class="campo"
-        >Correo<input type="email" formControlName="correo" autocomplete="email" />
+        >Correo<input type="email" formControlName="correo" autocomplete="email" maxlength="150" />
         @if (formulario.controls.correo.touched && formulario.controls.correo.errors; as e) {
           <span class="ayuda">{{
             e['registrado']
@@ -26,14 +26,15 @@
           }}</span>
         }</label
       ><label class="campo"
-        >Teléfono<input type="tel" formControlName="telefono" autocomplete="tel" />
+        >Teléfono<input type="tel" formControlName="telefono" autocomplete="tel" maxlength="20" />
         @if (formulario.controls.telefono.touched && formulario.controls.telefono.invalid) {
           <span class="ayuda">Ingresa tu teléfono.</span>
         }</label
       ><label class="campo"
         >Dirección (opcional)<input
           formControlName="direccion"
-          autocomplete="street-address" /></label
+          autocomplete="street-address"
+          maxlength="255" /></label
       ><label class="campo"
         >Contraseña<input
           [type]="verContrasena() ? 'text' : 'password'"

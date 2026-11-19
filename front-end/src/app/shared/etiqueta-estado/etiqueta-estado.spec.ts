@@ -12,6 +12,9 @@ describe('EtiquetaEstado', () => {
   it.each([
     ['CONFIRMADO', 'exito', 'Confirmado'],
     ['APROBADO', 'exito', 'Aprobado'],
+    ['EN_PREPARACION', 'info', 'En preparación'],
+    ['LISTO', 'info', 'Listo'],
+    ['ENTREGADO', 'exito', 'Entregado'],
     ['PENDIENTE', 'alerta', 'Pendiente'],
     ['STOCK BAJO', 'alerta', 'Stock bajo'],
     ['CANCELADO', 'peligro', 'Cancelado'],

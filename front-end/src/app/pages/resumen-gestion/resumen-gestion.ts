@@ -6,6 +6,7 @@ import { esReintentable, mensajeError } from '../../shared/errores';
 import { GestionService } from '../../services/gestion.service';
 import { PedidosService } from '../../services/pedidos.service';
 import { estadoStock } from '../../shared/stock';
+import { ESTADOS_PAGADOS } from '../../shared/estados-pedido';
 import { Inventario, Pedido } from '../../models/product';
 import { EtiquetaEstado } from '../../shared/etiqueta-estado/etiqueta-estado';
 import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
@@ -22,13 +23,15 @@ export class ResumenGestion implements OnInit {
   private readonly pedidosServicio = inject(PedidosService);
   private readonly gestion = inject(GestionService);
   readonly pedidos = signal<Pedido[]>([]);
-  readonly totalVendido = signal(0);
   readonly porReponer = signal<Inventario[]>([]);
   readonly cargando = signal(true);
   readonly error = signal('');
   readonly reintentable = signal(false);
 
-  readonly confirmados = computed(() => this.pedidos().filter(p => p.estado === 'CONFIRMADO').length);
+  // Un pedido pagado sigue contando como venta aunque avance a preparación, listo o entregado.
+  private readonly pagados = computed(() => this.pedidos().filter(p => ESTADOS_PAGADOS.includes(p.estado)));
+  readonly totalVendido = computed(() => this.pagados().reduce((suma, p) => suma + Number(p.total), 0));
+  readonly confirmados = computed(() => this.pagados().length);
   readonly cancelados = computed(() => this.pedidos().filter(p => p.estado === 'CANCELADO').length);
   readonly agotados = computed(() => this.porReponer().filter(i => i.producto.stock === 0).length);
   readonly ultimos = computed(() => [...this.pedidos()].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 5));
@@ -40,11 +43,10 @@ export class ResumenGestion implements OnInit {
     this.error.set(''); this.reintentable.set(false); this.cargando.set(true);
     forkJoin({
       pedidos: this.pedidosServicio.todos(),
-      total: this.pedidosServicio.totalPorEstado('CONFIRMADO'),
       porReponer: this.gestion.inventariosBajoMinimo(),
     }).subscribe({
-      next: ({ pedidos, total, porReponer }) => {
-        this.pedidos.set(pedidos); this.totalVendido.set(Number(total) || 0); this.porReponer.set(porReponer);
+      next: ({ pedidos, porReponer }) => {
+        this.pedidos.set(pedidos); this.porReponer.set(porReponer);
         this.cargando.set(false);
       },
       error: e => { this.error.set(mensajeError(e)); this.reintentable.set(esReintentable(e)); this.cargando.set(false); }

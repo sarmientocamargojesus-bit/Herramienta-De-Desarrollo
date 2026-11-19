@@ -6,6 +6,7 @@ import { CarritoService } from '../../services/carrito.service';
 import { mensajeError } from '../../shared/errores';
 import { SesionService } from '../../services/sesion.service';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
+import { correoConDominio } from '../../shared/validadores';
 
 @Component({ imports: [ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-inicio-sesion', templateUrl: './inicio-sesion.html', styleUrl: './inicio-sesion.scss' })
 export class InicioSesion {
@@ -14,7 +15,7 @@ export class InicioSesion {
   private readonly carrito = inject(CarritoService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  readonly formulario = this.fb.nonNullable.group({ correo: ['', [Validators.required, Validators.email]], contrasena: ['', Validators.required] });
+  readonly formulario = this.fb.nonNullable.group({ correo: ['', [Validators.required, Validators.email, correoConDominio]], contrasena: ['', Validators.required] });
   readonly enviando = signal(false);
   readonly error = signal('');
   readonly verContrasena = signal(false);

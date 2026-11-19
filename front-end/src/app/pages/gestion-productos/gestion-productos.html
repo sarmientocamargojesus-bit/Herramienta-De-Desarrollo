@@ -83,7 +83,7 @@
   <app-dialogo-confirmacion
     [abierto]="!!elegido()"
     titulo="Eliminar producto"
-    mensaje="¿Eliminar este producto? Los pedidos existentes podrían impedirlo."
+    mensaje="¿Eliminar este producto? Si ya tiene pedidos no se podrá borrar; en ese caso deja su stock en 0 para retirarlo del menú."
     (confirmar)="eliminar()"
     (cancelar)="elegido.set(null)"
   />

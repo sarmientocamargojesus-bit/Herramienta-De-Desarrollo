@@ -12,13 +12,13 @@
   <div class="editor">
     <form class="formulario panel" [formGroup]="form" (ngSubmit)="guardar()">
       <label class="campo"
-        >Nombre<input formControlName="nombre" required />
+        >Nombre<input formControlName="nombre" required maxlength="100" />
         @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
           <span class="ayuda">Escribe el nombre del producto.</span>
         }
       </label>
       <label class="campo"
-        >Descripción<textarea formControlName="descripcion" rows="3"></textarea>
+        >Descripción<textarea formControlName="descripcion" rows="3" maxlength="255"></textarea>
       </label>
       <div class="grid-dos">
         <label class="campo"

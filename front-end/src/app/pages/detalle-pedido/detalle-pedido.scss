@@ -1,6 +1,17 @@
 @use 'variables' as v;
 @use 'mixins' as m;
 
+.avance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 16px;
+
+  small {
+    color: v.$texto-suave;
+  }
+}
 .datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

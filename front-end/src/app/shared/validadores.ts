@@ -14,3 +14,10 @@ export function camposIguales(campo: string, confirmacion: string): ValidatorFn 
     return repetido && original !== repetido ? { noCoinciden: true } : null;
   };
 }
+
+// Igual que el backend: texto@dominio.ext, sin espacios. Validators.email acepta "ana@correo" sin punto.
+const FORMATO_CORREO = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+export const correoConDominio: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const valor = typeof control.value === 'string' ? control.value.trim() : '';
+  return valor && !FORMATO_CORREO.test(valor) ? { correoIncompleto: true } : null;
+};

@@ -1,6 +1,6 @@
 <section class="pagina">
   <h1>Resumen</h1>
-  <p class="subtitulo">Ventas confirmadas y productos que necesitan reposición.</p>
+  <p class="subtitulo">Ventas de pedidos pagados y productos que necesitan reposición.</p>
   <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
 
   @if (cargando()) {
@@ -10,10 +10,10 @@
       <article class="indicador">
         <p>Total vendido</p>
         <strong>S/ {{ totalVendido() | number: '1.2-2' }}</strong>
-        <span>Pedidos confirmados</span>
+        <span>Pedidos pagados</span>
       </article>
       <article class="indicador">
-        <p>Pedidos confirmados</p>
+        <p>Pedidos pagados</p>
         <strong>{{ confirmados() }}</strong>
         <span>{{ cancelados() }} cancelados</span>
       </article>

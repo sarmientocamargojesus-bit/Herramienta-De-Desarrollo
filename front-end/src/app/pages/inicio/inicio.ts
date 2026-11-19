@@ -32,7 +32,10 @@ export class Inicio implements OnInit {
   readonly buscando = signal(false);
   // null: sin búsqueda activa, se muestra el menú completo.
   readonly resultados = signal<Producto[] | null>(null);
+  // Ids de las categorías activas: un producto de una categoría inactiva no se muestra ni se puede comprar.
+  private readonly activas = signal<Set<number>>(new Set());
   readonly visibles = computed(() => (this.resultados() ?? this.productos())
+    .filter(p => p.categoriaId === undefined || p.categoriaId === null || this.activas().has(p.categoriaId))
     .filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
   readonly cargando = signal(true);
   readonly error = signal('');
@@ -60,6 +63,7 @@ export class Inicio implements OnInit {
     forkJoin({ productos: this.catalogo.productos(), categorias: this.catalogo.categorias() }).subscribe({
       next: ({ productos, categorias }) => {
         this.productos.set(productos);
+        this.activas.set(new Set(categorias.map(c => c.id)));
         this.categorias.set([{ label: 'Todos', value: 'TODAS' }, ...categorias.map(c => ({ label: c.nombre, value: c.nombre }))]);
         this.cargando.set(false);
       },

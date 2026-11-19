@@ -12,5 +12,6 @@ export class PedidosService {
   todos() { return this.http.get<Pedido[]>(`${this.api}/pedidos`); }
   obtener(id: number) { return this.http.get<Pedido>(`${this.api}/pedidos/${id}`); }
   detalles(id: number) { return this.http.get<DetallePedido[]>(`${this.api}/pedidos/${id}/detalles`); }
-  totalPorEstado(estado: string) { return this.http.get<number>(`${this.api}/pedidos/total-por-estado/${estado}`); }
+  // Avanza el pedido al estado siguiente (empleado o administrador).
+  cambiarEstado(id: number, estado: string) { return this.http.put<Pedido>(`${this.api}/pedidos/${id}/estado`, { estado }); }
 }

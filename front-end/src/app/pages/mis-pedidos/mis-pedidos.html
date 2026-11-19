@@ -1,12 +1,12 @@
 <section class="pagina">
   <h1>Mis pedidos</h1>
-  <p class="subtitulo">Tus pedidos confirmados, del más reciente al más antiguo.</p>
+  <p class="subtitulo">Tus pedidos y su estado, del más reciente al más antiguo.</p>
   <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando()) {
     <p>Cargando…</p>
   } @else if (!pedidos().length) {
     <p class="vacio">
-      Aún no tienes pedidos confirmados. <a routerLink="/" fragment="menu">Ver el menú</a>
+      Aún no tienes pedidos. <a routerLink="/" fragment="menu">Ver el menú</a>
     </p>
   } @else {
     <div class="tarjetas">

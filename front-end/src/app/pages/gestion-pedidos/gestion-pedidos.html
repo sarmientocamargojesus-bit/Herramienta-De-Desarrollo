@@ -1,6 +1,6 @@
 <section class="pagina">
   <h1>Pedidos</h1>
-  <p class="subtitulo">Pedidos registrados por el backend después del checkout.</p>
+  <p class="subtitulo">Pedidos registrados por el backend. Abre un pedido para avanzar su estado.</p>
   <app-mensaje-error [texto]="error()" [reintentable]="reintentable()" (reintentar)="cargar()" />
   @if (cargando() && !pedidos().length) {
     <app-indicador-carga />
@@ -22,7 +22,7 @@
       >
         <option value="TODOS">Todos los estados</option>
         @for (e of estados; track e) {
-          <option [value]="e">{{ e.charAt(0) + e.slice(1).toLowerCase() }}</option>
+          <option [value]="e">{{ nombreEstado(e) }}</option>
         }
       </select>
       <span class="contador">{{ visibles().length }} de {{ pedidos().length }} pedidos</span>

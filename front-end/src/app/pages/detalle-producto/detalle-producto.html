@@ -12,8 +12,12 @@
         <h1>{{ p.nombre }}</h1>
         <p>{{ p.descripcion }}</p>
         <p class="precio">S/ {{ p.precio | number: '1.2-2' }}</p>
+        @if (!disponible()) {
+          <p class="estado">Este producto no está disponible por ahora.</p>
+        } @else {
         <p class="estado">{{ p.stock > 0 ? p.stock + ' disponibles' : 'Agotado' }}</p>
-        @if (p.stock > 0) {
+        }
+        @if (disponible() && p.stock > 0) {
           <div class="cantidad">
             <span>Cantidad</span>
             <app-selector-cantidad
@@ -26,6 +30,7 @@
           </div>
         }
         <div class="acciones">
+          @if (disponible()) {
           <button class="boton primario" [disabled]="p.stock < 1" (click)="agregar()">
             {{
               p.stock < 1
@@ -33,8 +38,9 @@
                 : cantidad() > 1
                   ? 'Agregar ' + cantidad() + ' al carrito'
                   : 'Agregar al carrito'
-            }}</button
-          ><a class="boton secundario" routerLink="/carrito">Ver carrito</a>
+            }}</button>
+          }
+          <a class="boton secundario" routerLink="/carrito">Ver carrito</a>
         </div>
       </div>
     </div>

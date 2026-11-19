@@ -52,8 +52,10 @@ describe('Mejoras de la tienda', () => {
   it('el detalle agrega la cantidad elegida y muestra el aviso con enlace al carrito', async () => {
     const harness = await RouterTestingHarness.create();
     const detalle = await harness.navigateByUrl('/productos/3', DetalleProducto);
-    TestBed.inject(HttpTestingController).expectOne('/api/productos/3').flush(
-      { id: 3, nombre: 'Papas Fuego', descripcion: '', precio: 12.5, stock: 10, categoria: 'PIQUEOS', tieneImagen: false });
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/productos/3').flush(
+      { id: 3, nombre: 'Papas Fuego', descripcion: '', precio: 12.5, stock: 10, categoria: 'PIQUEOS', categoriaId: 3, tieneImagen: false });
+    http.expectOne('/api/categorias/activas').flush([{ id: 3, nombre: 'PIQUEOS', descripcion: '', activo: true }]);
     harness.detectChanges();
 
     detalle.cantidad.set(3);
@@ -102,6 +104,11 @@ describe('Mejoras de la tienda', () => {
     ]));
     const fixture = TestBed.createComponent(Checkout);
     fixture.detectChanges();
+    // El carrito del navegador se actualiza con el menú vigente antes de mostrar el total.
+    TestBed.inject(HttpTestingController).expectOne('/api/productos').flush([
+      { id: 1, nombre: 'Burger', precio: 24.9, stock: 5, categoria: 'HAMBURGUESAS' },
+      { id: 2, nombre: 'Cola', precio: 6.5, stock: 5, categoria: 'BEBIDAS' },
+    ]);
     expect(fixture.componentInstance.total()).toBeCloseTo(56.3);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('S/ 56.30');

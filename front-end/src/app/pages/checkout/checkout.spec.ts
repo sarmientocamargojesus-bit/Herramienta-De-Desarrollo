@@ -29,6 +29,10 @@ describe("Checkout", () => {
 
   it("permite confirmar por recojo después de intentar domicilio sin dirección", async () => {
     fixture.detectChanges();
+    TestBed.inject(HttpTestingController).expectOne('/api/productos').flush([
+      { id: 1, nombre: 'Hamburguesa', precio: 12.5, stock: 5, categoria: 'HAMBURGUESAS' }
+    ]);
+    fixture.detectChanges();
     await fixture.whenStable();
     const elegirEntrega = async (valor: string) => {
       const select = fixture.nativeElement.querySelector('select[formControlName="tipoEntrega"]') as HTMLSelectElement;

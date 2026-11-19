@@ -24,6 +24,7 @@
             >Dirección de entrega<input
               formControlName="direccionEntrega"
               autocomplete="street-address"
+              maxlength="255"
               aria-required="true"
             />
             @if (
@@ -35,7 +36,7 @@
           </label>
         }
         <label class="campo"
-          >Observaciones<textarea formControlName="observaciones" rows="3"></textarea></label
+          >Observaciones<textarea formControlName="observaciones" rows="3" maxlength="255"></textarea></label
         ><label class="campo"
           >Método de pago simulado<select formControlName="metodoPago">
             <option value="YAPE">Yape (simulado)</option>

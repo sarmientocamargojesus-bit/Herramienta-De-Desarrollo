@@ -10,6 +10,14 @@
     <p class="subtitulo">
       {{ p.fecha | date: 'dd/MM/yyyy HH:mm' }} · <app-etiqueta-estado [valor]="p.estado" />
     </p>
+    @if (siguiente(); as paso) {
+      <div class="avance">
+        <button type="button" class="boton" [disabled]="avanzando()" (click)="avanzar()">
+          {{ avanzando() ? 'Guardando…' : paso.accion }}
+        </button>
+        <small>El pedido avanza paso a paso: preparación, listo y entregado.</small>
+      </div>
+    }
 
     <div class="datos">
       @if (enGestion) {

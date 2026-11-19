@@ -35,9 +35,14 @@
               <td data-label="Monto">S/ {{ p.monto | number: '1.2-2' }}</td>
               <td data-label="Fecha">{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
               <td data-label="">
-                <button type="button" class="boton peligro pequeno" (click)="elegido.set(p)">
-                  Anular
-                </button>
+                <!-- Un pedido entregado ya no se puede anular: la comida salió y el stock no vuelve. -->
+                @if (p.pedido.estado === 'ENTREGADO') {
+                  <small class="sin-accion">Pedido entregado</small>
+                } @else {
+                  <button type="button" class="boton peligro pequeno" (click)="elegido.set(p)">
+                    Anular
+                  </button>
+                }
               </td>
             </tr>
           }

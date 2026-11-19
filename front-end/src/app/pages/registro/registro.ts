@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { mensajeError } from '../../shared/errores';
 import { SesionService } from '../../services/sesion.service';
-import { camposIguales, noSoloEspacios } from '../../shared/validadores';
+import { camposIguales, correoConDominio, noSoloEspacios } from '../../shared/validadores';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
 
 @Component({ imports: [ReactiveFormsModule, RouterLink, MensajeError], selector: 'app-registro', templateUrl: './registro.html', styleUrl: './registro.scss' })
@@ -14,9 +14,9 @@ export class Registro {
   private readonly router = inject(Router);
   readonly formulario = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(100), noSoloEspacios]],
-    correo: ['', [Validators.required, Validators.email]],
-    telefono: ['', [Validators.required, noSoloEspacios]],
-    direccion: [''],
+    correo: ['', [Validators.required, Validators.email, correoConDominio, Validators.maxLength(150)]],
+    telefono: ['', [Validators.required, noSoloEspacios, Validators.maxLength(20)]],
+    direccion: ['', Validators.maxLength(255)],
     contrasena: ['', [Validators.required, Validators.minLength(6)]],
     confirmarContrasena: ['', Validators.required]
   }, { validators: camposIguales('contrasena', 'confirmarContrasena') });

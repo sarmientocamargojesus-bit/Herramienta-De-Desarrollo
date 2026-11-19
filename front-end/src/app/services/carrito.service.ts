@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal } from '@angular/core';
-import { from, lastValueFrom, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, from, lastValueFrom, map, Observable, of, switchMap, tap } from 'rxjs';
 import { CarritoItem, Producto } from '../models/product';
 import { API_URL } from './api.config';
 import { SesionService } from './sesion.service';
@@ -42,6 +42,15 @@ export class CarritoService {
     this.ultimaOperacion = ejecucion;
     return from(ejecucion);
   }
+  private actualizarInvitado(items: CarritoItem[], productos: Producto[]): CarritoItem[] {
+    const porId = new Map(productos.map(p => [p.id, p]));
+    const actualizados = items.flatMap(item => {
+      const producto = porId.get(item.productoId);
+      return producto ? [{ ...item, nombre: producto.nombre, precio: producto.precio, stock: producto.stock }] : [];
+    });
+    this.guardarInvitado(actualizados);
+    return actualizados;
+  }
   private guardarInvitado(items: CarritoItem[]): void {
     localStorage.setItem(CLAVE, JSON.stringify(items));
     this.items.set(items);
@@ -51,7 +60,13 @@ export class CarritoService {
     if (!this.esCliente()) {
       const items = leerInvitado();
       this.items.set(items);
-      return of(items);
+      if (!items.length) return of(items);
+      // El carrito del navegador guarda una copia del precio y del stock: se actualiza con el menú actual
+      // y se quitan los productos que ya no existen. Sin conexión se muestra lo guardado.
+      return this.http.get<Producto[]>(`${this.api}/productos`).pipe(
+        map(productos => this.actualizarInvitado(items, productos)),
+        catchError(() => of(items))
+      );
     }
     return this.http.get<CarritoItem[]>(`${this.api}/carrito`).pipe(tap(items => this.items.set(items)));
   }
