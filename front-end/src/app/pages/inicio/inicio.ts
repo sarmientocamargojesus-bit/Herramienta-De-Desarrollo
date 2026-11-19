@@ -13,15 +13,17 @@ import { IndicadorCarga } from '../../shared/indicador-carga/indicador-carga';
 import { MensajeError } from '../../shared/mensaje-error/mensaje-error';
 import { Portada } from '../../components/portada/portada';
 import { SobreNosotros } from '../../components/sobre-nosotros/sobre-nosotros';
+import { ComoPedir } from '../../components/como-pedir/como-pedir';
+import { Vitrina } from '../../components/vitrina/vitrina';
 
 @Component({
-  imports: [CatalogoProductos, FiltroCategorias, IndicadorCarga, MensajeError, Portada, ReactiveFormsModule, SobreNosotros],
+  imports: [CatalogoProductos, ComoPedir, FiltroCategorias, IndicadorCarga, MensajeError, Portada, ReactiveFormsModule, SobreNosotros, Vitrina],
   selector: "app-inicio",
   styleUrl: "./inicio.scss",
   templateUrl: "./inicio.html",
 })
 export class Inicio implements OnInit {
-  private readonly catalogo = inject(CatalogoService);
+  private readonly api = inject(CatalogoService);
   private readonly carrito = inject(CarritoService);
   private readonly avisos = inject(AvisosService);
   readonly productos = signal<Producto[]>([]);
@@ -37,10 +39,12 @@ export class Inicio implements OnInit {
   readonly visibles = computed(() => (this.resultados() ?? this.productos())
     .filter(p => p.categoriaId === undefined || p.categoriaId === null || this.activas().has(p.categoriaId))
     .filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
+  // Catálogo completo sin los productos de categorías inactivas; lo usan la portada y la vitrina.
+  readonly catalogo = computed(() => this.productos()
+    .filter(p => p.categoriaId == null || this.activas().has(p.categoriaId)));
   // Producto de la portada: el combo disponible más económico (o, si no hay combos, el primero con stock).
   readonly destacado = computed(() => {
-    const disponibles = this.productos()
-      .filter(p => p.stock > 0 && (p.categoriaId == null || this.activas().has(p.categoriaId)));
+    const disponibles = this.catalogo().filter(p => p.stock > 0);
     const combos = disponibles.filter(p => p.categoria === 'COMBOS').sort((a, b) => a.precio - b.precio);
     return combos[0] ?? disponibles[0] ?? null;
   });
@@ -67,7 +71,7 @@ export class Inicio implements OnInit {
     this.error.set('');
     this.reintentable.set(false);
     this.cargando.set(true);
-    forkJoin({ productos: this.catalogo.productos(), categorias: this.catalogo.categorias() }).subscribe({
+    forkJoin({ productos: this.api.productos(), categorias: this.api.categorias() }).subscribe({
       next: ({ productos, categorias }) => {
         this.productos.set(productos);
         this.activas.set(new Set(categorias.map(c => c.id)));
@@ -96,7 +100,7 @@ export class Inicio implements OnInit {
 
   // Un error se muestra sin cortar el flujo: la siguiente búsqueda sigue funcionando.
   private buscar(texto: string): Observable<Producto[] | null> {
-    return this.catalogo.buscar(texto).pipe(
+    return this.api.buscar(texto).pipe(
       tap(() => this.error.set('')),
       catchError(error => { this.error.set(mensajeError(error)); this.reintentable.set(false); return of(null); })
     );

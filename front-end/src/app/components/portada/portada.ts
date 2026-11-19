@@ -4,12 +4,13 @@ import { RouterLink } from '@angular/router';
 import { Producto } from '../../models/product';
 import { CarritoService } from '../../services/carrito.service';
 import { SesionService } from '../../services/sesion.service';
+import { ImagenProducto } from '../../shared/imagen-producto/imagen-producto';
 
 // Portada de la tienda. Recibe de Inicio las categorías y el producto destacado (input)
-// y le avisa qué categoría eligió el cliente en los accesos directos (output).
+// y le avisa qué categoría eligió el cliente con "Ver combos" (output).
 @Component({
   selector: 'app-portada',
-  imports: [DecimalPipe, RouterLink],
+  imports: [DecimalPipe, ImagenProducto, RouterLink],
   templateUrl: './portada.html',
   styleUrl: './portada.scss'
 })
@@ -23,15 +24,11 @@ export class Portada implements OnInit {
 
   readonly esCliente = computed(() => this.sesion.rol() === 'CLIENTE');
   readonly unidades = computed(() => this.carrito.items().reduce((total, item) => total + item.cantidad, 0));
-  readonly accesos = computed(() => this.categorias().filter(c => c.value !== 'TODAS'));
+  // "Ver combos" solo aparece si la categoría COMBOS está activa.
+  readonly tieneCombos = computed(() => this.categorias().some(c => c.value === 'COMBOS'));
 
   ngOnInit(): void {
     // El carrito del cliente vive en el servidor: se carga para mostrar su pedido en curso.
     if (this.esCliente() && !this.carrito.items().length) this.carrito.cargar().subscribe({ error: () => undefined });
-  }
-
-  // "HAMBURGUESAS" se muestra como "Hamburguesas".
-  nombre(texto: string): string {
-    return texto.charAt(0) + texto.slice(1).toLowerCase();
   }
 }

@@ -1,0 +1,303 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
+$sombra-categoria: rgb(20 18 16 / 0%), rgb(20 18 16 / 85%);
+$texto-sobre-rojo: #ffe1d9;
+
+@include m.seccion-inicio;
+
+.sin-arriba {
+  padding-top: 0;
+}
+
+// Categorías: tarjetas con foto que filtran el menú.
+.categorias {
+  display: grid;
+  // auto-fit reparte el ancho entre las categorías que haya (4, 5…) sin dejar una sola abajo.
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+.categoria {
+  position: relative;
+  aspect-ratio: 1 / 1.05;
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 0;
+  background: v.$oscuro;
+  color: v.$blanco;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  // El nombre se mide contra el ancho de la tarjeta (unidades cqi), no de la pantalla.
+  container-type: inline-size;
+
+  &:hover .categoria-foto {
+    transform: scale(1.05);
+    opacity: 0.72;
+  }
+}
+.categoria-foto {
+  position: absolute;
+  inset: 0;
+  opacity: 0.85;
+  transition: transform 0.4s ease, opacity 0.3s;
+}
+.categoria-pie {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  gap: 2px;
+  padding: 40px 14px 14px;
+  background: linear-gradient($sombra-categoria);
+
+  strong {
+    // Se ajusta al ancho de la tarjeta para que "HAMBURGUESAS" entre en una línea.
+    font-size: clamp(13px, 7.5cqi, 22px);
+    font-weight: 1000;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+    @include m.mayusculas(0);
+  }
+  small {
+    font-size: 12.5px;
+    color: v.$fondo-estado;
+  }
+}
+
+// Selección de productos.
+.productos {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+.producto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid v.$borde;
+  border-radius: 20px;
+  background: v.$blanco;
+
+  small {
+    font-size: 10.5px;
+    font-weight: 800;
+    @include m.mayusculas(0.14em);
+    color: v.$texto-suave;
+  }
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.15;
+    min-height: 2.3em;
+    @include m.mayusculas(0);
+
+    a {
+      color: v.$texto;
+      text-decoration: none;
+
+      &:hover {
+        color: v.$rojo;
+      }
+    }
+  }
+}
+.producto-foto {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: v.$crema;
+}
+.producto-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+
+  strong {
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+}
+.mas {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: v.$rojo-precio;
+  color: v.$blanco;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: v.$rojo-oscuro;
+  }
+}
+
+// Franja roja con las cifras del menú.
+.cifras-banda {
+  background: v.$rojo;
+  color: v.$blanco;
+  padding: 60px 28px;
+}
+.cifras-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    line-height: 0.9;
+    letter-spacing: -0.07em;
+    font-weight: 1000;
+  }
+  p {
+    margin: 16px 0 0;
+    color: $texto-sobre-rojo;
+  }
+}
+.cifras {
+  @include m.lista-limpia;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  li {
+    display: grid;
+    gap: 6px;
+    padding: 18px 16px;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 18px;
+  }
+  strong {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 1000;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+  span {
+    font-size: 13px;
+    color: $texto-sobre-rojo;
+  }
+}
+
+// Combos.
+.combos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.combo {
+  display: grid;
+  grid-template-columns: 42% minmax(0, 1fr);
+  border: 1px solid v.$borde;
+  border-radius: 24px;
+  overflow: hidden;
+  background: v.$blanco;
+}
+.combo-foto {
+  display: block;
+  min-height: 190px;
+  background: v.$crema;
+}
+.combo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 18px;
+  min-width: 0;
+
+  h3 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    @include m.mayusculas(0);
+
+    a {
+      color: v.$texto;
+      text-decoration: none;
+
+      &:hover {
+        color: v.$rojo;
+      }
+    }
+  }
+  p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: v.$texto-suave;
+  }
+  .producto-fila {
+    padding-top: 10px;
+
+    strong {
+      font-size: 17px;
+    }
+  }
+}
+.agregar {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: v.$oscuro;
+  color: v.$blanco;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: v.$rojo;
+  }
+}
+
+@media (max-width: 1100px) {
+  .productos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .combos {
+    grid-template-columns: 1fr;
+  }
+}
+@include m.hasta(portada) {
+  .categorias {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .cifras-banda {
+    padding: 48px 20px;
+  }
+  .cifras-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+@include m.hasta(chico) {
+  .productos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .cifras {
+    grid-template-columns: 1fr;
+  }
+  .combo {
+    grid-template-columns: 1fr;
+  }
+  .combo-foto {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+}

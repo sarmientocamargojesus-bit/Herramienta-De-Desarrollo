@@ -5,6 +5,8 @@ import { provideRouter } from '@angular/router';
 import { Inicio } from '../pages/inicio/inicio';
 import { PiePagina } from './pie-pagina/pie-pagina';
 import { Portada } from './portada/portada';
+import { ComoPedir } from './como-pedir/como-pedir';
+import { Vitrina } from './vitrina/vitrina';
 
 const SESION = 'fast-food-sesion';
 const CARRITO = 'fast-food-carrito-invitado';
@@ -21,19 +23,59 @@ describe('Portada y pie de página', () => {
   });
   afterEach(() => { sessionStorage.removeItem(SESION); localStorage.removeItem(CARRITO); });
 
-  it('los accesos directos avisan qué categoría se eligió', () => {
+  it('"Ver combos" avisa la categoría y solo aparece si COMBOS está activa', () => {
     const fixture = TestBed.createComponent(Portada);
-    fixture.componentRef.setInput('categorias', [
-      { label: 'Todos', value: 'TODAS' }, { label: 'COMBOS', value: 'COMBOS' }, { label: 'BEBIDAS', value: 'BEBIDAS' },
-    ]);
+    fixture.componentRef.setInput('categorias', [{ label: 'Todos', value: 'TODAS' }, { label: 'BEBIDAS', value: 'BEBIDAS' }]);
     const elegidas: string[] = [];
     fixture.componentInstance.categoriaElegida.subscribe(c => elegidas.push(c));
     fixture.detectChanges();
+    const portada = fixture.nativeElement as HTMLElement;
+    expect(portada.querySelector('.hero-secundario')).toBeNull();
 
-    const botones = [...(fixture.nativeElement as HTMLElement).querySelectorAll('.accesos button')] as HTMLButtonElement[];
-    expect(botones.map(b => b.textContent?.trim())).toEqual(['Combos', 'Bebidas']);
-    botones[0].click();
+    fixture.componentRef.setInput('categorias', [{ label: 'Todos', value: 'TODAS' }, { label: 'COMBOS', value: 'COMBOS' }]);
+    fixture.detectChanges();
+    (portada.querySelector('.hero-secundario') as HTMLButtonElement).click();
     expect(elegidas).toEqual(['COMBOS']);
+  });
+
+  it('la vitrina arma categorías, selección variada, cifras y combos con el catálogo real', () => {
+    const fixture = TestBed.createComponent(Vitrina);
+    fixture.componentRef.setInput('categorias', [
+      { label: 'Todos', value: 'TODAS' }, { label: 'COMBOS', value: 'COMBOS' }, { label: 'BEBIDAS', value: 'BEBIDAS' },
+    ]);
+    fixture.componentRef.setInput('productos', [
+      { id: 1, nombre: 'Combo Doble', descripcion: 'Para dos', precio: 54.9, stock: 5, categoria: 'COMBOS', tieneImagen: false },
+      { id: 2, nombre: 'Combo Personal', descripcion: '', precio: 19.9, stock: 0, categoria: 'COMBOS', tieneImagen: false },
+      { id: 3, nombre: 'Combo Clásico', descripcion: '', precio: 29.9, stock: 4, categoria: 'COMBOS', tieneImagen: false },
+      { id: 4, nombre: 'Cola', descripcion: '', precio: 6.9, stock: 9, categoria: 'BEBIDAS', tieneImagen: false },
+    ]);
+    const agregados: string[] = [];
+    const elegidas: string[] = [];
+    fixture.componentInstance.agregar.subscribe(p => agregados.push(p.nombre));
+    fixture.componentInstance.categoriaElegida.subscribe(c => elegidas.push(c));
+    fixture.detectChanges();
+    const vitrina = fixture.componentInstance;
+
+    expect(vitrina.tarjetas().map(t => [t.nombre, t.cantidad])).toEqual([['Combos', 3], ['Bebidas', 1]]);
+    // Sin el agotado y alternando categorías.
+    expect(vitrina.seleccion().map(p => p.nombre)).toEqual(['Combo Doble', 'Cola', 'Combo Clásico']);
+    expect(vitrina.cifras().map(c => c.valor)).toEqual([4, 2, 3]);
+    expect(vitrina.combos().map(p => p.nombre)).toEqual(['Combo Clásico', 'Combo Doble']);
+
+    const html = fixture.nativeElement as HTMLElement;
+    (html.querySelector('.categoria') as HTMLButtonElement).click();
+    (html.querySelector('.mas') as HTMLButtonElement).click();
+    expect(elegidas).toEqual(['COMBOS']);
+    expect(agregados).toEqual(['Combo Doble']);
+  });
+
+  it('"Ver mi pedido" se oculta para el personal', () => {
+    iniciarSesion('EMPLEADO');
+    const fixture = TestBed.createComponent(ComoPedir);
+    fixture.detectChanges();
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.querySelectorAll('.pasos li').length).toBe(3);
+    expect(html.querySelector('.boton-borde')).toBeNull();
   });
 
   it('muestra el pedido en curso y el producto destacado', () => {

@@ -1,54 +1,30 @@
 @use 'variables' as v;
 @use 'mixins' as m;
 
-// Degradado oscuro sobre la foto para que el texto se lea bien.
-$sombra-portada: rgba(15, 14, 13, 0.97) 0%, rgba(15, 14, 13, 0.86) 40%, rgba(15, 14, 13, 0.1) 100%;
-$sombra-portada-movil: rgba(15, 14, 13, 0.94), rgba(15, 14, 13, 0.7) 70%, rgba(15, 14, 13, 0.2);
-$texto-claro: #e9e3d9;
-$texto-tenue-oscuro: #cfc8bd;
+$fondo-icono: #fbe3dd;
+$linea-portada: #e6ddcf;
 
 .hero {
-  position: relative;
-  // El contenido entra completo en una pantalla de portátil (1366×768) sin desplazarse.
-  min-height: min(620px, calc(100svh - 88px));
-  background: #201e1b;
-  color: v.$blanco;
-  overflow: hidden;
-  isolation: isolate;
-
-  &:before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(90deg, $sombra-portada);
-  }
-}
-.hero-foto {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: right center;
-  }
+  background: v.$blanco;
+  border-bottom: 1px solid $linea-portada;
+  padding: 0 28px;
 }
 .hero-inner {
-  position: relative;
   @include m.contenedor;
-  padding: 52px 28px 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 48px;
+  align-items: center;
+  padding: 48px 0 40px;
 }
 .hero-content {
-  max-width: 640px;
+  min-width: 0;
 
   // Entrada suave del texto; _base.scss la desactiva si el usuario prefiere menos movimiento.
   > * {
     animation: aparecer 0.6s ease-out both;
   }
-  @for $i from 2 through 7 {
+  @for $i from 2 through 6 {
     > :nth-child(#{$i}) {
       animation-delay: #{($i - 1) * 0.07}s;
     }
@@ -67,219 +43,248 @@ $texto-tenue-oscuro: #cfc8bd;
 .saludo {
   margin: 0 0 12px;
   font-weight: 800;
-  color: #ffd166;
+  color: v.$rojo-acento;
 }
 .eyebrow {
   margin: 0;
   font-size: 12px;
-  letter-spacing: 0.19em;
+  letter-spacing: 0.18em;
   font-weight: 900;
-  color: #ffd166;
-
-  span {
-    color: #ef4d2f;
-    margin-left: 12px;
-  }
+  color: v.$rojo;
 }
 h1 {
-  max-width: 100%;
-  font-size: clamp(3.75rem, 6.6vw, 6.5rem);
-  line-height: 0.9;
-  letter-spacing: -0.085em;
-  margin: 20px 0 20px;
+  font-size: clamp(2.8rem, 5.4vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: -0.07em;
+  margin: 16px 0 18px;
   font-weight: 1000;
+  color: v.$oscuro;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 
   em {
     font-style: normal;
-    color: #f2482e;
+    color: v.$rojo-titulo;
   }
 }
 .lead {
   font-size: 17px;
   line-height: 1.55;
-  max-width: 475px;
-  color: v.$fondo-estado;
-  margin: 0 0 24px;
+  max-width: 460px;
+  color: v.$texto-gris;
+  margin: 0 0 26px;
 }
 .hero-acciones {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px 20px;
+  gap: 12px;
 }
-.hero-button {
+%boton-portada {
   display: inline-flex;
   align-items: center;
-  gap: 22px;
-  text-decoration: none;
-  color: v.$blanco;
-  background: v.$rojo-vivo;
-  border-radius: 4px;
-  padding: 16px 22px;
+  gap: 14px;
+  border-radius: 999px;
+  padding: 15px 24px;
+  font: inherit;
   font-size: 13px;
   font-weight: 950;
   letter-spacing: 0.04em;
-  transition: background 0.15s;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.hero-button {
+  @extend %boton-portada;
+  color: v.$blanco;
+  background: v.$rojo-vivo;
+  border: 2px solid v.$rojo-vivo;
 
   &:hover {
     background: #bc2818;
+    border-color: #bc2818;
   }
   span {
-    font-size: 17px;
+    font-size: 16px;
+  }
+}
+.hero-secundario {
+  @extend %boton-portada;
+  color: v.$oscuro;
+  background: transparent;
+  border: 2px solid v.$oscuro;
+
+  &:hover {
+    background: v.$oscuro;
+    color: v.$blanco;
   }
 }
 .hero-pedido {
-  color: $texto-claro;
+  display: inline-block;
+  margin-top: 18px;
+  @include m.enlace-acento(v.$rojo-enlace);
   font-size: 14px;
-  font-weight: 800;
-  text-decoration: underline;
-  text-decoration-color: rgb(255 255 255 / 35%);
   text-underline-offset: 4px;
-
-  &:hover {
-    color: v.$blanco;
-    text-decoration-color: currentColor;
-  }
 }
-// Accesos directos: llevan al menú con la categoría ya filtrada.
-.accesos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 22px;
 
-  button {
-    border: 1px solid rgb(255 255 255 / 28%);
-    background: rgb(255 255 255 / 6%);
-    color: $texto-claro;
-    border-radius: 999px;
-    padding: 8px 14px;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-
-    &:hover {
-      background: rgb(255 255 255 / 14%);
-      border-color: rgb(255 255 255 / 55%);
-    }
-  }
+// Foto principal con el producto destacado encima.
+.hero-visual {
+  position: relative;
+  min-width: 0;
 }
-.datos {
-  @include m.lista-limpia;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 22px;
-  margin-top: 22px;
-  font-size: 13px;
-  color: $texto-tenue-oscuro;
-
-  li {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    &:before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: v.$rojo-vivo;
-    }
-  }
+.hero-foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3.3;
+  object-fit: cover;
+  object-position: 62% center;
+  border-radius: 28px;
+  background: #201e1b;
 }
-// Etiqueta del producto destacado, sobre la foto.
 .destacado {
   position: absolute;
-  right: 58px;
-  bottom: 40px;
-  display: grid;
-  gap: 2px;
-  min-width: 200px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: rgb(20 18 16 / 82%);
-  border: 1px solid rgb(255 255 255 / 16%);
-  backdrop-filter: blur(4px);
-  color: v.$blanco;
+  left: 18px;
+  bottom: 18px;
+  max-width: calc(100% - 36px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 18px;
+  background: v.$blanco;
+  color: v.$texto;
   text-decoration: none;
-  transition: transform 0.15s, border-color 0.15s;
+  transition: transform 0.15s;
 
   &:hover {
     transform: translateY(-2px);
-    border-color: rgb(255 255 255 / 40%);
   }
+}
+.destacado-foto {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: v.$crema;
+}
+.destacado-texto {
+  display: grid;
+  min-width: 0;
+
   small {
     font-size: 11px;
     font-weight: 900;
     @include m.mayusculas(0.14em);
-    color: #ffd166;
+    color: v.$texto-suave;
   }
   strong {
-    font-size: 17px;
+    font-size: 16px;
+    @include m.mayusculas(0);
+    overflow-wrap: anywhere;
   }
   span {
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 800;
-    color: #ffb3a4;
+    color: v.$rojo-precio;
   }
 }
-.side-tag {
-  position: absolute;
-  right: 20px;
-  top: 30%;
-  writing-mode: vertical-rl;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  font-weight: 900;
-  color: #fce8bd;
+
+// Franja de beneficios bajo la portada.
+.rasgos {
+  @include m.lista-limpia;
+  @include m.contenedor;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid $linea-portada;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 22px 18px 26px 0;
+    font-size: 13px;
+    color: v.$texto-suave;
+    line-height: 1.4;
+  }
+  li + li {
+    padding-left: 18px;
+    border-left: 1px solid $linea-portada;
+  }
+  strong {
+    display: block;
+    font-size: 14px;
+    color: v.$texto;
+  }
+}
+.icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: $fondo-icono;
+  color: v.$rojo;
+
+  svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
-@include m.hasta(portada) {
-  .hero {
-    min-height: auto;
+@include m.hasta(mediano) {
+  .rasgos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    &:before {
-      background: linear-gradient(90deg, $sombra-portada-movil);
+    li:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    li:nth-child(n + 3) {
+      border-top: 1px solid $linea-portada;
     }
   }
-  .hero-foto img {
-    object-position: 67% center;
+}
+@include m.hasta(portada) {
+  .hero {
+    padding: 0 20px;
   }
   .hero-inner {
-    padding: 48px 20px 40px;
-  }
-  h1 {
-    font-size: clamp(3.25rem, 12vw, 5.5rem);
-  }
-  .side-tag {
-    display: none;
-  }
-  // En celular el destacado deja de flotar y queda debajo del texto.
-  .destacado {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin: 0 20px 36px;
-    width: fit-content;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 36px 0 28px;
   }
 }
 @include m.hasta(chico) {
-  .hero-inner {
-    padding: 40px 20px 32px;
-  }
   h1 {
-    font-size: clamp(2.6rem, 12.3vw, 4rem);
-    letter-spacing: -0.07em;
+    font-size: clamp(2.4rem, 11.5vw, 3.4rem);
+    letter-spacing: -0.06em;
   }
   .lead {
     font-size: 15px;
   }
-  .hero-button {
-    gap: 14px;
-    padding: 15px 17px;
+  .hero-button,
+  .hero-secundario {
+    padding: 13px 18px;
     font-size: 12px;
+  }
+  .rasgos {
+    grid-template-columns: 1fr;
+
+    li,
+    li + li {
+      padding-left: 0;
+      border-left: 0;
+    }
+    li + li {
+      border-top: 1px solid $linea-portada;
+    }
   }
 }

@@ -1,0 +1,112 @@
+@if (tarjetas().length) {
+  <section class="banda" aria-labelledby="categorias-titulo">
+    <div class="inner">
+      <div class="cabeza">
+        <div>
+          <p class="eyebrow">CATEGORÍAS</p>
+          <h2 id="categorias-titulo">ELIGE TU <em>ANTOJO.</em></h2>
+        </div>
+        <a class="ver" href="#menu">Ver todo el menú →</a>
+      </div>
+      <div class="categorias">
+        @for (t of tarjetas(); track t.valor) {
+          <button type="button" class="categoria" (click)="categoriaElegida.emit(t.valor)">
+            @if (t.foto; as foto) {
+              <span class="categoria-foto"><app-imagen-producto [producto]="foto" /></span>
+            }
+            <span class="categoria-pie">
+              <strong>{{ t.nombre }}</strong>
+              <small>{{ t.cantidad }} {{ t.cantidad === 1 ? 'producto' : 'productos' }}</small>
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@if (seleccion().length) {
+  <section class="banda sin-arriba" aria-labelledby="seleccion-titulo">
+    <div class="inner">
+      <div class="cabeza">
+        <div>
+          <p class="eyebrow">DEL MENÚ</p>
+          <h2 id="seleccion-titulo">FAVORITOS DE <em>LA CASA.</em></h2>
+        </div>
+      </div>
+      <div class="productos">
+        @for (p of seleccion(); track p.id) {
+          <article class="producto">
+            <a class="producto-foto" [routerLink]="['/productos', p.id]" tabindex="-1" aria-hidden="true">
+              <app-imagen-producto [producto]="p" />
+            </a>
+            <small>{{ nombre(p.categoria) }}</small>
+            <h3>
+              <a [routerLink]="['/productos', p.id]">{{ p.nombre }}</a>
+            </h3>
+            <div class="producto-fila">
+              <strong>S/ {{ p.precio | number: '1.2-2' }}</strong>
+              <button type="button" class="mas" [attr.aria-label]="'Agregar ' + p.nombre" (click)="agregar.emit(p)">
+                +
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@if (productos().length) {
+  <section class="cifras-banda" aria-labelledby="cifras-titulo">
+    <div class="inner cifras-inner">
+      <div>
+        <h2 id="cifras-titulo">PIDE.<br />DISFRUTA.<br />REPITE.</h2>
+        <p>Así está el menú en este momento.</p>
+      </div>
+      <ul class="cifras">
+        @for (c of cifras(); track c.texto) {
+          <li>
+            <strong>{{ c.valor }}</strong>
+            <span>{{ c.texto }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+}
+
+@if (combos().length) {
+  <section class="banda" aria-labelledby="combos-titulo">
+    <div class="inner">
+      <div class="cabeza">
+        <div>
+          <p class="eyebrow">COMBOS</p>
+          <h2 id="combos-titulo">PARA CADA <em>OCASIÓN.</em></h2>
+        </div>
+        <button type="button" class="ver" (click)="categoriaElegida.emit('COMBOS')">
+          Ver todos los combos →
+        </button>
+      </div>
+      <div class="combos">
+        @for (p of combos(); track p.id) {
+          <article class="combo">
+            <span class="combo-foto"><app-imagen-producto [producto]="p" /></span>
+            <div class="combo-texto">
+              <h3>
+                <a [routerLink]="['/productos', p.id]">{{ p.nombre }}</a>
+              </h3>
+              @if (p.descripcion) {
+                <p>{{ p.descripcion }}</p>
+              }
+              <div class="producto-fila">
+                <strong>S/ {{ p.precio | number: '1.2-2' }}</strong>
+                <button type="button" class="agregar" (click)="agregar.emit(p)">Agregar +</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+}

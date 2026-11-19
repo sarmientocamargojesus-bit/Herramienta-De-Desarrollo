@@ -1,0 +1,54 @@
+<section class="banda" aria-labelledby="pasos-titulo">
+  <div class="inner">
+    <div class="cabeza">
+      <div>
+        <p class="eyebrow">CÓMO PEDIR</p>
+        <h2 id="pasos-titulo">TU PEDIDO EN <em>TRES PASOS.</em></h2>
+      </div>
+    </div>
+    <ol class="pasos">
+      @for (paso of pasos; track paso.titulo; let i = $index) {
+        <li>
+          <span class="numero" aria-hidden="true">{{ i + 1 }}</span>
+          <h3>{{ paso.titulo }}</h3>
+          <p>{{ paso.texto }}</p>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
+
+<section class="banda sin-arriba" aria-labelledby="preguntas-titulo">
+  <div class="inner preguntas">
+    <div class="cabeza">
+      <div>
+        <p class="eyebrow">PREGUNTAS FRECUENTES</p>
+        <h2 id="preguntas-titulo">ANTES DE <em>PEDIR.</em></h2>
+        <p class="nota">Lo que más nos consultan sobre el pedido y el pago.</p>
+      </div>
+    </div>
+    <div>
+      @for (p of preguntas; track p.pregunta; let primera = $first) {
+        <details [open]="primera">
+          <summary>{{ p.pregunta }}</summary>
+          <p>{{ p.respuesta }}</p>
+        </details>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="banda sin-arriba" aria-labelledby="empezar-titulo">
+  <div class="inner">
+    <div class="empezar">
+      <h2 id="empezar-titulo">ARMA TU PEDIDO</h2>
+      <p>Recojo en tienda o delivery: lo eliges al confirmar.</p>
+      <div class="empezar-acciones">
+        <a class="boton-rojo" href="#menu">Empezar pedido →</a>
+        @if (puedeComprar()) {
+          <a class="boton-borde" routerLink="/carrito">Ver mi pedido</a>
+        }
+      </div>
+    </div>
+  </div>
+</section>

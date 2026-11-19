@@ -3,12 +3,20 @@
   [destacado]="destacado()"
   (categoriaElegida)="irACategoria($event)"
 />
+@if (!cargando() && catalogo().length) {
+  <app-vitrina
+    [productos]="catalogo()"
+    [categorias]="categorias()"
+    (categoriaElegida)="irACategoria($event)"
+    (agregar)="agregar($event)"
+  />
+}
 <section class="menu-section" id="menu" aria-labelledby="menu-title">
   <div class="menu-inner">
     <div class="section-heading">
       <div>
         <p class="eyebrow">EL MENÚ</p>
-        <h2 id="menu-title">ELIGE TU <em>ANTOJO.</em></h2>
+        <h2 id="menu-title">TODO EL <em>MENÚ.</em></h2>
         <p>Hamburguesas, combos, piqueos y bebidas preparados al momento.</p>
       </div>
       <span class="spark" aria-hidden="true">✳</span>
@@ -38,4 +46,5 @@
     }
   </div>
 </section>
+<app-como-pedir />
 <app-sobre-nosotros />
