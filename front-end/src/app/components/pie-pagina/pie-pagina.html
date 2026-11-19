@@ -1,13 +1,54 @@
 <footer>
   <div class="inner">
-    <div>
+    <div class="marca">
       <a class="logo" routerLink="/">FAST<span>FOOD.</span></a>
-      <p>Proyecto académico de menú y pedidos de comida rápida.</p>
+      <p>
+        Hamburguesas, combos, piqueos y bebidas preparados al momento. Pide en línea y recoge o
+        recibe en casa.
+      </p>
     </div>
-    <nav aria-label="Navegación del pie de página">
-      <a routerLink="/">Inicio</a><a routerLink="/" fragment="menu">Menú</a
-      ><a routerLink="/" fragment="nosotros">Nosotros</a>
+
+    <nav class="columna" aria-label="Explorar la tienda">
+      <h2>Explora</h2>
+      <a routerLink="/">Inicio</a>
+      <a routerLink="/" fragment="menu">Menú</a>
+      <a routerLink="/" fragment="nosotros">Nosotros</a>
     </nav>
+
+    <nav class="columna" aria-label="Tu cuenta">
+      <h2>Tu cuenta</h2>
+      @switch (sesion.rol()) {
+        @case ('CLIENTE') {
+          <a routerLink="/mis-pedidos">Mis pedidos</a>
+          <a routerLink="/carrito">Mi pedido</a>
+        }
+        @case ('EMPLEADO') {
+          <a routerLink="/gestion">Panel de gestión</a>
+        }
+        @case ('ADMINISTRADOR') {
+          <a routerLink="/gestion">Panel de gestión</a>
+        }
+        @default {
+          <a routerLink="/iniciar-sesion">Iniciar sesión</a>
+          <a routerLink="/registro">Crear cuenta</a>
+          <a routerLink="/carrito">Mi pedido</a>
+        }
+      }
+    </nav>
+
+    <div class="columna">
+      <h2>Cómo pedir</h2>
+      <ul>
+        <li>Recojo en tienda o delivery</li>
+        <li>Yape o tarjeta</li>
+        <li>Stock verificado al confirmar</li>
+      </ul>
+    </div>
   </div>
-  <div class="bottom">Fast Food · pagos simulados para el proyecto</div>
+
+  <div class="bottom">
+    <p>© {{ anio }} Fast Food · Proyecto académico de Desarrollo Web Integrado</p>
+    <p class="aviso">Los pagos son simulados: no se realizan cobros reales.</p>
+    <button type="button" class="arriba" (click)="subir()">Volver arriba <span aria-hidden="true">↑</span></button>
+  </div>
 </footer>

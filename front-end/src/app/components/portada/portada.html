@@ -1,14 +1,60 @@
 <section class="hero" id="inicio" aria-labelledby="hero-title">
+  <!-- La foto es un <img> (no un fondo de CSS) para que el navegador la pida de inmediato. -->
+  <picture class="hero-foto" aria-hidden="true">
+    <source media="(max-width: 750px)" srcset="/assets/demo/hero-fast-food-movil.webp" />
+    <img
+      src="/assets/demo/hero-fast-food.webp"
+      alt=""
+      width="1672"
+      height="941"
+      fetchpriority="high"
+      decoding="async"
+    />
+  </picture>
+
   <div class="hero-inner">
     <div class="hero-content">
-      <p class="eyebrow">SABOR PARA CADA ANTOJO <span>✳</span></p>
+      @if (esCliente()) {
+        <p class="saludo">¡Qué bueno verte de nuevo!</p>
+      }
+      <p class="eyebrow">SABOR PARA CADA ANTOJO <span aria-hidden="true">✳</span></p>
       <h1 id="hero-title">RÁPIDO.<br /><em>BRUTAL.</em><br />DELICIOSO.</h1>
       <p class="lead">
         Hamburguesas, combos, piqueos y bebidas. Explora el menú y encuentra lo que se te antoja.
       </p>
-      <a class="hero-button" href="#menu">EXPLORAR EL MENÚ <span aria-hidden="true">↗</span></a>
-      <p class="demo-label">Pide en línea y recoge o recibe en casa · pago de prueba</p>
+
+      <div class="hero-acciones">
+        <a class="hero-button" href="#menu">EXPLORAR EL MENÚ <span aria-hidden="true">↓</span></a>
+        @if (unidades() > 0) {
+          <a class="hero-pedido" routerLink="/carrito">
+            Tienes {{ unidades() }} {{ unidades() === 1 ? 'producto' : 'productos' }} en tu pedido
+            <span aria-hidden="true">→</span>
+          </a>
+        }
+      </div>
+
+      @if (accesos().length) {
+        <nav class="accesos" aria-label="Ir a una categoría del menú">
+          @for (c of accesos(); track c.value) {
+            <button type="button" (click)="categoriaElegida.emit(c.value)">{{ nombre(c.label) }}</button>
+          }
+        </nav>
+      }
+
+      <ul class="datos" aria-label="Cómo funciona el pedido">
+        <li>Recojo en tienda o delivery</li>
+        <li>Yape o tarjeta · pago de prueba</li>
+        <li>Stock verificado al confirmar</li>
+      </ul>
     </div>
   </div>
+
+  @if (destacado(); as p) {
+    <a class="destacado" [routerLink]="['/productos', p.id]">
+      <small>Destacado</small>
+      <strong>{{ p.nombre }}</strong>
+      <span>desde S/ {{ p.precio | number: '1.2-2' }} →</span>
+    </a>
+  }
   <span class="side-tag" aria-hidden="true">FAST FOOD · FAST FOOD · FAST FOOD</span>
 </section>

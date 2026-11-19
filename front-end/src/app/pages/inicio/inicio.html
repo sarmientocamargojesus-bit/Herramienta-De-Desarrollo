@@ -1,4 +1,8 @@
-<app-portada />
+<app-portada
+  [categorias]="categorias()"
+  [destacado]="destacado()"
+  (categoriaElegida)="irACategoria($event)"
+/>
 <section class="menu-section" id="menu" aria-labelledby="menu-title">
   <div class="menu-inner">
     <div class="section-heading">

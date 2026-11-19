@@ -37,6 +37,13 @@ export class Inicio implements OnInit {
   readonly visibles = computed(() => (this.resultados() ?? this.productos())
     .filter(p => p.categoriaId === undefined || p.categoriaId === null || this.activas().has(p.categoriaId))
     .filter(p => this.seleccion() === 'TODAS' || p.categoria === this.seleccion()));
+  // Producto de la portada: el combo disponible más económico (o, si no hay combos, el primero con stock).
+  readonly destacado = computed(() => {
+    const disponibles = this.productos()
+      .filter(p => p.stock > 0 && (p.categoriaId == null || this.activas().has(p.categoriaId)));
+    const combos = disponibles.filter(p => p.categoria === 'COMBOS').sort((a, b) => a.precio - b.precio);
+    return combos[0] ?? disponibles[0] ?? null;
+  });
   readonly cargando = signal(true);
   readonly error = signal('');
   // Solo la carga del menú ofrece Reintentar; los errores al agregar o buscar no.
@@ -69,6 +76,12 @@ export class Inicio implements OnInit {
       },
       error: error => { this.error.set(mensajeError(error)); this.reintentable.set(esReintentable(error)); this.cargando.set(false); }
     });
+  }
+
+  // Acceso directo de la portada: filtra el menú por la categoría y baja hasta él.
+  irACategoria(categoria: string): void {
+    this.seleccion.set(categoria);
+    document.getElementById('menu')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }
 
   agregar(producto: Producto): void {

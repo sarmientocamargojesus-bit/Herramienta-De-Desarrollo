@@ -10,6 +10,9 @@
       content="Explora hamburguesas, combos, piqueos y bebidas de Fast Food."
     />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- La foto de la portada es lo primero que se ve: se pide antes de que cargue Angular. -->
+    <link rel="preload" as="image" href="/assets/demo/hero-fast-food.webp" media="(min-width: 751px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/assets/demo/hero-fast-food-movil.webp" media="(max-width: 750px)" fetchpriority="high" />
   </head>
   <body>
     <app-root></app-root>

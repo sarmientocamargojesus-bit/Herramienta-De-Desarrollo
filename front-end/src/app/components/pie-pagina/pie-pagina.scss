@@ -1,33 +1,29 @@
 @use 'variables' as v;
 @use 'mixins' as m;
 
+$fondo-pie: #1d1b19;
+$texto-pie: #bdb6aa;
+$enlace-pie: #eee8de;
+$linea-pie: #4a453e;
+$texto-bajo: #a39d95;
+
 footer {
-  background: #1d1b19;
+  background: $fondo-pie;
   color: v.$blanco;
-  padding: 55px 28px 24px;
+  padding: 56px 28px 24px;
 }
 .inner {
   @include m.contenedor;
-  display: flex;
-  justify-content: space-between;
-  gap: 30px;
-
-  p {
-    color: #bdb6aa;
-    font-size: 13px;
-  }
-  nav {
-    display: flex;
-    gap: 28px;
-    align-items: start;
-
-    a {
-      color: #eee8de;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 13px;
-    }
-  }
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: 36px;
+}
+.marca p {
+  max-width: 320px;
+  margin: 14px 0 0;
+  color: $texto-pie;
+  font-size: 14px;
+  line-height: 1.6;
 }
 .logo {
   color: v.$blanco;
@@ -40,23 +36,97 @@ footer {
     color: #f04a30;
   }
 }
+.columna {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+
+  h2 {
+    margin: 4px 0 6px;
+    font-size: 12px;
+    font-weight: 900;
+    @include m.mayusculas(0.16em);
+    color: #ffd166;
+  }
+  a {
+    width: fit-content;
+    color: $enlace-pie;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+
+    &:hover {
+      color: v.$blanco;
+      text-decoration: underline;
+      text-decoration-color: #f04a30;
+      text-underline-offset: 4px;
+    }
+  }
+  ul {
+    @include m.lista-limpia;
+    display: grid;
+    gap: 10px;
+  }
+  li {
+    color: $texto-pie;
+    font-size: 14px;
+  }
+}
 .bottom {
   max-width: v.$ancho-tienda;
-  margin: 55px auto 0;
+  margin: 48px auto 0;
   padding-top: 18px;
-  border-top: 1px solid #4a453e;
-  color: #97918a;
+  border-top: 1px solid $linea-pie;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  color: $texto-bajo;
   font-size: 12px;
+
+  p {
+    margin: 0;
+  }
+  .aviso {
+    margin-right: auto;
+  }
+}
+.arriba {
+  border: 1px solid $linea-pie;
+  background: transparent;
+  color: $enlace-pie;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $texto-pie;
+    color: v.$blanco;
+  }
+}
+
+@include m.hasta(mediano) {
+  .inner {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .marca {
+    grid-column: 1 / -1;
+  }
 }
 @include m.hasta(compacto) {
   .inner {
-    display: block;
-
-    nav {
-      margin-top: 30px;
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
   }
   .bottom {
-    margin-top: 35px;
+    margin-top: 36px;
+  }
+}
+@include m.hasta(mini) {
+  .inner {
+    grid-template-columns: 1fr;
   }
 }
